@@ -53,12 +53,12 @@ export default function Hosting() {
             <h1 className="font-heading text-4xl lg:text-5xl font-extrabold text-white mb-3">Pet Hosting Services</h1>
             <p className="text-white/80 text-lg max-w-xl">Trusted pet care while you are away. Browse verified hosts or book a service.</p>
             <div className="flex flex-wrap gap-3 mt-5">
-              <Link to="/hosts">
+              <Link href="/hosts">
                 <Button className="bg-white text-foreground hover:bg-white/90 font-bold rounded-xl px-6">
                   <Users className="w-4 h-4 mr-2" /> Browse All Hosts
                 </Button>
               </Link>
-              <Link to="/become-host">
+              <Link href="/become-host">
                 <Button variant="outline" className="border-white/50 text-white hover:bg-white/15 rounded-xl px-6">
                   <Star className="w-4 h-4 mr-2" /> Become a Host
                 </Button>

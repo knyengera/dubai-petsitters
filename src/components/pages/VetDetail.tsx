@@ -95,7 +95,7 @@ export default function VetDetail() {
     <div className="min-h-screen bg-background">
       {/* Top bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-3 flex items-center justify-between">
-        <Link to="/vets">
+        <Link href="/vets">
           <Button variant="outline" size="sm" className="rounded-xl">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
           </Button>

@@ -100,7 +100,7 @@ export default function FeaturedHosts() {
               Trusted hosts across the Kingdom — browse profiles and book in minutes.
             </p>
           </div>
-          <Link to="/hosts">
+          <Link href="/hosts">
             <Button variant="outline" className="rounded-xl shrink-0">
               View All Hosts <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

@@ -4,6 +4,7 @@ export type AuthUser = {
   id: string;
   email: string;
   full_name?: string;
+  role?: string;
 };
 
 export const authApi = {
@@ -19,6 +20,7 @@ export const authApi = {
       full_name:
         (user.user_metadata?.full_name as string) ??
         user.email.split("@")[0],
+      role: (user.app_metadata?.role as string) ?? "user",
     };
   },
 

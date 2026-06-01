@@ -30,12 +30,12 @@ export default function CTASection() {
             Whether you're looking to adopt, need a pet sitter, or want to find the best vet — we're here to help.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center relative">
-            <Link to="/adopt">
+            <Link href="/adopt">
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-xl px-8 font-semibold">
                 Adopt a Pet
               </Button>
             </Link>
-            <Link to="/hosting">
+            <Link href="/hosting">
               <Button size="lg" variant="outline" className="border-white/30 text-primary-foreground hover:bg-white/10 rounded-xl px-8 font-semibold">
                 Find a Sitter <ArrowRight className="w-5 h-5 ml-2" />
               </Button>

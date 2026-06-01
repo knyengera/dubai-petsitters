@@ -2,7 +2,8 @@
 
 import { base44 } from "@/lib/data";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { AuthUser } from '@/lib/data/auth-api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { entities } from '@/lib/data/entities';
 import { Button } from '@/components/ui/button';
@@ -23,21 +24,30 @@ const EMPTY_FORM = {
 export default function AdminVets() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<AuthUser | null | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
-  useState(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
   const { data: vets = [], isLoading } = useQuery({
     queryKey: ['admin-vets'],
     queryFn: () => entities.VetClinic.list('-created_date', 100),
+    enabled: user?.role === 'admin',
   });
 
-  if (user && user.role !== 'admin') {
+  if (user === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">Access restricted to admins only.</p>

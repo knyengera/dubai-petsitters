@@ -44,7 +44,7 @@ export default function VerifiedVetsSection() {
             </p>
           </div>
           <Link
-            to="/vets"
+            href="/vets"
             className="text-emerald-700 text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all shrink-0"
           >
             {t('Browse all vets', 'تصفح جميع الأطباء')} <ChevronRight className="w-4 h-4" />
@@ -117,7 +117,7 @@ export default function VerifiedVetsSection() {
 
         {/* CTA */}
         <div className="mt-10 text-center">
-          <Link to="/vet-advertise">
+          <Link href="/vet-advertise">
             <span className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-md shadow-emerald-200">
               <BadgeCheck className="w-4 h-4" />
               {t('Join as a Verified Partner', 'انضم كشريك معتمد')}

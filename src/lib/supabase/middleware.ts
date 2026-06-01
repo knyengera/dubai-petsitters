@@ -1,5 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  isAdminPath,
+  isAdminRole,
+  isProtectedPath,
+} from "@/lib/auth/routes";
+
+function copyCookies(from: NextResponse, to: NextResponse) {
+  from.cookies.getAll().forEach((cookie) => {
+    to.cookies.set(cookie.name, cookie.value);
+  });
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -25,7 +36,29 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+
+  if (isProtectedPath(pathname) && !user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+    loginUrl.searchParams.set("next", pathname);
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    copyCookies(supabaseResponse, redirectResponse);
+    return redirectResponse;
+  }
+
+  if (isAdminPath(pathname) && user && !isAdminRole(user.app_metadata)) {
+    const redirectResponse = NextResponse.redirect(
+      new URL("/dashboard", request.url)
+    );
+    copyCookies(supabaseResponse, redirectResponse);
+    return redirectResponse;
+  }
 
   return supabaseResponse;
 }

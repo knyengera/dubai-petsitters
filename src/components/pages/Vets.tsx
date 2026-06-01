@@ -35,7 +35,7 @@ export default function Vets() {
             <p className="text-muted-foreground text-lg max-w-2xl">
               Browse veterinary clinics across Saudi Arabia. Find emergency services, specialists, and routine care near you.
             </p>
-            <Link to="/vet-advertise" className="inline-block mt-5">
+            <Link href="/vet-advertise" className="inline-block mt-5">
               <Button className="rounded-xl gap-2 font-semibold">
                 <Megaphone className="w-4 h-4" /> Advertise Your Clinic
               </Button>

@@ -27,7 +27,7 @@ export default function FeaturedPets({ pets }) {
               These lovely animals are waiting for their forever family.
             </p>
           </div>
-          <Link to="/adopt">
+          <Link href="/adopt">
             <Button variant="outline" className="rounded-xl">
               View All Pets <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

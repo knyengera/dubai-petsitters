@@ -111,12 +111,12 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-lg font-bold text-foreground">{t('My Pets', 'حيواناتي')}</h2>
-            <Link to="/pets" className="text-primary text-sm font-medium flex items-center gap-1">
+            <Link href="/pets" className="text-primary text-sm font-medium flex items-center gap-1">
               {t('Manage', 'إدارة')} <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
           {pets.length === 0 ? (
-            <Link to="/pets">
+            <Link href="/pets">
               <div className="border-2 border-dashed border-border rounded-2xl p-8 flex flex-col items-center text-center hover:border-primary/50 transition-colors">
                 <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-3">
                   <Plus className="w-7 h-7 text-primary" />
@@ -128,7 +128,7 @@ export default function Dashboard() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {pets.map((pet) => (
-                <Link key={pet.id} to="/pets">
+                <Link key={pet.id} href="/pets">
                   <div className="bg-card border border-border rounded-2xl p-4 hover:shadow-md transition-all">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
                       {pet.photo_url ? (
@@ -142,7 +142,7 @@ export default function Dashboard() {
                   </div>
                 </Link>
               ))}
-              <Link to="/pets">
+              <Link href="/pets">
                 <div className="bg-muted rounded-2xl p-4 flex flex-col items-center justify-center min-h-[100px] hover:bg-muted/80 transition-colors border-2 border-dashed border-border">
                   <Plus className="w-6 h-6 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground mt-1">{t('Add pet', 'أضف حيوانًا')}</span>
@@ -156,12 +156,12 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-lg font-bold text-foreground">{t('Upcoming Appointments', 'المواعيد القادمة')}</h2>
-            <Link to="/appointments" className="text-primary text-sm font-medium flex items-center gap-1">
+            <Link href="/appointments" className="text-primary text-sm font-medium flex items-center gap-1">
               {t('View all', 'عرض الكل')} <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
           {appointments.length === 0 ? (
-            <Link to="/appointments">
+            <Link href="/appointments">
               <div className="bg-card border border-border rounded-2xl p-6 text-center hover:shadow-md transition-shadow">
                 <Calendar className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">{t('No upcoming appointments. Book one now.', 'لا توجد مواعيد قادمة. احجز الآن.')}</p>
@@ -192,7 +192,7 @@ export default function Dashboard() {
               <ShieldCheck className="w-5 h-5 text-emerald-600" /> Admin Tools
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Link to="/admin/vets">
+              <Link href="/admin/vets">
                 <div className="flex items-center gap-3 bg-white dark:bg-card border border-border rounded-xl p-4 hover:shadow-md transition-all">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0">
                     <Stethoscope className="w-5 h-5 text-white" />

@@ -49,7 +49,7 @@ export default function PetHealth() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Pet not found</p>
-          <Link to="/pets">
+          <Link href="/pets">
             <Button variant="outline">Back to Pets</Button>
           </Link>
         </div>
@@ -69,7 +69,7 @@ export default function PetHealth() {
       {/* Header */}
       <div className="bg-gradient-to-br from-primary/5 to-accent/5 border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Link to="/pets" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-4">
+          <Link href="/pets" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-4">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm font-medium">Back to Pets</span>
           </Link>

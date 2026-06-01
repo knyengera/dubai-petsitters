@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-
-const MAIN_TAB_PATHS = ["/", "/dashboard", "/ai-chat", "/pets", "/vets"];
+import { ArrowLeft, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { getMainTabPaths } from "@/lib/auth/navigation";
 
 const EXACT_TITLES: Record<string, string> = {
   "/settings": "Settings",
@@ -38,8 +38,16 @@ const PATTERN_TITLES = [
 export default function TopHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user, signOut } = useAuth();
+  const mainTabPaths = getMainTabPaths(!!user);
 
-  if (MAIN_TAB_PATHS.includes(pathname)) return null;
+  if (mainTabPaths.includes(pathname)) return null;
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   const exactTitle = EXACT_TITLES[pathname];
   const patternMatch = PATTERN_TITLES.find(({ pattern }) =>
@@ -60,10 +68,23 @@ export default function TopHeader() {
           type="button"
           onClick={() => router.back()}
           className="p-2 -ml-2 rounded-xl hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          aria-label="Go back"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <span className="font-semibold text-foreground">{title}</span>
+        <span className="font-semibold text-foreground flex-1 truncate">
+          {title}
+        </span>
+        {user && (
+          <button
+            type="button"
+            onClick={handleLogout}
+            aria-label="Log out"
+            className="p-2 -mr-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        )}
       </div>
     </div>
   );

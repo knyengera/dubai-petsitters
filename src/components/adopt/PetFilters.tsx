@@ -3,6 +3,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 
+const speciesItems = {
+  all: 'All Species',
+  dog: 'Dogs',
+  cat: 'Cats',
+  bird: 'Birds',
+  rabbit: 'Rabbits',
+  fish: 'Fish',
+  reptile: 'Reptiles',
+  other: 'Other',
+};
+
+const genderItems = {
+  all: 'Any Gender',
+  male: 'Male',
+  female: 'Female',
+};
+
+const sizeItems = {
+  all: 'Any Size',
+  small: 'Small',
+  medium: 'Medium',
+  large: 'Large',
+};
+
 export default function PetFilters({ filters, setFilters }) {
   return (
     <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
@@ -16,11 +40,11 @@ export default function PetFilters({ filters, setFilters }) {
         />
       </div>
 
-      <Select value={filters.species} onValueChange={(v) => setFilters(f => ({ ...f, species: v }))}>
-        <SelectTrigger className="rounded-xl">
+      <Select items={speciesItems} value={filters.species} onValueChange={(v) => setFilters(f => ({ ...f, species: v }))}>
+        <SelectTrigger className="h-11 w-full rounded-xl">
           <SelectValue placeholder="All Species" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="start" alignItemWithTrigger={false} side="top" sideOffset={8}>
           <SelectItem value="all">All Species</SelectItem>
           <SelectItem value="dog">Dogs</SelectItem>
           <SelectItem value="cat">Cats</SelectItem>
@@ -32,22 +56,22 @@ export default function PetFilters({ filters, setFilters }) {
         </SelectContent>
       </Select>
 
-      <Select value={filters.gender} onValueChange={(v) => setFilters(f => ({ ...f, gender: v }))}>
-        <SelectTrigger className="rounded-xl">
+      <Select items={genderItems} value={filters.gender} onValueChange={(v) => setFilters(f => ({ ...f, gender: v }))}>
+        <SelectTrigger className="h-11 w-full rounded-xl">
           <SelectValue placeholder="Any Gender" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="start" alignItemWithTrigger={false} side="top" sideOffset={8}>
           <SelectItem value="all">Any Gender</SelectItem>
           <SelectItem value="male">Male</SelectItem>
           <SelectItem value="female">Female</SelectItem>
         </SelectContent>
       </Select>
 
-      <Select value={filters.size} onValueChange={(v) => setFilters(f => ({ ...f, size: v }))}>
-        <SelectTrigger className="rounded-xl">
+      <Select items={sizeItems} value={filters.size} onValueChange={(v) => setFilters(f => ({ ...f, size: v }))}>
+        <SelectTrigger className="h-11 w-full rounded-xl">
           <SelectValue placeholder="Any Size" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="start" alignItemWithTrigger={false} side="top" sideOffset={8}>
           <SelectItem value="all">Any Size</SelectItem>
           <SelectItem value="small">Small</SelectItem>
           <SelectItem value="medium">Medium</SelectItem>

@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/language-context';
+import { useAuth } from '@/lib/auth-context';
+import { filterByAuth } from '@/lib/auth/navigation';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
 import { Bot, Stethoscope, PawPrint, Plane, MapPin, Heart, Shield, Clock, ChevronRight, Star, ArrowRight, Users, BadgeCheck } from 'lucide-react';
@@ -11,7 +13,8 @@ import VetCard from '@/components/vets/VetCard';
 import HostCard from '@/components/hosts/HostCard';
 import PartnerDealsSection from '@/components/home/PartnerDealsSection';
 import VerifiedVetsSection from '@/components/home/VerifiedVetsSection';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const HERO_MAIN = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&q=80';
 const HERO_THUMB1 = 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=300&q=80';
@@ -87,7 +90,7 @@ function FeaturedVetsSection({ t }) {
             {t('Verified partners providing top-tier care for your pets', 'شركاء موثقون يقدمون أعلى مستويات الرعاية لحيوانك')}
           </p>
         </div>
-        <Link to="/vets" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all shrink-0">
+        <Link href="/vets" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all shrink-0">
           {t('View all', 'عرض الكل')} <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
@@ -97,7 +100,7 @@ function FeaturedVetsSection({ t }) {
         ))}
       </div>
       <div className="mt-6 text-center">
-        <Link to="/vet-advertise">
+        <Link href="/vet-advertise">
           <span className="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium px-5 py-2.5 rounded-xl text-sm transition-all border border-emerald-200">
             <BadgeCheck className="w-4 h-4" /> {t('Get Your Clinic Featured', 'احصل على إدراج عيادتك')}
           </span>
@@ -109,6 +112,9 @@ function FeaturedVetsSection({ t }) {
 
 export default function Home() {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
+  const visibleFeatures = filterByAuth(features, isAuthenticated, 'to');
 
   const { data: pets = [] } = useQuery({
     queryKey: ['featured-pets'],
@@ -147,18 +153,39 @@ export default function Home() {
                 )}
               </p>
               <div className="flex flex-wrap gap-3 mb-10">
-                <Link to="/dashboard">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-2xl px-8 shadow-lg shadow-primary/25">
-                    {t('Get Started', 'ابدأ الآن')}
-                    <ArrowRight className="w-4 h-4 ms-2" />
-                  </Button>
+                <Link
+                  href={isAuthenticated ? '/dashboard' : '/login'}
+                  className={cn(
+                    buttonVariants({ size: "lg" }),
+                    "bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-2xl px-8 shadow-lg shadow-primary/25"
+                  )}
+                >
+                  {t(isAuthenticated ? 'Go to Dashboard' : 'Get Started', isAuthenticated ? 'لوحة التحكم' : 'ابدأ الآن')}
+                  <ArrowRight className="w-4 h-4 ms-2" />
                 </Link>
-                <Link to="/ai-chat">
-                  <Button size="lg" variant="outline" className="rounded-2xl px-8 border-border hover:border-primary hover:text-primary">
+                {isAuthenticated ? (
+                  <Link
+                    href="/ai-chat"
+                    className={cn(
+                      buttonVariants({ size: "lg", variant: "outline" }),
+                      "rounded-2xl px-8 border-border hover:border-primary hover:text-primary"
+                    )}
+                  >
                     <Bot className="w-4 h-4 me-2" />
                     {t('AI Health Check', 'فحص صحي ذكي')}
-                  </Button>
-                </Link>
+                  </Link>
+                ) : (
+                  <Link
+                    href="/vets"
+                    className={cn(
+                      buttonVariants({ size: "lg", variant: "outline" }),
+                      "rounded-2xl px-8 border-border hover:border-primary hover:text-primary"
+                    )}
+                  >
+                    <Stethoscope className="w-4 h-4 me-2" />
+                    {t('Find a Vet', 'ابحث عن طبيب')}
+                  </Link>
+                )}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {stats.map((s) => (
@@ -207,7 +234,7 @@ export default function Home() {
           </p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map((f, i) => (
+          {visibleFeatures.map((f, i) => (
             <motion.div key={f.labelEn} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
               <Link href={f.to} className="block h-full">
                 <div className="group relative rounded-2xl overflow-hidden border border-border hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer h-full">
@@ -259,24 +286,26 @@ export default function Home() {
             </h2>
             <p className="text-muted-foreground text-sm mt-1">{t('Verified, reviewed and ready to welcome your pet', 'موثقون ومستعدون لاستقبال حيوانك')}</p>
           </div>
-          <Link to="/hosts" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all shrink-0">
+          <Link href="/hosts" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all shrink-0">
             {t('View all', 'عرض الكل')} <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {hosts.map(host => (
-            <Link key={host.id} to="/hosts">
+            <Link key={host.id} href="/hosts">
               <HostCard host={host} onSelect={() => {}} />
             </Link>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <Link to="/become-host">
-            <span className="inline-flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-medium px-5 py-2.5 rounded-xl text-sm transition-all border border-border">
-              <Users className="w-4 h-4 text-primary" /> {t('Become a Host', 'كن مضيفًا')}
-            </span>
-          </Link>
-        </div>
+        {isAuthenticated && (
+          <div className="text-center mt-8">
+            <Link href="/become-host">
+              <span className="inline-flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-medium px-5 py-2.5 rounded-xl text-sm transition-all border border-border">
+                <Users className="w-4 h-4 text-primary" /> {t('Become a Host', 'كن مضيفًا')}
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Featured Pets */}
@@ -286,13 +315,13 @@ export default function Home() {
             <h2 className="font-heading text-2xl font-bold text-foreground">
               {t('Pets Looking for Homes', 'حيوانات تبحث عن منزل')}
             </h2>
-            <Link to="/adopt" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
+            <Link href="/adopt" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
               {t('View all', 'عرض الكل')} <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
           <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
             {pets.slice(0, 6).map((pet) => (
-              <Link key={pet.id} to="/adopt">
+              <Link key={pet.id} href="/adopt">
                 <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="aspect-[4/3] bg-muted overflow-hidden">
                     <img
@@ -332,10 +361,17 @@ export default function Home() {
           <p className="text-white/80 mb-6">
             {t('Join thousands of Saudi pet owners trusting Saudi Petsitters', 'انضم لآلاف أصحاب الحيوانات الأليفة الذين يثقون بـ سعودي بيتسيترز')}
           </p>
-          <Link to="/dashboard">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold rounded-2xl px-10">
-              {t('Create Free Account', 'إنشاء حساب مجاني')}
-            </Button>
+          <Link
+            href={isAuthenticated ? '/dashboard' : '/login'}
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "bg-white text-primary hover:bg-white/90 font-bold rounded-2xl px-10"
+            )}
+          >
+            {t(
+              isAuthenticated ? 'Go to Dashboard' : 'Create Free Account',
+              isAuthenticated ? 'لوحة التحكم' : 'إنشاء حساب مجاني'
+            )}
           </Link>
         </div>
       </div>

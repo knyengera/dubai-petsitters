@@ -122,7 +122,7 @@ export default function PetRemindersSection({ t }) {
             <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{urgent}</span>
           )}
         </h2>
-        <Link to="/pets" className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
+        <Link href="/pets" className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
           {t ? t('View pets', 'عرض الحيوانات') : 'View pets'} <ChevronRight className="w-4 h-4" />
         </Link>
       </div>

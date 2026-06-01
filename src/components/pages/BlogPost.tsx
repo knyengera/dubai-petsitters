@@ -39,7 +39,7 @@ export default function BlogPostPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
         <h2 className="font-heading text-2xl font-bold mb-4">Post Not Found</h2>
-        <Link to="/blog"><Button variant="outline" className="rounded-xl"><ArrowLeft className="w-4 h-4 mr-2" />Back to Blog</Button></Link>
+        <Link href="/blog"><Button variant="outline" className="rounded-xl"><ArrowLeft className="w-4 h-4 mr-2" />Back to Blog</Button></Link>
       </div>
     );
   }
@@ -54,7 +54,7 @@ export default function BlogPostPage() {
       )}
 
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-        <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+        <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to Blog
         </Link>

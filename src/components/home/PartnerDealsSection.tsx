@@ -52,7 +52,7 @@ export default function PartnerDealsSection() {
             {t('Special offers from our trusted partner network', 'عروض خاصة من شبكة شركائنا الموثوقين')}
           </p>
         </div>
-        <Link to="/partners" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all shrink-0">
+        <Link href="/partners" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all shrink-0">
           {t('All Partners', 'جميع الشركاء')} <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
