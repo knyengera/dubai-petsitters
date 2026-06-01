@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Saudi Petsitters (Next.js + Supabase)
 
-## Getting Started
+Next.js TypeScript app migrated from the [saudi-petsitters](../saudi-petsitters) Vite/Base44 reference, with Supabase as the backend.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router)
+- **TypeScript**
+- **Tailwind CSS v4** + **shadcn/ui**
+- **Supabase** (Auth, Postgres, RLS)
+- **TanStack React Query**
+
+## Getting started
 
 ```bash
+npm install
+cp .env.example .env.local
+# Add your Supabase URL and anon key to .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create or use an existing Supabase project.
+2. Copy `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` into `.env.local`.
+3. Apply migrations:
 
-## Learn More
+```bash
+npx supabase link --project-ref YOUR_PROJECT_REF
+npx supabase db push
+```
 
-To learn more about Next.js, take a look at the following resources:
+Migrations live in [`supabase/migrations`](supabase/migrations).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Path | Purpose |
+|------|---------|
+| `src/app/(main)/` | App Router pages |
+| `src/components/pages/` | Ported page components |
+| `src/components/layout/` | Navbar, footer, mobile tabs |
+| `src/lib/data/` | Supabase entity client (replaces Base44 SDK) |
+| `src/features/*/queries.ts` | Domain query helpers |
+| `supabase/migrations/` | Database schema + RLS |
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` — development server
+- `npm run build` — production build
+- `npm run lint` — ESLint
