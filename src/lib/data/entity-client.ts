@@ -1,6 +1,32 @@
 import { createClient } from "@/lib/supabase/client";
+import type { Database } from "@/lib/supabase/database.types";
 
 type Row = Record<string, unknown>;
+type TableName = Extract<keyof Database["public"]["Tables"], string>;
+type EntityError = { message?: string };
+type QueryResult<R> = PromiseLike<{ data: R; error: EntityError | null }>;
+type DynamicQuery = QueryResult<Row[] | null> & {
+  select: (columns?: string) => DynamicQuery;
+  order: (column: string, options: { ascending: boolean }) => DynamicQuery;
+  limit: (count: number) => DynamicQuery;
+  eq: (column: string, value: string | number | boolean) => DynamicQuery;
+  maybeSingle: () => QueryResult<Row | null>;
+  single: () => QueryResult<Row | null>;
+  insert: (payload: Row) => DynamicQuery;
+  update: (payload: Row) => DynamicQuery;
+  delete: () => DynamicQuery;
+};
+
+function toEntityError(table: string, operation: string, error: EntityError) {
+  const message = error.message || `${table}.${operation} failed`;
+  const entityError = new Error(message);
+  (entityError as Error & { cause?: unknown }).cause = error;
+  return entityError;
+}
+
+function fromTable(table: TableName): DynamicQuery {
+  return createClient().from(table) as unknown as DynamicQuery;
+}
 
 function parseOrder(order?: string): { column: string; ascending: boolean } | null {
   if (!order) return null;
@@ -11,12 +37,10 @@ function parseOrder(order?: string): { column: string; ascending: boolean } | nu
   return { column: mapped, ascending: !desc };
 }
 
-export function createEntityClient<T extends Row>(table: string) {
-  const supabase = () => createClient();
-
+export function createEntityClient<T extends Row>(table: TableName) {
   return {
     async list(order?: string, limit?: number): Promise<T[]> {
-      let query = supabase().from(table).select("*");
+      let query = fromTable(table).select("*");
       const o = parseOrder(order);
       if (o) query = query.order(o.column, { ascending: o.ascending });
       if (limit) query = query.limit(limit);
@@ -29,8 +53,7 @@ export function createEntityClient<T extends Row>(table: string) {
     },
 
     async get(id: string): Promise<T | null> {
-      const { data, error } = await supabase()
-        .from(table)
+      const { data, error } = await fromTable(table)
         .select("*")
         .eq("id", id)
         .maybeSingle();
@@ -46,7 +69,7 @@ export function createEntityClient<T extends Row>(table: string) {
       order?: string,
       limit?: number
     ): Promise<T[]> {
-      let query = supabase().from(table).select("*");
+      let query = fromTable(table).select("*");
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           query = query.eq(key, value as string | number | boolean);
@@ -64,34 +87,32 @@ export function createEntityClient<T extends Row>(table: string) {
     },
 
     async create(payload: Partial<T>): Promise<T> {
-      const { data, error } = await supabase()
-        .from(table)
+      const { data, error } = await fromTable(table)
         .insert(payload as Row)
         .select()
         .single();
-      if (error) throw error;
+      if (error) throw toEntityError(table, "create", error);
       return data as T;
     },
 
     async update(id: string, payload: Partial<T>): Promise<T> {
-      const { data, error } = await supabase()
-        .from(table)
+      const { data, error } = await fromTable(table)
         .update(payload as Row)
         .eq("id", id)
         .select()
         .single();
-      if (error) throw error;
+      if (error) throw toEntityError(table, "update", error);
       return data as T;
     },
 
     async delete(id: string): Promise<void> {
-      const { error } = await supabase().from(table).delete().eq("id", id);
-      if (error) throw error;
+      const { error } = await fromTable(table).delete().eq("id", id);
+      if (error) throw toEntityError(table, "delete", error);
     },
 
     /** Realtime subscription — refreshes on any change to the table. */
     subscribe(callback: (event: { type: string }) => void): () => void {
-      const client = supabase();
+      const client = createClient();
       const channel = client
         .channel(`${table}-changes`)
         .on(

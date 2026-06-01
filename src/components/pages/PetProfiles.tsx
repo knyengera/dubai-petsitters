@@ -5,21 +5,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { entities } from '@/lib/data/entities';
 import { useLanguage } from '@/lib/language-context';
-import { PawPrint, Plus, X, Syringe, FileText, Edit2, Trash2, ChevronDown } from 'lucide-react';
+import { PawPrint, Plus, X, Syringe, Trash2, ChevronDown } from 'lucide-react';
 import ImageUpload from '@/components/common/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/lib/auth-context';
 
 const SPECIES = ['dog', 'cat', 'bird', 'rabbit', 'reptile', 'other'];
 
 const emptyForm = { name: '', species: '', breed: '', age: '', gender: '', weight_kg: '', color: '', microchip_number: '', notes: '', photo_url: '' };
 
+function getErrorMessage(error) {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === 'object' && 'message' in error) return String(error.message);
+  return 'Something went wrong. Please try again.';
+}
+
 export default function PetProfiles() {
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { user, navigateToLogin } = useAuth();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -40,19 +48,49 @@ export default function PetProfiles() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!user?.email) {
+      toast({
+        title: t('Please sign in to add a pet', 'يرجى تسجيل الدخول لإضافة حيوان'),
+        variant: 'destructive',
+      });
+      navigateToLogin();
+      return;
+    }
+
     setLoading(true);
-    await entities.UserPet.create({ ...form, weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : undefined });
-    toast({ title: t('Pet added!', 'تمت إضافة الحيوان!') });
-    qc.invalidateQueries(['my-pets']);
-    setForm(emptyForm);
-    setShowForm(false);
-    setLoading(false);
+    try {
+      await entities.UserPet.create({
+        ...form,
+        created_by: user.email,
+        weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : undefined,
+      });
+      toast({ title: t('Pet added!', 'تمت إضافة الحيوان!') });
+      qc.invalidateQueries({ queryKey: ['my-pets'] });
+      setForm(emptyForm);
+      setShowForm(false);
+    } catch (error) {
+      toast({
+        title: t('Could not add pet', 'تعذر إضافة الحيوان'),
+        description: getErrorMessage(error),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id) => {
-    await entities.UserPet.delete(id);
-    qc.invalidateQueries(['my-pets']);
-    toast({ title: t('Pet removed', 'تمت الإزالة') });
+    try {
+      await entities.UserPet.delete(id);
+      qc.invalidateQueries({ queryKey: ['my-pets'] });
+      toast({ title: t('Pet removed', 'تمت الإزالة') });
+    } catch (error) {
+      toast({
+        title: t('Could not remove pet', 'تعذرت إزالة الحيوان'),
+        description: getErrorMessage(error),
+        variant: 'destructive',
+      });
+    }
   };
 
   const petVaccines = (petName) => vaccinations.filter(v => v.pet_name === petName);
