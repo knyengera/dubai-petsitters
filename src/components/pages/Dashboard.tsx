@@ -10,9 +10,10 @@ import { entities } from '@/lib/data/entities';
 import { useLanguage } from '@/lib/language-context';
 import { PawPrint, Calendar, Bot, MapPin, Stethoscope, Plus, ChevronRight, Syringe, CalendarDays, ShieldCheck } from 'lucide-react';
 import PetRemindersSection from '@/components/home/PetRemindersSection';
+import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
 
 const quickActions = [
-  { icon: Bot, color: 'bg-violet-500', en: 'AI Health Check', ar: 'فحص ذكي', to: '/ai-chat' },
+  { icon: Bot, color: 'bg-violet-500', en: 'AI Health Check', ar: 'فحص ذكي', openAssistant: true as const },
   { icon: PawPrint, color: 'bg-primary', en: 'My Pets', ar: 'حيواناتي', to: '/pets' },
   { icon: Calendar, color: 'bg-sky-500', en: 'Book Appointment', ar: 'احجز موعداً', to: '/appointments' },
   { icon: Stethoscope, color: 'bg-emerald-500', en: 'Find a Vet', ar: 'ابحث عن طبيب', to: '/vets' },
@@ -22,6 +23,7 @@ const quickActions = [
 
 export default function Dashboard() {
   const { t } = useLanguage();
+  const { openAssistant } = usePetHealthAssistant();
   const [user, setUser] = React.useState(null);
 
   React.useEffect(() => {
@@ -85,18 +87,27 @@ export default function Dashboard() {
         <div>
           <h2 className="font-heading text-lg font-bold text-foreground mb-4">{t('Quick Actions', 'إجراءات سريعة')}</h2>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-            {quickActions.map((a, i) => (
-              <motion.div key={a.en} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.06 }}>
-                <Link href={a.to}>
-                  <div className="flex flex-col items-center gap-2 p-3 bg-card border border-border rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all text-center">
-                    <div className={`w-10 h-10 rounded-xl ${a.color} flex items-center justify-center`}>
-                      <a.icon className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-[11px] font-medium text-foreground leading-tight">{t(a.en, a.ar)}</span>
+            {quickActions.map((a, i) => {
+              const card = (
+                <div className="flex flex-col items-center gap-2 p-3 bg-card border border-border rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all text-center">
+                  <div className={`w-10 h-10 rounded-xl ${a.color} flex items-center justify-center`}>
+                    <a.icon className="w-5 h-5 text-white" />
                   </div>
-                </Link>
-              </motion.div>
-            ))}
+                  <span className="text-[11px] font-medium text-foreground leading-tight">{t(a.en, a.ar)}</span>
+                </div>
+              );
+              return (
+                <motion.div key={a.en} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.06 }}>
+                  {"openAssistant" in a && a.openAssistant ? (
+                    <button type="button" onClick={openAssistant} className="w-full text-start">
+                      {card}
+                    </button>
+                  ) : (
+                    <Link href={a.to!}>{card}</Link>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
 

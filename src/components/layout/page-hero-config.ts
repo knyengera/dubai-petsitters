@@ -111,11 +111,6 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
     subtitle: "Health records & profiles",
     imageAlt: DEFAULT_ALT,
   },
-  "/ai-chat": {
-    title: "AI Pet Health Assistant",
-    subtitle: "Online · Bilingual guidance for your pet",
-    imageAlt: DEFAULT_ALT,
-  },
   "/appointments": {
     title: "Appointments",
     subtitle: "Manage your vet visits",

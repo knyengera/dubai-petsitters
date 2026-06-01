@@ -1,11 +1,13 @@
 "use client";
 
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "./navbar";
 import Footer from "./footer";
 import BottomTab from "./bottom-tab";
 import TopHeader from "./top-header";
 import { PageHeroFromPath } from "./page-hero";
+import PetHealthAssistantWidget from "@/components/ai/pet-health-assistant-widget";
 
 export default function MainLayout({
   children,
@@ -36,6 +38,9 @@ export default function MainLayout({
         <Footer />
       </div>
       <BottomTab />
+      <Suspense fallback={null}>
+        <PetHealthAssistantWidget />
+      </Suspense>
     </div>
   );
 }

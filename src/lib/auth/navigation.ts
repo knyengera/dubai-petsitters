@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Home,
   PawPrint,
-  Bot,
   Stethoscope,
   LayoutDashboard,
   Heart,
@@ -53,7 +52,6 @@ const PUBLIC_BOTTOM_TABS: BottomTabItem[] = [
 
 const PROTECTED_BOTTOM_TABS: BottomTabItem[] = [
   { labelEn: "Dashboard", labelAr: "لوحتي", path: "/dashboard", icon: LayoutDashboard },
-  { labelEn: "AI Chat", labelAr: "ذكاء", path: "/ai-chat", icon: Bot },
   { labelEn: "My Pets", labelAr: "حيواناتي", path: "/pets", icon: PawPrint },
 ];
 

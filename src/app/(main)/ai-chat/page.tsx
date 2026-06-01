@@ -1,5 +1,6 @@
-import AIChat from "@/components/pages/AIChat";
+import { redirect } from "next/navigation";
 
+/** Legacy route — opens the global AI assistant widget on the dashboard. */
 export default function Page() {
-  return <AIChat />;
+  redirect("/dashboard?openAssistant=1");
 }

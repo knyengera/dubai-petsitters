@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/language-context';
 import { useAuth } from '@/lib/auth-context';
 import { filterByAuth } from '@/lib/auth/navigation';
+import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
 import { Bot, Stethoscope, PawPrint, Plane, MapPin, Heart, Shield, Clock, ChevronRight, Star, ArrowRight, Users, BadgeCheck } from 'lucide-react';
@@ -41,7 +42,7 @@ const SAMPLE_HOSTS = [
 ];
 
 const features = [
-  { icon: Bot, gradient: 'from-violet-600 to-purple-700', labelEn: 'AI Health Assistant', labelAr: 'مساعد الصحة الذكي', descEn: 'Symptom checker & emergency alerts', descAr: 'فحص الأعراض وتنبيهات الطوارئ', to: '/ai-chat', img: 'https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&q=80' },
+  { icon: Bot, gradient: 'from-violet-600 to-purple-700', labelEn: 'AI Health Assistant', labelAr: 'مساعد الصحة الذكي', descEn: 'Symptom checker & emergency alerts', descAr: 'فحص الأعراض وتنبيهات الطوارئ', openAssistant: true as const, img: 'https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&q=80' },
   { icon: PawPrint, gradient: 'from-orange-500 to-amber-600', labelEn: 'Pet Profiles', labelAr: 'ملفات الحيوانات', descEn: 'Vaccination records & health passports', descAr: 'سجلات التطعيم وجوازات الصحة', to: '/pets', img: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80' },
   { icon: Stethoscope, gradient: 'from-emerald-500 to-teal-600', labelEn: 'Find a Vet', labelAr: 'ابحث عن طبيب', descEn: 'Nearby clinics & emergency care', descAr: 'عيادات قريبة ورعاية طارئة', to: '/vets', img: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=80' },
   { icon: Plane, gradient: 'from-sky-500 to-blue-600', labelEn: 'Travel Compliance', labelAr: 'امتثال السفر', descEn: 'Import/export Saudi pet regulations', descAr: 'لوائح استيراد وتصدير الحيوانات', to: '/travel', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&q=80' },
@@ -113,8 +114,13 @@ function FeaturedVetsSection({ t }) {
 export default function Home() {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { openAssistant } = usePetHealthAssistant();
   const isAuthenticated = !!user;
-  const visibleFeatures = filterByAuth(features, isAuthenticated, 'to');
+  const visibleFeatures = filterByAuth(
+    features.filter((f) => !f.openAssistant || isAuthenticated),
+    isAuthenticated,
+    'to'
+  );
 
   const { data: pets = [] } = useQuery({
     queryKey: ['featured-pets'],
@@ -164,16 +170,16 @@ export default function Home() {
                   <ArrowRight className="w-4 h-4 ms-2" />
                 </Link>
                 {isAuthenticated ? (
-                  <Link
-                    href="/ai-chat"
-                    className={cn(
-                      buttonVariants({ size: "lg", variant: "outline" }),
-                      "rounded-2xl px-8 border-border hover:border-primary hover:text-primary"
-                    )}
+                  <Button
+                    type="button"
+                    size="lg"
+                    variant="outline"
+                    onClick={openAssistant}
+                    className="rounded-2xl px-8 border-border hover:border-primary hover:text-primary"
                   >
                     <Bot className="w-4 h-4 me-2" />
                     {t('AI Health Check', 'فحص صحي ذكي')}
-                  </Link>
+                  </Button>
                 ) : (
                   <Link
                     href="/vets"
@@ -234,28 +240,39 @@ export default function Home() {
           </p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {visibleFeatures.map((f, i) => (
-            <motion.div key={f.labelEn} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
-              <Link href={f.to} className="block h-full">
-                <div className="group relative rounded-2xl overflow-hidden border border-border hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer h-full">
-                  <div className="relative h-40 overflow-hidden">
-                    <img src={f.img} alt={t(f.labelEn, f.labelAr)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                    <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient} opacity-70`} />
-                    <div className="absolute inset-0 flex flex-col justify-end p-4">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mb-2">
-                        <f.icon className="w-5 h-5 text-white" />
-                      </div>
-                      <h3 className="font-heading font-bold text-white text-lg leading-tight drop-shadow">{t(f.labelEn, f.labelAr)}</h3>
+          {visibleFeatures.map((f, i) => {
+            const featureCard = (
+              <div className="group relative rounded-2xl overflow-hidden border border-border hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer h-full">
+                <div className="relative h-40 overflow-hidden">
+                  <img src={f.img} alt={t(f.labelEn, f.labelAr)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient} opacity-70`} />
+                  <div className="absolute inset-0 flex flex-col justify-end p-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mb-2">
+                      <f.icon className="w-5 h-5 text-white" />
                     </div>
-                  </div>
-                  <div className="bg-card p-4 flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">{t(f.descEn, f.descAr)}</p>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 ms-2" />
+                    <h3 className="font-heading font-bold text-white text-lg leading-tight drop-shadow">{t(f.labelEn, f.labelAr)}</h3>
                   </div>
                 </div>
-              </Link>
-            </motion.div>
-          ))}
+                <div className="bg-card p-4 flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">{t(f.descEn, f.descAr)}</p>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 ms-2" />
+                </div>
+              </div>
+            );
+            return (
+              <motion.div key={f.labelEn} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
+                {"openAssistant" in f && f.openAssistant ? (
+                  <button type="button" onClick={openAssistant} className="block h-full w-full text-start">
+                    {featureCard}
+                  </button>
+                ) : (
+                  <Link href={f.to!} className="block h-full">
+                    {featureCard}
+                  </Link>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 

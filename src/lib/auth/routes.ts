@@ -6,7 +6,6 @@ const PROTECTED_EXACT = new Set([
   "/settings",
   "/host-calendar",
   "/appointments",
-  "/ai-chat",
   "/become-host",
   "/pets",
 ]);
