@@ -55,36 +55,29 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background pb-8">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-primary/10 to-accent/5 px-4 sm:px-6 lg:px-8 pt-6 pb-8">
-        <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <p className="text-muted-foreground text-sm">{t('Welcome back', 'مرحباً بعودتك')}</p>
-            <h1 className="font-heading text-2xl font-bold text-foreground">
-              {user?.full_name || t('Pet Owner', 'صاحب الحيوان')} 👋
-            </h1>
-          </motion.div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pt-8">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          <p className="text-muted-foreground text-sm">{t('Welcome back', 'مرحباً بعودتك')}</p>
+          <p className="font-heading text-2xl font-bold text-foreground">
+            {user?.full_name || t('Pet Owner', 'صاحب الحيوان')} 👋
+          </p>
+        </motion.div>
 
-          {/* Stat pills */}
-          <div className="flex flex-wrap gap-3 mt-5">
-            {[
-              { val: pets.length, en: 'Pets', ar: 'حيوانات', icon: PawPrint, to: '/pets' },
-              { val: appointments.length, en: 'Upcoming', ar: 'قادمة', icon: Calendar, to: '/appointments' },
-              { val: dueSoon.length, en: 'Vaccines Due', ar: 'تطعيمات', icon: Syringe, to: '/pets', warn: dueSoon.length > 0 },
-            ].map(stat => (
-              <Link key={stat.en} href={stat.to}>
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border ${stat.warn ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800' : 'bg-card border-border'}`}>
-                  <stat.icon className={`w-4 h-4 ${stat.warn ? 'text-orange-500' : 'text-primary'}`} />
-                  <span className="font-bold text-foreground">{stat.val}</span>
-                  <span className="text-xs text-muted-foreground">{t(stat.en, stat.ar)}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-3">
+          {[
+            { val: pets.length, en: 'Pets', ar: 'حيوانات', icon: PawPrint, to: '/pets' },
+            { val: appointments.length, en: 'Upcoming', ar: 'قادمة', icon: Calendar, to: '/appointments' },
+            { val: dueSoon.length, en: 'Vaccines Due', ar: 'تطعيمات', icon: Syringe, to: '/pets', warn: dueSoon.length > 0 },
+          ].map(stat => (
+            <Link key={stat.en} href={stat.to}>
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border ${stat.warn ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800' : 'bg-card border-border'}`}>
+                <stat.icon className={`w-4 h-4 ${stat.warn ? 'text-orange-500' : 'text-primary'}`} />
+                <span className="font-bold text-foreground">{stat.val}</span>
+                <span className="text-xs text-muted-foreground">{t(stat.en, stat.ar)}</span>
+              </div>
+            </Link>
+          ))}
         </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 mt-8">
         {/* Pet Reminders */}
         <PetRemindersSection t={t} />
 

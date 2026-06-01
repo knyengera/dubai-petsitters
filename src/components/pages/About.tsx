@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { PawPrint, Heart, Shield, Users } from 'lucide-react';
+import { Heart, Shield, Users } from 'lucide-react';
 
 const values = [
   { icon: Heart, title: 'Compassion First', desc: 'Every decision we make is guided by the well-being of animals and the people who love them.' },
@@ -12,17 +12,6 @@ const values = [
 export default function About() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className="bg-gradient-to-br from-primary/10 to-accent/5 py-20 px-4 text-center">
-        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-5">
-          <PawPrint className="w-8 h-8 text-primary-foreground" />
-        </div>
-        <h1 className="font-heading text-4xl font-extrabold text-foreground mb-3">About Saudi Petsitters</h1>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Saudi Arabia's trusted pet care community — connecting pet owners with trusted hosts, vets, and resources all in one place.
-        </p>
-      </div>
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
         {/* Mission */}
         <section>

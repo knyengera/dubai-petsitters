@@ -12,8 +12,6 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { CheckCircle, Upload, Home, Sun, Dog, Footprints, Star, Users, DollarSign, Shield, Loader2 } from 'lucide-react';
 
-const HERO_IMG = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1200&q=80';
-
 const perks = [
   { icon: DollarSign, title: 'Earn Extra Income', desc: 'Set your own rates and earn on your schedule.' },
   { icon: Users, title: 'Meet Fellow Pet Lovers', desc: 'Join a community of passionate animal caregivers.' },
@@ -99,22 +97,6 @@ export default function BecomeHost() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className="relative h-72 lg:h-96 overflow-hidden">
-        <img src={HERO_IMG} alt="Become a host" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-        <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 lg:px-20">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur border border-white/25 rounded-full px-4 py-1.5 text-sm font-semibold text-white mb-4">
-              🐾 Join Our Host Community
-            </div>
-            <h1 className="font-heading text-4xl lg:text-5xl font-extrabold text-white mb-3">Become a Pet Host</h1>
-            <p className="text-white/80 text-lg max-w-xl">Turn your love for animals into income. Register your profile, set your services, and start welcoming pets into your care.</p>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Perks */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-14">
           {perks.map((p, i) => (

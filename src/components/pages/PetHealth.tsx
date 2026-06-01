@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { ArrowLeft, FileText, Heart } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import HealthOverview from '@/components/health/HealthOverview';
@@ -66,26 +65,15 @@ export default function PetHealth() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-primary/5 to-accent/5 border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Link href="/pets" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-4">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Back to Pets</span>
-          </Link>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-3 mb-4">
-              <Heart className="w-8 h-8 text-primary" />
-              <div>
-                <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">{pet.name}'s Health</h1>
-                <p className="text-muted-foreground text-sm capitalize">{pet.species} • {pet.breed || 'Mixed'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <HealthPDFExport pet={pet} vaccinations={vaccinations} medicalRecords={medicalRecords} />
-            </div>
-          </motion.div>
-        </div>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+        <Link href="/pets" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-4">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm font-medium">Back to Pets</span>
+        </Link>
+        <p className="text-muted-foreground text-sm capitalize mb-4">
+          {pet.name} · {pet.species} • {pet.breed || 'Mixed'}
+        </p>
+        <HealthPDFExport pet={pet} vaccinations={vaccinations} medicalRecords={medicalRecords} />
       </div>
 
       {/* Tabs */}

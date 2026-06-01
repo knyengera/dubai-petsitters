@@ -26,21 +26,6 @@ export default function Hosts() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-primary/5 to-accent/5 py-12 lg:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-3 mb-3">
-              <Home className="w-8 h-8 text-primary" />
-              <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">Find a Pet Host</h1>
-            </div>
-            <p className="text-muted-foreground text-lg max-w-2xl">
-              Browse trusted pet sitters and hosts across Saudi Arabia. Book the perfect care for your pet — just like Airbnb.
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
       <PullToRefresh onRefresh={refetch}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <HostFilters filters={filters} onChange={setFilters} />

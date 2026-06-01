@@ -63,21 +63,7 @@ export default function AIChat() {
   const isEmergency = (text) => text?.includes('🚨');
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600 to-primary px-4 py-4 flex items-center gap-3 shrink-0">
-        <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
-          <Bot className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h1 className="font-heading font-bold text-white">{t('AI Pet Health Assistant', 'مساعد صحة الحيوانات الذكي')}</h1>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-            <span className="text-white/70 text-xs">{t('Online · Bilingual', 'متصل · ثنائي اللغة')}</span>
-          </div>
-        </div>
-      </div>
-
+    <div className="flex flex-col min-h-[calc(100vh-12rem)] bg-background">
       {/* Disclaimer */}
       <div className="bg-orange-50 dark:bg-orange-900/20 border-b border-orange-200 dark:border-orange-800 px-4 py-2 flex items-center gap-2 shrink-0">
         <AlertTriangle className="w-3.5 h-3.5 text-orange-500 shrink-0" />

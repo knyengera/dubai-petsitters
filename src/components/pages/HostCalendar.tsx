@@ -139,10 +139,9 @@ export default function HostCalendar() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="font-heading text-3xl font-extrabold text-foreground">Calendar Management</h1>
-          <p className="text-muted-foreground mt-1">Manage your availability and pricing for <span className="font-semibold text-foreground">{hostProfile.full_name}</span></p>
-        </div>
+        <p className="text-muted-foreground mb-6">
+          Managing availability for <span className="font-semibold text-foreground">{hostProfile.full_name}</span>
+        </p>
 
         {/* Legend */}
         <div className="flex flex-wrap gap-3 mb-6">

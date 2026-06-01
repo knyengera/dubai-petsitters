@@ -17,11 +17,6 @@ export default function Disclaimer() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex items-center gap-3 mb-2">
-          <AlertTriangle className="w-7 h-7 text-amber-500" />
-          <h1 className="font-heading text-3xl font-extrabold text-foreground">Disclaimer</h1>
-        </div>
-        <p className="text-muted-foreground text-sm mb-10">Last updated: May 2026</p>
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-10 text-sm text-amber-800">
           <strong>Important:</strong> The information on Saudi Petsitters is not a substitute for professional veterinary advice. When in doubt, always consult a qualified vet.
         </div>

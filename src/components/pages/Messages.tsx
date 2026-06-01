@@ -66,11 +66,6 @@ export default function Messages() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <MessageCircle className="w-7 h-7 text-primary" />
-          <h1 className="font-heading text-2xl font-bold text-foreground">Messages</h1>
-        </div>
-
         <div className="bg-card border border-border rounded-2xl overflow-hidden" style={{ height: 'calc(100vh - 220px)', minHeight: 480 }}>
           <div className="flex h-full">
             {/* Conversation list */}

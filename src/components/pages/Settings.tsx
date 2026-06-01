@@ -7,8 +7,7 @@ import { entities } from '@/lib/data/entities';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Settings, Trash2, LogOut, AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Trash2, LogOut, AlertTriangle } from 'lucide-react';
 
 export default function SettingsPage() {
   const [deleting, setDeleting] = useState(false);
@@ -24,18 +23,6 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 to-accent/5 py-12 lg:py-16">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-3 mb-1">
-              <Settings className="w-8 h-8 text-primary" />
-              <h1 className="font-heading text-3xl font-bold text-foreground">Settings</h1>
-            </div>
-            <p className="text-muted-foreground">Manage your account preferences.</p>
-          </motion.div>
-        </div>
-      </div>
-
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-4">
         {/* Logout */}
         <Card className="rounded-2xl">

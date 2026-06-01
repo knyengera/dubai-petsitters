@@ -95,7 +95,6 @@ export default function VetAdvertise() {
               <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
                 <Stethoscope className="w-7 h-7 text-primary" />
               </div>
-              <h1 className="font-heading text-3xl font-extrabold text-foreground mb-2">Advertise Your Clinic</h1>
               <p className="text-muted-foreground leading-relaxed">Reach thousands of pet owners across Saudi Arabia. List your clinic, post specials, and grow your practice.</p>
             </div>
 

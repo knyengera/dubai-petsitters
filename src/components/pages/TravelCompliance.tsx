@@ -62,18 +62,8 @@ export default function TravelCompliance() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-sky-500/10 to-primary/5 px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-8">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-sky-500 rounded-2xl flex items-center justify-center">
-              <Plane className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="font-heading text-xl font-bold text-foreground">{t('Travel Compliance Wizard', 'معالج امتثال السفر')}</h1>
-              <p className="text-sm text-muted-foreground">{t('Saudi pet import/export requirements', 'متطلبات استيراد وتصدير الحيوانات السعودية')}</p>
-            </div>
-          </div>
-          {/* Progress */}
           <div className="flex items-center gap-1">
             {steps.map((s, i) => (
               <React.Fragment key={s.en}>

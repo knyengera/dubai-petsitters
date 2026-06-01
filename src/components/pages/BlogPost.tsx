@@ -46,13 +46,6 @@ export default function BlogPostPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {post.cover_image && (
-        <div className="w-full h-64 sm:h-80 lg:h-96 relative">
-          <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-        </div>
-      )}
-
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />

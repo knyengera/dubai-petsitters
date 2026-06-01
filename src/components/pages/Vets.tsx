@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import VetCard from '@/components/vets/VetCard';
 import VetFilters, { DEFAULT_VET_FILTERS, applyVetFilters } from '@/components/filters/VetFilters';
 import { Stethoscope, Loader2, Megaphone } from 'lucide-react';
@@ -25,26 +24,12 @@ export default function Vets() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 to-accent/5 py-12 lg:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-3 mb-3">
-              <Stethoscope className="w-8 h-8 text-primary" />
-              <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">Find a Vet</h1>
-            </div>
-            <p className="text-muted-foreground text-lg max-w-2xl">
-              Browse veterinary clinics across Saudi Arabia. Find emergency services, specialists, and routine care near you.
-            </p>
-            <Link href="/vet-advertise" className="inline-block mt-5">
-              <Button className="rounded-xl gap-2 font-semibold">
-                <Megaphone className="w-4 h-4" /> Advertise Your Clinic
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <Link href="/vet-advertise" className="inline-block mb-6">
+          <Button className="rounded-xl gap-2 font-semibold">
+            <Megaphone className="w-4 h-4" /> Advertise Your Clinic
+          </Button>
+        </Link>
         <VetFilters filters={filters} onChange={setFilters} />
         {!isLoading && (
           <p className="text-sm text-muted-foreground mb-6">{filtered.length} clinic{filtered.length !== 1 ? 's' : ''} found</p>
@@ -63,9 +48,9 @@ export default function Vets() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((clinic, i) => (
-              <motion.div key={clinic.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              <div key={clinic.id}>
                 <VetCard clinic={clinic} index={i} />
-              </motion.div>
+              </div>
             ))}
           </div>
         )}

@@ -59,19 +59,12 @@ export default function PetProfiles() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/10 to-accent/5 px-4 sm:px-6 lg:px-8 pt-6 pb-8">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-2xl font-bold text-foreground">{t('My Pets', 'حيواناتي')}</h1>
-            <p className="text-muted-foreground text-sm mt-1">{t('Health records & profiles', 'السجلات الصحية والملفات')}</p>
-          </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+        <div className="flex items-center justify-end mb-4">
           <Button onClick={() => setShowForm(true)} className="rounded-2xl gap-2">
             <Plus className="w-4 h-4" /> {t('Add Pet', 'أضف حيوانًا')}
           </Button>
         </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
         {isLoading && <div className="text-center py-12 text-muted-foreground">{t('Loading...', 'جاري التحميل...')}</div>}
 
         {!isLoading && pets.length === 0 && (

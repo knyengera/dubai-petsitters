@@ -89,23 +89,15 @@ export default function AdminVets() {
 
   return (
     <div className="min-h-screen bg-background pb-10">
-      <div className="bg-gradient-to-br from-emerald-500/10 to-primary/5 px-4 sm:px-6 lg:px-8 pt-6 pb-8">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-2xl font-bold text-foreground flex items-center gap-2">
-              <Stethoscope className="w-6 h-6 text-emerald-600" /> Vet Clinic Management
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Free listings during launch · {approved.length} approved · {pending.length} pending
-            </p>
-          </div>
-          <Button onClick={() => setShowForm(true)} className="rounded-xl gap-2">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            Free listings during launch · {approved.length} approved · {pending.length} pending
+          </p>
+          <Button onClick={() => setShowForm(true)} className="rounded-xl gap-2 shrink-0">
             <Plus className="w-4 h-4" /> Add Vet
           </Button>
         </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
         {isLoading ? (
           <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
         ) : (

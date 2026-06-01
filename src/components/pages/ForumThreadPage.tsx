@@ -147,7 +147,7 @@ export default function ForumThreadPage() {
                   {CATEGORY_LABELS[thread.category] || thread.category}
                 </span>
               </div>
-              <h1 className="font-heading text-2xl font-bold text-foreground mb-3">{thread.title}</h1>
+              <h2 className="font-heading text-2xl font-bold text-foreground mb-3">{thread.title}</h2>
               <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap mb-5">{thread.content}</p>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <span className="font-medium text-foreground/70">{thread.author_name}</span>

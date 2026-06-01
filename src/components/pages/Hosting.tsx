@@ -8,13 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Shield, Clock, Heart, CheckCircle, Star, Users, ChevronRight, Search, Loader2, MapPin, Badge } from 'lucide-react';
+import { Shield, Clock, Heart, CheckCircle, Star, Users, Search, Loader2 } from 'lucide-react';
 import HostCard from '@/components/hosts/HostCard';
 import HostBookingModal from '@/components/hosting/HostBookingModal';
-
-const HERO_IMG = 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1400&q=80';
-
-
 
 const benefits = [
   { icon: Shield, text: 'Verified & Trusted Sitters' },
@@ -44,32 +40,19 @@ export default function Hosting() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className="relative h-64 lg:h-80 overflow-hidden">
-        <img src={HERO_IMG} alt="Dogs running" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-        <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 lg:px-20">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="font-heading text-4xl lg:text-5xl font-extrabold text-white mb-3">Pet Hosting Services</h1>
-            <p className="text-white/80 text-lg max-w-xl">Trusted pet care while you are away. Browse verified hosts or book a service.</p>
-            <div className="flex flex-wrap gap-3 mt-5">
-              <Link href="/hosts">
-                <Button className="bg-white text-foreground hover:bg-white/90 font-bold rounded-xl px-6">
-                  <Users className="w-4 h-4 mr-2" /> Browse All Hosts
-                </Button>
-              </Link>
-              <Link href="/become-host">
-                <Button variant="outline" className="border-white/50 text-white hover:bg-white/15 rounded-xl px-6">
-                  <Star className="w-4 h-4 mr-2" /> Become a Host
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-wrap gap-3 mb-8">
+          <Link href="/hosts">
+            <Button className="rounded-xl px-6 font-bold">
+              <Users className="w-4 h-4 mr-2" /> Browse All Hosts
+            </Button>
+          </Link>
+          <Link href="/become-host">
+            <Button variant="outline" className="rounded-xl px-6">
+              <Star className="w-4 h-4 mr-2" /> Become a Host
+            </Button>
+          </Link>
+        </div>
         {/* Search & Filter */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">

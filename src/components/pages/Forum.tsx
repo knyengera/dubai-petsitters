@@ -3,7 +3,6 @@
 import { base44 } from "@/lib/data";
 
 import { useState, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { entities } from '@/lib/data/entities';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ThreadCard from '@/components/forum/ThreadCard';
 import NewThreadModal from '@/components/forum/NewThreadModal';
-import { Users, Search, Plus, Loader2, MessageSquare } from 'lucide-react';
+import { Search, Plus, Loader2, MessageSquare } from 'lucide-react';
 
 const CATEGORIES = [
   { value: 'all', label: 'All Topics' },
@@ -70,20 +69,6 @@ export default function Forum() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-primary/5 to-accent/5 py-12 lg:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-3 mb-3">
-              <Users className="w-8 h-8 text-primary" />
-              <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">Community Forum</h1>
-            </div>
-            <p className="text-muted-foreground text-lg max-w-2xl">
-              Ask questions, share advice, and connect with fellow pet owners across Saudi Arabia.
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">

@@ -73,19 +73,12 @@ export default function Appointments() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-sky-500/10 to-primary/5 px-4 sm:px-6 lg:px-8 pt-6 pb-8">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-2xl font-bold text-foreground">{t('Appointments', 'المواعيد')}</h1>
-            <p className="text-muted-foreground text-sm mt-1">{t('Manage your vet visits', 'إدارة زيارات الطبيب البيطري')}</p>
-          </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div className="flex items-center justify-end">
           <Button onClick={() => setShowForm(true)} className="rounded-2xl gap-2">
             <Plus className="w-4 h-4" /> {t('Book', 'احجز')}
           </Button>
         </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {isLoading && <div className="text-center py-12 text-muted-foreground">{t('Loading...', 'جاري التحميل...')}</div>}
 
         {upcoming.length > 0 && (

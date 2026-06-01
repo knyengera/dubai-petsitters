@@ -13,8 +13,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { CheckCircle, Stethoscope, Store, TrendingUp, Megaphone, Globe, BadgeCheck, Loader2, ChevronRight } from 'lucide-react';
 import AdvertisePaymentModal from '@/components/partners/AdvertisePaymentModal';
 
-const HERO_IMG = 'https://images.unsplash.com/photo-1629909615184-74f495363b67?w=1200&q=80';
-
 const partnerTypes = [
   { icon: Stethoscope, label: 'Vet Clinics', desc: 'Reach thousands of pet owners looking for trusted care.' },
   { icon: Store, label: 'Pet Shops & Stores', desc: 'Promote your products to an engaged Saudi audience.' },
@@ -95,21 +93,6 @@ export default function Partners() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className="relative h-72 lg:h-96 overflow-hidden">
-        <img src={HERO_IMG} alt="Partners" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
-        <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 lg:px-20">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur border border-white/25 rounded-full px-4 py-1.5 text-sm font-semibold text-white mb-4">
-              <Megaphone className="w-4 h-4" /> B2B Partnerships
-            </div>
-            <h1 className="font-heading text-4xl lg:text-5xl font-extrabold text-white mb-3">Grow Your Pet Business</h1>
-            <p className="text-white/80 text-lg max-w-xl">Advertise to Saudi Arabia's most engaged community of pet owners. Reach the right audience at the right time.</p>
-          </motion.div>
-        </div>
-      </div>
-
       {/* Stats bar */}
       <div className="bg-primary text-primary-foreground py-6">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">

@@ -5,6 +5,7 @@ import Navbar from "./navbar";
 import Footer from "./footer";
 import BottomTab from "./bottom-tab";
 import TopHeader from "./top-header";
+import { PageHeroFromPath } from "./page-hero";
 
 export default function MainLayout({
   children,
@@ -28,6 +29,7 @@ export default function MainLayout({
           paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
         }}
       >
+        <PageHeroFromPath pathname={pathname} />
         {children}
       </main>
       <div className="hidden lg:block">

@@ -53,13 +53,9 @@ export default function LostPets() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-rose-500/10 to-orange-500/5 px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="font-heading text-2xl font-bold text-foreground">{t('Lost & Found Pets', 'الحيوانات الضائعة والمعثورة')}</h1>
-              <p className="text-sm text-muted-foreground mt-1">{t('Report & find missing pets in Saudi Arabia', 'أبلغ عن الحيوانات الضائعة وابحث عنها في المملكة')}</p>
-            </div>
+          <div className="flex justify-end mb-4">
             <Button onClick={() => setShowForm(true)} className="rounded-2xl gap-2 bg-rose-500 hover:bg-rose-600">
               <Plus className="w-4 h-4" /> {t('Report', 'بلّغ')}
             </Button>
