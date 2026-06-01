@@ -25,11 +25,6 @@ export default function HeroSection({ heroImage }) {
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="max-w-2xl"
         >
-          <div className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-sm border border-primary/30 rounded-full px-4 py-1.5 mb-6">
-            <Heart className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Saudi Arabia's #1 Pet Care Platform</span>
-          </div>
-
           <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
             Where Every Pet Finds{' '}
             <span className="text-primary">Love & Care</span>

@@ -1,14 +1,71 @@
+"use client";
+
 import Link from "next/link";
-import { PawPrint, Mail, MapPin } from "lucide-react";
+import { ArrowRight, HeartHandshake, Mail, MapPin, PawPrint } from "lucide-react";
+import { PUBLIC_NAV_LINKS, type NavLinkItem } from "@/lib/auth/navigation";
+import { useLanguage } from "@/lib/language-context";
+
+const serviceLinks: NavLinkItem[] = [
+  ...PUBLIC_NAV_LINKS.filter(
+    (link) => link.path !== "/blog" && link.path !== "/forum"
+  ),
+  { labelEn: "Lost Pets", labelAr: "الحيوانات المفقودة", path: "/lost-pets" },
+  { labelEn: "Travel Care", labelAr: "رعاية السفر", path: "/travel" },
+];
+
+const companyLinks: NavLinkItem[] = [
+  { labelEn: "About Us", labelAr: "من نحن", path: "/about" },
+  { labelEn: "Become a Host", labelAr: "كن مضيفا", path: "/become-host" },
+  { labelEn: "Partners", labelAr: "الشركاء", path: "/partners" },
+  { labelEn: "Blog", labelAr: "المدونة", path: "/blog" },
+  { labelEn: "Forum", labelAr: "المنتدى", path: "/forum" },
+  { labelEn: "Advertise Your Vet Clinic", labelAr: "أعلن عن عيادتك", path: "/vet-advertise" },
+];
+
+const legalLinks: NavLinkItem[] = [
+  { labelEn: "Privacy", labelAr: "الخصوصية", path: "/privacy" },
+  { labelEn: "Terms", labelAr: "الشروط", path: "/terms" },
+  { labelEn: "Disclaimer", labelAr: "إخلاء المسؤولية", path: "/disclaimer" },
+];
+
+function FooterLinkList({
+  title,
+  links,
+}: {
+  title: string;
+  links: NavLinkItem[];
+}) {
+  const { t } = useLanguage();
+
+  return (
+    <div>
+      <h3 className="font-semibold text-background mb-4">{title}</h3>
+      <ul className="space-y-2.5">
+        {links.map((link) => (
+          <li key={link.path}>
+            <Link
+              href={link.path}
+              className="inline-flex rounded-md text-sm text-background/65 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
+            >
+              {t(link.labelEn, link.labelAr)}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function Footer() {
+  const { isRTL, t } = useLanguage();
+
   return (
     <footer className="bg-foreground text-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          <div>
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[1.25fr_0.85fr_0.85fr_1fr]">
+          <div className="space-y-6">
+            <Link href="/" className="inline-flex items-center gap-2.5 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary transition-transform group-hover:scale-105">
                 <PawPrint className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
@@ -19,48 +76,84 @@ export default function Footer() {
                   Petsitters
                 </span>
               </div>
-            </div>
-            <p className="text-background/60 text-sm leading-relaxed">
-              Saudi Arabia&apos;s trusted pet care community.
+            </Link>
+            <p className="max-w-sm text-sm leading-relaxed text-background/65">
+              {t(
+                "Saudi Arabia's trusted pet care community for vets, adoption, hosting, and everyday pet support.",
+                "مجتمع رعاية الحيوانات الأليفة الموثوق في السعودية للأطباء، التبني، الاستضافة، والدعم اليومي."
+              )}
             </p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-background mb-4">Quick Links</h4>
-            <ul className="space-y-2.5">
-              {[
-                { label: "Adopt a Pet", path: "/adopt" },
-                { label: "Pet Hosting", path: "/hosting" },
-                { label: "Find a Vet", path: "/vets" },
-                { label: "Blog", path: "/blog" },
-                { label: "Forum", path: "/forum" },
-              ].map((link) => (
-                <li key={link.path}>
-                  <Link
-                    href={link.path}
-                    className="text-sm text-background/60 hover:text-primary transition-colors"
+            <div>
+              <h3 className="mb-4 font-semibold text-background">
+                {t("Contact", "تواصل معنا")}
+              </h3>
+              <ul className="space-y-3 text-sm text-background/65">
+                <li>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Khobar%2C%20Saudi%20Arabia"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2.5 rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
                   >
-                    {link.label}
-                  </Link>
+                    <MapPin className="w-4 h-4 text-primary shrink-0" />
+                    {t("Khobar, Saudi Arabia", "الخبر، السعودية")}
+                  </a>
                 </li>
-              ))}
-            </ul>
+                <li>
+                  <a
+                    href="mailto:hello@saudipetsitters.com"
+                    className="inline-flex items-center gap-2.5 rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
+                  >
+                    <Mail className="w-4 h-4 text-primary shrink-0" />
+                    hello@saudipetsitters.com
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
+
+          <FooterLinkList title={t("Services", "الخدمات")} links={serviceLinks} />
+          <FooterLinkList title={t("Company", "الشركة")} links={companyLinks} />
+
           <div>
-            <h4 className="font-semibold text-background mb-4">Contact</h4>
-            <ul className="space-y-3 text-sm text-background/60">
-              <li className="flex items-center gap-2.5">
-                <MapPin className="w-4 h-4 text-primary shrink-0" />
-                Khobar, Saudi Arabia
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-primary shrink-0" />
-                hello@saudipetsitters.com
-              </li>
-            </ul>
+            <div className="rounded-2xl border border-background/10 bg-background/[0.04] p-5">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-background">
+                <HeartHandshake className="h-4 w-4 text-primary" />
+                {t("Need trusted pet care?", "تحتاج رعاية موثوقة؟")}
+              </div>
+              <p className="mb-4 text-sm leading-relaxed text-background/65">
+                {t(
+                  "Explore hosts and vets nearby, or start a conversation with the community.",
+                  "استكشف المضيفين والأطباء القريبين، أو ابدأ محادثة مع المجتمع."
+                )}
+              </p>
+              <Link
+                href="/hosting"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
+              >
+                {t("Find pet care", "ابحث عن رعاية")}
+                <ArrowRight className={`h-4 w-4 ${isRTL ? "rotate-180" : ""}`} />
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="border-t border-background/10 mt-12 pt-6 text-sm text-background/40">
-          © {new Date().getFullYear()} Saudi Petsitters. All rights reserved.
+
+        <div className="mt-12 flex flex-col gap-4 border-t border-background/10 pt-6 text-sm text-background/45 md:flex-row md:items-center md:justify-between">
+          <p>
+            © {new Date().getFullYear()} Saudi Petsitters.{" "}
+            {t("All rights reserved.", "جميع الحقوق محفوظة.")}
+          </p>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            {legalLinks.map((link) => (
+              <Link
+                key={link.path}
+                href={link.path}
+                className="rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
+              >
+                {t(link.labelEn, link.labelAr)}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
