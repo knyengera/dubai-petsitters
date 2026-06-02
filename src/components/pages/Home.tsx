@@ -34,6 +34,32 @@ const PET_FALLBACKS = {
   other: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=800&q=90',
 };
 
+type PetFallbackSpecies = keyof typeof PET_FALLBACKS;
+
+type FeaturedPet = {
+  id: string;
+  name: string;
+  species: string;
+  image_url?: string | null;
+};
+
+function toFeaturedPet(pet: Record<string, unknown>): FeaturedPet {
+  return {
+    id: typeof pet.id === 'string' ? pet.id : String(pet.id ?? pet.name ?? 'pet'),
+    name: typeof pet.name === 'string' ? pet.name : 'Pet',
+    species: typeof pet.species === 'string' ? pet.species : 'other',
+    image_url: typeof pet.image_url === 'string' ? pet.image_url : null,
+  };
+}
+
+function getPetImageUrl(pet: FeaturedPet) {
+  const fallbackSpecies = pet.species in PET_FALLBACKS
+    ? (pet.species as PetFallbackSpecies)
+    : 'other';
+
+  return pet.image_url || PET_FALLBACKS[fallbackSpecies];
+}
+
 const SAMPLE_HOSTS = [
   { id: 'h1', full_name: 'Sara Al-Dosari', city: 'Riyadh', neighborhood: 'Al Olaya', bio: 'Passionate animal lover with 5 years hosting experience.', services: ['boarding', 'daycare'], price_per_night: 120, rating: 4.9, review_count: 87, is_available: true, photo_url: 'https://images.unsplash.com/photo-1488426862026-56bde9d879af?w=400&q=80' },
   { id: 'h2', full_name: 'Mohammed Al-Qahtani', city: 'Jeddah', neighborhood: 'Al Rawdah', bio: 'Dog trainer and boarding specialist. Large yard available.', services: ['boarding', 'dog_walking'], price_per_night: 95, rating: 4.8, review_count: 54, is_available: true, has_yard: true, photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80' },
@@ -124,7 +150,10 @@ export default function Home() {
 
   const { data: pets = [] } = useQuery({
     queryKey: ['featured-pets'],
-    queryFn: () => entities.Pet.filter({ status: 'available' }, '-created_date', 6),
+    queryFn: async () => {
+      const featuredPets = await entities.Pet.filter({ status: 'available' }, '-created_date', 6);
+      return featuredPets.map(toFeaturedPet);
+    },
     initialData: [],
   });
 
@@ -338,7 +367,7 @@ export default function Home() {
                 <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="aspect-[4/3] bg-muted overflow-hidden">
                     <img
-                      src={pet.image_url || PET_FALLBACKS[pet.species] || PET_FALLBACKS.other}
+                      src={getPetImageUrl(pet)}
                       alt={pet.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />

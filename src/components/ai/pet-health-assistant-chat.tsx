@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, User, AlertTriangle } from "lucide-react";
 import { base44 } from "@/lib/data";
+import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 
 export default function PetHealthAssistantChat() {
   const { t, isRTL } = useLanguage();
+  const { user, isLoadingAuth } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,6 +49,8 @@ export default function PetHealthAssistantChat() {
   }, [messages, loading]);
 
   const sendMessage = async (text?: string) => {
+    if (!user) return;
+
     const userMsg = text || input.trim();
     if (!userMsg) return;
     setInput("");
@@ -74,6 +78,31 @@ export default function PetHealthAssistantChat() {
   };
 
   const isEmergency = (text: string) => text?.includes("🚨");
+
+  if (isLoadingAuth) {
+    return (
+      <div className="flex h-full min-h-0 items-center justify-center bg-background px-4 text-sm text-muted-foreground">
+        {t("Checking your account...", "جار التحقق من حسابك...")}
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex h-full min-h-0 flex-col items-center justify-center bg-background px-6 text-center">
+        <Bot className="mb-3 h-8 w-8 text-violet-600" />
+        <h2 className="font-heading text-lg font-bold text-foreground">
+          {t("Sign in to use the AI assistant", "سجل الدخول لاستخدام المساعد الذكي")}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t(
+            "Pet health guidance is available for authenticated users only.",
+            "إرشادات صحة الحيوانات متاحة للمستخدمين المسجلين فقط."
+          )}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full min-h-0 bg-background">

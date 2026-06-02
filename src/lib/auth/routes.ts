@@ -8,6 +8,7 @@ const PROTECTED_EXACT = new Set([
   "/appointments",
   "/become-host",
   "/pets",
+  "/ai-chat",
 ]);
 
 const PET_HEALTH_PATH = /^\/pets\/[^/]+\/health$/;
