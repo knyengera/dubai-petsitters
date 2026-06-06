@@ -136,9 +136,79 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
     subtitle: "Manage your account and preferences",
     imageAlt: DEFAULT_ALT,
   },
+  "/admin": {
+    title: "Admin Console",
+    subtitle: "Platform overview and management tools",
+    imageAlt: DEFAULT_ALT,
+  },
   "/admin/vets": {
     title: "Vet Clinic Management",
     subtitle: "Review and manage vet clinic listings",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/users": {
+    title: "User Management",
+    subtitle: "Manage profiles and roles",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/hosts": {
+    title: "Host Management",
+    subtitle: "Manage pet host listings",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/bookings": {
+    title: "Booking Management",
+    subtitle: "Review hosting bookings",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/appointments": {
+    title: "Appointment Management",
+    subtitle: "Manage vet appointments",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/pets": {
+    title: "Adoption Pets",
+    subtitle: "Manage adoption catalog",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/adoption-requests": {
+    title: "Adoption Requests",
+    subtitle: "Review adoption applications",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/lost-pets": {
+    title: "Lost Pets",
+    subtitle: "Moderate lost and found reports",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/blog": {
+    title: "Blog Management",
+    subtitle: "Publish and manage articles",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/forum": {
+    title: "Forum Moderation",
+    subtitle: "Moderate community threads",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/partners": {
+    title: "Partner Deals",
+    subtitle: "Manage partner promotions",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/subscriptions": {
+    title: "Subscriptions",
+    subtitle: "Manage vet subscriptions",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/payments": {
+    title: "Payments",
+    subtitle: "View payment records",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/admin/reviews": {
+    title: "Reviews",
+    subtitle: "Moderate user reviews",
     imageAlt: DEFAULT_ALT,
   },
 };

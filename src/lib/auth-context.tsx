@@ -13,6 +13,8 @@ import { createClient } from "@/lib/supabase/client";
 type AuthContextValue = {
   user: User | null;
   session: Session | null;
+  role: string | null;
+  isAdmin: boolean;
   isLoadingAuth: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
@@ -72,11 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.location.href = "/login";
   }, []);
 
+  const role = (user?.app_metadata?.role as string) ?? null;
+  const isAdmin = role === "admin";
+
   return (
     <AuthContext.Provider
       value={{
         user,
         session,
+        role,
+        isAdmin,
         isLoadingAuth,
         signInWithEmail,
         signUpWithEmail,

@@ -1,11 +1,20 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@/lib/supabase/database.types";
+import { getSupabasePublicKey, getSupabaseUrl } from "@/lib/supabase/env";
+
+let cachedClient: ReturnType<typeof createBrowserClient<Database>> | null = null;
+let cachedClientSignature: string | null = null;
 
 export function createClient() {
-  const url =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co";
-  const key =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder";
+  const url = getSupabaseUrl();
+  const key = getSupabasePublicKey();
+  const signature = `${url}:${key}`;
 
-  return createBrowserClient<Database>(url, key);
+  if (cachedClient && cachedClientSignature === signature) {
+    return cachedClient;
+  }
+
+  cachedClient = createBrowserClient<Database>(url, key, { isSingleton: false });
+  cachedClientSignature = signature;
+  return cachedClient;
 }

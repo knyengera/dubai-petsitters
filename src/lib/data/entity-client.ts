@@ -37,6 +37,19 @@ function parseOrder(order?: string): { column: string; ascending: boolean } | nu
   return { column: mapped, ascending: !desc };
 }
 
+function normalizeRow<T extends Row>(row: Row | null): T | null {
+  if (!row) return null;
+  return {
+    ...row,
+    created_date: row.created_date ?? row.created_at,
+    updated_date: row.updated_date ?? row.updated_at,
+  } as unknown as T;
+}
+
+function normalizeRows<T extends Row>(rows: Row[] | null): T[] {
+  return (rows ?? []).map((row) => normalizeRow<T>(row) as T);
+}
+
 export function createEntityClient<T extends Row>(table: TableName) {
   return {
     async list(order?: string, limit?: number): Promise<T[]> {
@@ -49,7 +62,7 @@ export function createEntityClient<T extends Row>(table: TableName) {
         console.warn(`[${table}.list]`, error.message);
         return [];
       }
-      return (data ?? []) as T[];
+      return normalizeRows<T>(data);
     },
 
     async get(id: string): Promise<T | null> {
@@ -61,7 +74,7 @@ export function createEntityClient<T extends Row>(table: TableName) {
         console.warn(`[${table}.get]`, error.message);
         return null;
       }
-      return data as T | null;
+      return normalizeRow<T>(data);
     },
 
     async filter(
@@ -83,7 +96,7 @@ export function createEntityClient<T extends Row>(table: TableName) {
         console.warn(`[${table}.filter]`, error.message);
         return [];
       }
-      return (data ?? []) as T[];
+      return normalizeRows<T>(data);
     },
 
     async create(payload: Partial<T>): Promise<T> {
@@ -92,7 +105,7 @@ export function createEntityClient<T extends Row>(table: TableName) {
         .select()
         .single();
       if (error) throw toEntityError(table, "create", error);
-      return data as T;
+      return normalizeRow<T>(data) as T;
     },
 
     async update(id: string, payload: Partial<T>): Promise<T> {
@@ -102,7 +115,7 @@ export function createEntityClient<T extends Row>(table: TableName) {
         .select()
         .single();
       if (error) throw toEntityError(table, "update", error);
-      return data as T;
+      return normalizeRow<T>(data) as T;
     },
 
     async delete(id: string): Promise<void> {

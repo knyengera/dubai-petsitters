@@ -27,7 +27,6 @@ export default function Hosting() {
   const { data: hosts = [], isLoading } = useQuery({
     queryKey: ['pet-hosts-hosting'],
     queryFn: () => entities.PetHost.filter({ is_available: true }, '-rating'),
-    initialData: [],
   });
 
   const filtered = hosts.filter(h => {

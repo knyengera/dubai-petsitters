@@ -19,7 +19,6 @@ export default function Hosts() {
   const { data: hosts = [], isLoading, refetch } = useQuery({
     queryKey: ['pet-hosts'],
     queryFn: () => entities.PetHost.list('-rating'),
-    initialData: [],
   });
 
   const filtered = useMemo(() => applyHostFilters(hosts, filters), [hosts, filters]);

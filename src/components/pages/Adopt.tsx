@@ -14,10 +14,9 @@ export default function Adopt() {
   const [filters, setFilters] = useState({ search: '', species: 'all', gender: 'all', size: 'all' });
   const [selectedPet, setSelectedPet] = useState(null);
 
-  const { data: pets, isLoading, refetch } = useQuery({
+  const { data: pets = [], isLoading, refetch } = useQuery({
     queryKey: ['pets'],
-    queryFn: () => entities.Pet.list('-created_date'),
-    initialData: [],
+    queryFn: () => entities.Pet.filter({ status: 'available' }, '-created_date'),
   });
 
   const filteredPets = useMemo(() => {

@@ -8,7 +8,8 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { entities } from '@/lib/data/entities';
 import { useLanguage } from '@/lib/language-context';
-import { PawPrint, Calendar, Bot, MapPin, Stethoscope, Plus, ChevronRight, Syringe, CalendarDays, ShieldCheck } from 'lucide-react';
+import { PawPrint, Calendar, Bot, MapPin, Stethoscope, Plus, ChevronRight, Syringe, CalendarDays, ShieldCheck, LayoutDashboard } from 'lucide-react';
+import { ADMIN_NAV_ITEMS } from '@/lib/admin/config';
 import PetRemindersSection from '@/components/home/PetRemindersSection';
 import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
 
@@ -196,18 +197,35 @@ export default function Dashboard() {
               <ShieldCheck className="w-5 h-5 text-emerald-600" /> Admin Tools
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Link href="/admin/vets">
-                <div className="flex items-center gap-3 bg-white dark:bg-card border border-border rounded-xl p-4 hover:shadow-md transition-all">
+              <Link href="/admin">
+                <div className="flex items-center gap-3 bg-white dark:bg-card border border-border rounded-xl p-4 hover:shadow-md transition-all sm:col-span-2">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0">
-                    <Stethoscope className="w-5 h-5 text-white" />
+                    <LayoutDashboard className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-foreground">Manage Vets</p>
-                    <p className="text-xs text-muted-foreground">Add & approve trusted clinics (free)</p>
+                    <p className="font-semibold text-sm text-foreground">Admin Console</p>
+                    <p className="text-xs text-muted-foreground">Platform overview and all management tools</p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
                 </div>
               </Link>
+              {ADMIN_NAV_ITEMS.filter((item) => item.href !== "/admin").slice(0, 5).map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <div className="flex items-center gap-3 bg-white dark:bg-card border border-border rounded-xl p-4 hover:shadow-md transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                        <Icon className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-foreground">{item.label}</p>
+                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { entities } from '@/lib/data/entities';
-import { Tag, ChevronRight, ExternalLink } from 'lucide-react';
+import { Tag, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/lib/language-context';
 import { Badge } from '@/components/ui/badge';
 
@@ -18,22 +18,48 @@ const PARTNER_IMAGES = {
   other: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&q=80',
 };
 
-const SAMPLE_DEALS = [
-  { id: 'd1', title: '20% Off Annual Vet Checkup', description: 'Book your pet\'s annual health checkup and get 20% off at any of our partner clinics in Riyadh.', partner_name: 'Al Hayat Vet Clinics', partner_type: 'vet_clinic', discount_label: '20% OFF', discount_code: 'PETSITTER20', city: 'Riyadh', is_active: true },
-  { id: 'd2', title: 'Free Grooming Session', description: 'New customers get a complimentary full grooming session for dogs up to 10kg.', partner_name: 'PawSpa Grooming', partner_type: 'grooming', discount_label: 'FREE Session', discount_code: 'FIRSTPAW', city: 'Jeddah', is_active: true },
-  { id: 'd3', title: '15% Off Premium Pet Food', description: 'Exclusive discount on Royal Canin and Hills Science Diet for Saudi Petsitters members.', partner_name: 'PetMart KSA', partner_type: 'food', discount_label: '15% OFF', discount_code: 'PETMART15', city: 'All Cities', is_active: true },
-];
+type PartnerType = keyof typeof PARTNER_IMAGES;
+
+type PartnerDeal = {
+  id: string;
+  title: string;
+  description?: string;
+  partner_name?: string;
+  partner_type: PartnerType;
+  discount_label?: string;
+  discount_code?: string;
+  city?: string;
+  image_url?: string;
+};
+
+function toPartnerDeal(deal: Record<string, unknown>): PartnerDeal {
+  const partnerType = typeof deal.partner_type === 'string' && deal.partner_type in PARTNER_IMAGES
+    ? (deal.partner_type as PartnerType)
+    : 'other';
+
+  return {
+    id: typeof deal.id === 'string' ? deal.id : String(deal.id ?? deal.title ?? 'deal'),
+    title: typeof deal.title === 'string' ? deal.title : 'Partner offer',
+    description: typeof deal.description === 'string' ? deal.description : undefined,
+    partner_name: typeof deal.partner_name === 'string' ? deal.partner_name : undefined,
+    partner_type: partnerType,
+    discount_label: typeof deal.discount_label === 'string' ? deal.discount_label : undefined,
+    discount_code: typeof deal.discount_code === 'string' ? deal.discount_code : undefined,
+    city: typeof deal.city === 'string' ? deal.city : undefined,
+    image_url: typeof deal.image_url === 'string' ? deal.image_url : undefined,
+  };
+}
 
 export default function PartnerDealsSection() {
   const { t } = useLanguage();
 
   const { data: deals = [] } = useQuery({
     queryKey: ['partner-deals'],
-    queryFn: () => entities.PartnerDeal.filter({ is_active: true }, '-created_date', 6),
-    initialData: [],
+    queryFn: async () => {
+      const activeDeals = await entities.PartnerDeal.filter({ is_active: true }, '-created_date', 6);
+      return activeDeals.map(toPartnerDeal);
+    },
   });
-
-  const displayDeals = deals.length > 0 ? deals : SAMPLE_DEALS;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -58,7 +84,7 @@ export default function PartnerDealsSection() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {displayDeals.map((deal, i) => (
+        {deals.map((deal, i) => (
           <motion.div
             key={deal.id}
             initial={{ opacity: 0, y: 16 }}
@@ -70,7 +96,7 @@ export default function PartnerDealsSection() {
               <div className="relative h-36 overflow-hidden">
                 <img
                   src={deal.image_url || PARTNER_IMAGES[deal.partner_type] || PARTNER_IMAGES.other}
-                  alt={deal.partner_name}
+                  alt={deal.partner_name || deal.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

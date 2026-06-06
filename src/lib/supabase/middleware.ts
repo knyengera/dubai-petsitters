@@ -5,6 +5,7 @@ import {
   isAdminRole,
   isProtectedPath,
 } from "@/lib/auth/routes";
+import { getSupabasePublicKey, getSupabaseUrl } from "@/lib/supabase/env";
 
 function copyCookies(from: NextResponse, to: NextResponse) {
   from.cookies.getAll().forEach((cookie) => {
@@ -14,10 +15,12 @@ function copyCookies(from: NextResponse, to: NextResponse) {
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
+  const url = getSupabaseUrl();
+  const key = getSupabasePublicKey();
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll() {

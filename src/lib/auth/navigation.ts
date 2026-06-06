@@ -38,6 +38,12 @@ export const PROTECTED_EXTRA_NAV_LINKS: NavLinkItem[] = [
   { labelEn: "Messages", labelAr: "الرسائل", path: "/messages" },
 ];
 
+export const ADMIN_NAV_LINK: NavLinkItem = {
+  labelEn: "Admin",
+  labelAr: "الإدارة",
+  path: "/admin",
+};
+
 export function getHeaderNavLinks(isAuthenticated: boolean): NavLinkItem[] {
   if (!isAuthenticated) return [...PUBLIC_NAV_LINKS];
   return [...PUBLIC_NAV_LINKS, ...PROTECTED_NAV_LINKS];

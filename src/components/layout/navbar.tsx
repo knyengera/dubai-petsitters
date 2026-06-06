@@ -8,13 +8,14 @@ import { useAuth } from "@/lib/auth-context";
 import {
   getHeaderNavLinks,
   PROTECTED_EXTRA_NAV_LINKS,
+  ADMIN_NAV_LINK,
 } from "@/lib/auth/navigation";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { t, lang, toggleLang } = useLanguage();
-  const { user, signOut, isLoadingAuth } = useAuth();
+  const { user, signOut, isLoadingAuth, isAdmin } = useAuth();
   const navLinks = getHeaderNavLinks(!!user);
 
   const handleLogout = async () => {
@@ -62,6 +63,18 @@ export default function Navbar() {
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
+            {user && isAdmin && (
+              <Link
+                href={ADMIN_NAV_LINK.path}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  pathname.startsWith("/admin")
+                    ? "bg-emerald-500/10 text-emerald-600"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {t(ADMIN_NAV_LINK.labelEn, ADMIN_NAV_LINK.labelAr)}
+              </Link>
+            )}
             {user &&
               PROTECTED_EXTRA_NAV_LINKS.map((link) => (
                 <Link

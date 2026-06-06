@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/language-context';
 import { useAuth } from '@/lib/auth-context';
-import { filterByAuth } from '@/lib/auth/navigation';
+import { isNavPathVisible } from '@/lib/auth/navigation';
 import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
-import { Bot, Stethoscope, PawPrint, Plane, MapPin, Heart, Shield, Clock, ChevronRight, Star, ArrowRight, Users, BadgeCheck } from 'lucide-react';
+import { Bot, Stethoscope, PawPrint, Plane, MapPin, Heart, Clock, ChevronRight, Star, ArrowRight, Users, BadgeCheck } from 'lucide-react';
 import VetCard from '@/components/vets/VetCard';
 import HostCard from '@/components/hosts/HostCard';
 import PartnerDealsSection from '@/components/home/PartnerDealsSection';
@@ -43,12 +43,46 @@ type FeaturedPet = {
   image_url?: string | null;
 };
 
+type FeaturedVetClinic = {
+  id: string;
+  name: string;
+  city?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  image_url?: string;
+  is_featured?: boolean;
+  emergency_available?: boolean;
+  rating?: number;
+  services?: string[];
+  opening_hours?: string;
+};
+
 function toFeaturedPet(pet: Record<string, unknown>): FeaturedPet {
   return {
     id: typeof pet.id === 'string' ? pet.id : String(pet.id ?? pet.name ?? 'pet'),
     name: typeof pet.name === 'string' ? pet.name : 'Pet',
     species: typeof pet.species === 'string' ? pet.species : 'other',
     image_url: typeof pet.image_url === 'string' ? pet.image_url : null,
+  };
+}
+
+function toFeaturedVetClinic(vet: Record<string, unknown>): FeaturedVetClinic {
+  return {
+    id: typeof vet.id === 'string' ? vet.id : String(vet.id ?? vet.name ?? 'vet'),
+    name: typeof vet.name === 'string' ? vet.name : 'Vet Clinic',
+    city: typeof vet.city === 'string' ? vet.city : undefined,
+    address: typeof vet.address === 'string' ? vet.address : undefined,
+    phone: typeof vet.phone === 'string' ? vet.phone : undefined,
+    email: typeof vet.email === 'string' ? vet.email : undefined,
+    website: typeof vet.website === 'string' ? vet.website : undefined,
+    image_url: typeof vet.image_url === 'string' ? vet.image_url : undefined,
+    is_featured: typeof vet.is_featured === 'boolean' ? vet.is_featured : undefined,
+    emergency_available: typeof vet.emergency_available === 'boolean' ? vet.emergency_available : undefined,
+    rating: typeof vet.rating === 'number' ? vet.rating : Number(vet.rating ?? 0),
+    services: Array.isArray(vet.services) ? vet.services.filter((service): service is string => typeof service === 'string') : undefined,
+    opening_hours: typeof vet.opening_hours === 'string' ? vet.opening_hours : undefined,
   };
 }
 
@@ -59,13 +93,6 @@ function getPetImageUrl(pet: FeaturedPet) {
 
   return pet.image_url || PET_FALLBACKS[fallbackSpecies];
 }
-
-const SAMPLE_HOSTS = [
-  { id: 'h1', full_name: 'Sara Al-Dosari', city: 'Riyadh', neighborhood: 'Al Olaya', bio: 'Passionate animal lover with 5 years hosting experience.', services: ['boarding', 'daycare'], price_per_night: 120, rating: 4.9, review_count: 87, is_available: true, photo_url: 'https://images.unsplash.com/photo-1488426862026-56bde9d879af?w=400&q=80' },
-  { id: 'h2', full_name: 'Mohammed Al-Qahtani', city: 'Jeddah', neighborhood: 'Al Rawdah', bio: 'Dog trainer and boarding specialist. Large yard available.', services: ['boarding', 'dog_walking'], price_per_night: 95, rating: 4.8, review_count: 54, is_available: true, has_yard: true, photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80' },
-  { id: 'h3', full_name: 'Nora Al-Harbi', city: 'Dammam', neighborhood: 'Al Faisaliyah', bio: 'Vet nurse offering professional home care.', services: ['home_sitting', 'daycare'], price_per_day: 80, rating: 5.0, review_count: 31, is_available: true, photo_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80' },
-  { id: 'h4', full_name: 'Khalid Al-Otaibi', city: 'Riyadh', neighborhood: 'Al Malaz', bio: 'Lifelong pet owner. Cats, small dogs and birds are my specialty!', services: ['boarding', 'home_sitting'], price_per_night: 110, rating: 4.7, review_count: 42, is_available: true, photo_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80' },
-];
 
 const features = [
   { icon: Bot, gradient: 'from-violet-600 to-purple-700', labelEn: 'AI Health Assistant', labelAr: 'مساعد الصحة الذكي', descEn: 'Symptom checker & emergency alerts', descAr: 'فحص الأعراض وتنبيهات الطوارئ', openAssistant: true as const, img: 'https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&q=80' },
@@ -83,22 +110,14 @@ const stats = [
   { numEn: '24/7', numAr: '٢٤/٧', labelEn: 'Emergency Support', labelAr: 'دعم طارئ' },
 ];
 
-const SAMPLE_VETS = [
-  { id: 'v1', name: 'Al-Noor Vet Clinic', city: 'Riyadh', phone: '+966-11-123-4567', email: 'info@alnoor.com', rating: 4.9, services: ['emergency', 'surgery', 'vaccination'], image_url: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=85' },
-  { id: 'v2', name: 'Pet Care Plus', city: 'Jeddah', phone: '+966-12-234-5678', email: 'hello@petcareplus.com', rating: 4.8, services: ['checkup', 'dental', 'grooming'], image_url: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&q=85' },
-  { id: 'v3', name: 'Paws Medical Center', city: 'Dammam', phone: '+966-13-345-6789', email: 'contact@pawsmedical.com', rating: 4.7, services: ['xray', 'lab', 'ultrasound'], image_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&q=85' },
-  { id: 'v4', name: 'Happy Tails Veterinary', city: 'Riyadh', phone: '+966-11-456-7890', email: 'support@happytails.com', rating: 4.9, services: ['vaccination', 'microchip', 'consultation'], image_url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&q=85' },
-  { id: 'v5', name: 'Advanced Pet Hospital', city: 'Jeddah', phone: '+966-12-567-8901', email: 'admin@advancedpet.com', rating: 4.8, services: ['surgery', 'emergency', 'icu'], image_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&q=85' },
-];
-
 function FeaturedVetsSection({ t }) {
   const { data: vets = [] } = useQuery({
     queryKey: ['featured-vets'],
-    queryFn: () => entities.VetClinic.filter({ is_featured: true }, '-rating', 5),
-    initialData: [],
+    queryFn: async () => {
+      const featuredVets = await entities.VetClinic.filter({ is_featured: true }, '-rating', 5);
+      return featuredVets.map(toFeaturedVetClinic);
+    },
   });
-
-  const displayVets = vets.length > 0 ? vets : SAMPLE_VETS;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-border">
@@ -122,7 +141,7 @@ function FeaturedVetsSection({ t }) {
         </Link>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-        {displayVets.slice(0, 5).map((vet, i) => (
+        {vets.slice(0, 5).map((vet, i) => (
           <VetCard key={vet.id} clinic={vet} index={i} />
         ))}
       </div>
@@ -139,14 +158,9 @@ function FeaturedVetsSection({ t }) {
 
 export default function Home() {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, navigateToLogin } = useAuth();
   const { openAssistant } = usePetHealthAssistant();
   const isAuthenticated = !!user;
-  const visibleFeatures = filterByAuth(
-    features.filter((f) => !f.openAssistant || isAuthenticated),
-    isAuthenticated,
-    'to'
-  );
 
   const { data: pets = [] } = useQuery({
     queryKey: ['featured-pets'],
@@ -154,16 +168,14 @@ export default function Home() {
       const featuredPets = await entities.Pet.filter({ status: 'available' }, '-created_date', 6);
       return featuredPets.map(toFeaturedPet);
     },
-    initialData: [],
   });
 
   const { data: fetchedHosts = [] } = useQuery({
     queryKey: ['featured-hosts'],
     queryFn: () => entities.PetHost.filter({ is_available: true }, '-rating', 4),
-    initialData: [],
   });
 
-  const hosts = fetchedHosts.length > 0 ? fetchedHosts : SAMPLE_HOSTS;
+  const hosts = fetchedHosts;
 
   return (
     <div className="min-h-screen bg-background">
@@ -265,7 +277,8 @@ export default function Home() {
           </p>
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {visibleFeatures.map((f, i) => {
+          {features.map((f, i) => {
+            const featureHref = f.to && isNavPathVisible(f.to, isAuthenticated) ? f.to : '/login';
             const featureCard = (
               <div className="group relative rounded-2xl overflow-hidden border border-border hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer h-full">
                 <div className="relative h-40 overflow-hidden">
@@ -287,11 +300,11 @@ export default function Home() {
             return (
               <motion.div key={f.labelEn} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
                 {"openAssistant" in f && f.openAssistant ? (
-                  <button type="button" onClick={openAssistant} className="block h-full w-full text-start">
+                  <button type="button" onClick={isAuthenticated ? openAssistant : navigateToLogin} className="block h-full w-full text-start">
                     {featureCard}
                   </button>
                 ) : (
-                  <Link href={f.to!} className="block h-full">
+                  <Link href={featureHref} className="block h-full">
                     {featureCard}
                   </Link>
                 )}
@@ -334,9 +347,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {hosts.map(host => (
-            <Link key={host.id} href="/hosts">
-              <HostCard host={host} onSelect={() => {}} />
-            </Link>
+            <HostCard key={String(host.id)} host={host} onSelect={() => {}} />
           ))}
         </div>
         {isAuthenticated && (

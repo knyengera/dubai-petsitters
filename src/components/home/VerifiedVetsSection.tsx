@@ -2,21 +2,51 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { BadgeCheck, ChevronRight, Phone, MapPin, Star } from 'lucide-react';
+import { BadgeCheck, ChevronRight, Phone, MapPin } from 'lucide-react';
 import { entities } from '@/lib/data/entities';
 import { useLanguage } from '@/lib/language-context';
 
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=400&q=80';
 
+type VetSubscriptionCard = {
+  id: string;
+  clinic_id?: string;
+  clinic_name: string;
+  city?: string;
+  promo_title?: string;
+  promo_description?: string;
+  specialties: string[];
+  contact_phone?: string;
+};
+
+function toVetSubscriptionCard(subscription: Record<string, unknown>): VetSubscriptionCard {
+  return {
+    id: typeof subscription.id === 'string' ? subscription.id : String(subscription.id ?? subscription.clinic_name ?? 'subscription'),
+    clinic_id: typeof subscription.clinic_id === 'string' ? subscription.clinic_id : undefined,
+    clinic_name: typeof subscription.clinic_name === 'string' ? subscription.clinic_name : 'Vet clinic',
+    city: typeof subscription.city === 'string' ? subscription.city : undefined,
+    promo_title: typeof subscription.promo_title === 'string' ? subscription.promo_title : undefined,
+    promo_description: typeof subscription.promo_description === 'string' ? subscription.promo_description : undefined,
+    specialties: Array.isArray(subscription.specialties)
+      ? subscription.specialties.filter((specialty): specialty is string => typeof specialty === 'string')
+      : [],
+    contact_phone: typeof subscription.contact_phone === 'string' ? subscription.contact_phone : undefined,
+  };
+}
+
 export default function VerifiedVetsSection() {
   const { t } = useLanguage();
+  const router = useRouter();
 
   const { data: subscriptions = [] } = useQuery({
     queryKey: ['active-vet-subscriptions'],
-    queryFn: () => entities.VetSubscription.filter({ status: 'active' }, '-created_date', 8),
-    initialData: [],
+    queryFn: async () => {
+      const activeSubscriptions = await entities.VetSubscription.filter({ status: 'active' }, '-created_date', 8);
+      return activeSubscriptions.map(toVetSubscriptionCard);
+    },
   });
 
   if (subscriptions.length === 0) return null;
@@ -61,7 +91,18 @@ export default function VerifiedVetsSection() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.07 }}
             >
-              <Link href={sub.clinic_id ? `/vets/${sub.clinic_id}` : '/vets'} className="block h-full">
+              <div
+                role="link"
+                tabIndex={0}
+                onClick={() => router.push(sub.clinic_id ? `/vets/${sub.clinic_id}` : '/vets')}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    router.push(sub.clinic_id ? `/vets/${sub.clinic_id}` : '/vets');
+                  }
+                }}
+                className="block h-full cursor-pointer"
+              >
                 <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden h-full flex flex-col">
                   {/* Image */}
                   <div className="relative h-36 overflow-hidden">
@@ -110,7 +151,7 @@ export default function VerifiedVetsSection() {
                     )}
                   </div>
                 </div>
-              </Link>
+              </div>
             </motion.div>
           ))}
         </div>

@@ -9,15 +9,12 @@ import VetCard from '@/components/vets/VetCard';
 import VetFilters, { DEFAULT_VET_FILTERS, applyVetFilters } from '@/components/filters/VetFilters';
 import { Stethoscope, Loader2, Megaphone } from 'lucide-react';
 
-const CITIES = ['Riyadh', 'Jeddah', 'Dammam', 'Makkah', 'Madinah', 'Khobar', 'Tabuk', 'Abha'];
-
 export default function Vets() {
   const [filters, setFilters] = useState(DEFAULT_VET_FILTERS);
 
-  const { data: clinics, isLoading } = useQuery({
+  const { data: clinics = [], isLoading } = useQuery({
     queryKey: ['vet-clinics'],
-    queryFn: () => entities.VetClinic.list('-rating'),
-    initialData: [],
+    queryFn: () => entities.VetClinic.filter({ is_approved: true }, '-rating'),
   });
 
   const filtered = useMemo(() => applyVetFilters(clinics, filters), [clinics, filters]);
