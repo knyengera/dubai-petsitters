@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node scripts/push-migrations.mjs",
+    "db:seed-blog": "node scripts/seed-blog.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

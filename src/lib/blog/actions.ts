@@ -43,30 +43,44 @@ export async function getPublicBlogPosts(): Promise<BlogActionResult<BlogPost[]>
   }
 }
 
+function isPostVisible(post: BlogPost): boolean {
+  const publishedAt = post.published_at ?? post.created_at;
+  if (post.status === "published") {
+    return new Date(publishedAt).getTime() <= Date.now();
+  }
+  if (post.status === "scheduled" && post.scheduled_at) {
+    return new Date(post.scheduled_at).getTime() <= Date.now();
+  }
+  // Legacy rows before CMS migration
+  if (post.published && !post.status) {
+    return new Date(publishedAt).getTime() <= Date.now();
+  }
+  return false;
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getPublicBlogPostBySlug(
-  slug: string
+  slugOrId: string
 ): Promise<BlogActionResult<BlogPost | null>> {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .eq("slug", slug)
-      .maybeSingle();
+    let query = supabase.from("blog_posts").select("*");
+
+    if (UUID_RE.test(slugOrId)) {
+      query = query.eq("id", slugOrId);
+    } else {
+      query = query.eq("slug", slugOrId);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) return { ok: false, error: error.message };
     if (!data) return { ok: true, data: null };
 
     const post = data as BlogPost;
-    const publishedAt = post.published_at ?? post.created_at;
-    const isVisible =
-      (post.status === "published" &&
-        new Date(publishedAt).getTime() <= Date.now()) ||
-      (post.status === "scheduled" &&
-        post.scheduled_at &&
-        new Date(post.scheduled_at).getTime() <= Date.now());
-
-    if (!isVisible) return { ok: true, data: null };
+    if (!isPostVisible(post)) return { ok: true, data: null };
     return { ok: true, data: post };
   } catch (e) {
     return { ok: false, error: toError(e) };
