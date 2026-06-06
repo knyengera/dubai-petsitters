@@ -21,6 +21,7 @@ const STAT_LABELS: Record<string, string> = {
   adoption_requests: "Adoption Requests",
   lost_pets: "Lost Pet Reports",
   blog_posts: "Blog Posts",
+  blog_comments: "Blog Comments",
   forum_threads: "Forum Threads",
   partner_deals: "Partner Deals",
   vet_subscriptions: "Subscriptions",

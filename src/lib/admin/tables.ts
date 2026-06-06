@@ -11,6 +11,7 @@ export const ADMIN_TABLES = {
   appointments: "appointments",
   forum_threads: "forum_threads",
   blog_posts: "blog_posts",
+  blog_comments: "blog_comments",
   lost_pets: "lost_pets",
   adoption_requests: "adoption_requests",
   payments: "payments",

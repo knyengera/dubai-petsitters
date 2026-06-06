@@ -13,6 +13,7 @@ export const entities = {
   ForumThread: createEntityClient("forum_threads"),
   ForumComment: createEntityClient("forum_comments"),
   BlogPost: createEntityClient("blog_posts"),
+  BlogComment: createEntityClient("blog_comments"),
   LostPet: createEntityClient("lost_pets"),
   MedicalRecord: createEntityClient("medical_records"),
   Vaccination: createEntityClient("vaccinations"),

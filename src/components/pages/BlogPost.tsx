@@ -1,30 +1,49 @@
 "use client";
 
-import React from 'react';
-import { entities } from '@/lib/data/entities';
-import { useQuery } from '@tanstack/react-query';
-import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, User, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
-import ReactMarkdown from 'react-markdown';
+import React from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Calendar, User, Loader2 } from "lucide-react";
+import BlogCommentForm from "@/components/blog/BlogCommentForm";
+import BlogCommentList from "@/components/blog/BlogCommentList";
+import {
+  getPublicBlogComments,
+  getPublicBlogPostBySlug,
+} from "@/lib/blog/actions";
+import { BLOG_CATEGORIES } from "@/lib/blog/types";
 
-const categoryLabels = {
-  pet_care: 'Pet Care', health: 'Health', training: 'Training',
-  nutrition: 'Nutrition', lifestyle: 'Lifestyle', news: 'News',
+const categoryLabels = Object.fromEntries(
+  BLOG_CATEGORIES.map((c) => [c.value, c.label])
+);
+
+type BlogPostPageProps = {
+  slug: string;
 };
 
-export default function BlogPostPage() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const postId = window.pathname.split('/').pop();
+export default function BlogPostPage({ slug }: BlogPostPageProps) {
+  const queryClient = useQueryClient();
 
   const { data: post, isLoading } = useQuery({
-    queryKey: ['blog-post', postId],
+    queryKey: ["blog-post", slug],
     queryFn: async () => {
-      const posts = await entities.BlogPost.list();
-      return posts.find(p => p.id === postId);
+      const result = await getPublicBlogPostBySlug(slug);
+      if (result.ok === false) throw new Error(result.error);
+      return result.data;
     },
+  });
+
+  const { data: comments = [] } = useQuery({
+    queryKey: ["blog-comments", post?.id],
+    queryFn: async () => {
+      if (!post?.id) return [];
+      const result = await getPublicBlogComments(post.id);
+      if (result.ok === false) throw new Error(result.error);
+      return result.data;
+    },
+    enabled: Boolean(post?.id),
   });
 
   if (isLoading) {
@@ -39,24 +58,48 @@ export default function BlogPostPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
         <h2 className="font-heading text-2xl font-bold mb-4">Post Not Found</h2>
-        <Link href="/blog"><Button variant="outline" className="rounded-xl"><ArrowLeft className="w-4 h-4 mr-2" />Back to Blog</Button></Link>
+        <Link href="/blog">
+          <Button variant="outline" className="rounded-xl">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Blog
+          </Button>
+        </Link>
       </div>
     );
   }
 
+  const publishedDate = post.published_at ?? post.created_at;
+
   return (
     <div className="min-h-screen bg-background">
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-        <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back to Blog
         </Link>
 
-        <div className="flex items-center gap-3 mb-4">
-          {post.category && <Badge variant="secondary" className="capitalize">{categoryLabels[post.category] || post.category}</Badge>}
+        {post.cover_image && (
+          <div className="rounded-2xl overflow-hidden mb-8 border border-border">
+            <img
+              src={post.cover_image}
+              alt={post.title}
+              className="w-full h-64 sm:h-80 object-cover"
+            />
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          {post.category && (
+            <Badge variant="secondary" className="capitalize">
+              {categoryLabels[post.category] || post.category}
+            </Badge>
+          )}
           <span className="text-sm text-muted-foreground flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            {format(new Date(post.created_date), 'MMMM d, yyyy')}
+            {format(new Date(publishedDate), "MMMM d, yyyy")}
           </span>
           {post.author_name && (
             <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -66,11 +109,45 @@ export default function BlogPostPage() {
           )}
         </div>
 
-        <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-6 leading-tight">{post.title}</h1>
+        {(post.tags ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {(post.tags ?? []).map((t) => (
+              <Badge key={t} variant="outline" className="text-xs">
+                #{t}
+              </Badge>
+            ))}
+          </div>
+        )}
 
-        <div className="prose prose-lg max-w-none text-foreground prose-headings:font-heading prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground">
-          <div dangerouslySetInnerHTML={{ __html: post.content }} />
-        </div>
+        <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-6 leading-tight">
+          {post.title}
+        </h1>
+
+        {post.excerpt && (
+          <p className="text-lg text-muted-foreground mb-8 border-l-4 border-primary pl-4">
+            {post.excerpt}
+          </p>
+        )}
+
+        <div
+          className="prose prose-lg max-w-none text-foreground prose-headings:font-heading prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-img:rounded-xl"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
+
+        <section className="mt-12 pt-8 border-t border-border space-y-6">
+          <h2 className="font-heading text-xl font-bold">
+            Comments ({comments.length})
+          </h2>
+          <BlogCommentList comments={comments} />
+          <BlogCommentForm
+            postId={post.id}
+            onSubmitted={() =>
+              queryClient.invalidateQueries({
+                queryKey: ["blog-comments", post.id],
+              })
+            }
+          />
+        </section>
       </article>
     </div>
   );

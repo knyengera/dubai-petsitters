@@ -44,7 +44,7 @@ export default function BlogCard({ post, index = 0 }) {
   const colorClass = categoryColors[post.category] || 'bg-primary';
 
   return (
-    <Link href={`/blog/${post.id}`} className="group block">
+    <Link href={`/blog/${post.slug || post.id}`} className="group block">
       <div className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
         {/* Cover image - always shown */}
         <div className="relative h-52 overflow-hidden">
@@ -72,7 +72,7 @@ export default function BlogCard({ post, index = 0 }) {
           <div className="flex items-center gap-3 mb-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {format(new Date(post.created_date), 'MMM d, yyyy')}
+              {format(new Date(post.published_at ?? post.created_date ?? post.created_at), 'MMM d, yyyy')}
             </span>
             {post.author_name && (
               <span className="flex items-center gap-1">
