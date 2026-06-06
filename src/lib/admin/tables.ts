@@ -15,6 +15,7 @@ export const ADMIN_TABLES = {
   adoption_requests: "adoption_requests",
   payments: "payments",
   partner_deals: "partner_deals",
+  partner_inquiries: "partner_inquiries",
   vet_subscriptions: "vet_subscriptions",
   reviews: "reviews",
 } as const satisfies Record<string, AdminTable>;

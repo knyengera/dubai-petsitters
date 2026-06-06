@@ -1,7 +1,5 @@
 "use client";
 
-import { base44 } from "@/lib/data";
-
 import React, { useState } from 'react';
 import { entities } from '@/lib/data/entities';
 import { Button } from '@/components/ui/button';
@@ -65,15 +63,30 @@ export default function Partners() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Store as a VetClinic or just send email inquiry
-    await base44.integrations.Core.SendEmail({
-      to: 'partners@saudipetsitters.com',
-      subject: `New Partner Inquiry: ${form.business_name}`,
-      body: `Business: ${form.business_name}\nType: ${form.business_type}\nContact: ${form.contact_name}\nEmail: ${form.email}\nPhone: ${form.phone}\nCity: ${form.city}\nWebsite: ${form.website}\nPlan: ${form.plan}\n\nMessage:\n${form.message}`,
-    });
-    toast({ title: 'Inquiry Sent!', description: 'Our partnerships team will contact you within 48 hours.' });
-    setLoading(false);
-    setSubmitted(true);
+    try {
+      await entities.PartnerInquiry.create({
+        business_name: form.business_name,
+        business_type: form.business_type,
+        contact_name: form.contact_name,
+        email: form.email,
+        phone: form.phone || null,
+        city: form.city,
+        website: form.website || null,
+        plan: form.plan || null,
+        message: form.message || null,
+        status: 'new',
+      });
+      toast({ title: 'Inquiry Sent!', description: 'Our partnerships team will contact you within 48 hours.' });
+      setSubmitted(true);
+    } catch (err) {
+      toast({
+        title: 'Submission failed',
+        description: err instanceof Error ? err.message : 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -156,7 +169,10 @@ export default function Partners() {
                   ))}
                 </ul>
                 <Button
-                  onClick={() => setSelectedPlan(plan)}
+                  onClick={() => {
+                    setSelectedPlan(plan);
+                    setForm((f) => ({ ...f, plan: plan.name }));
+                  }}
                   className={`w-full rounded-xl ${plan.badge ? 'bg-primary text-primary-foreground' : 'variant-outline'}`}
                   variant={plan.badge ? 'default' : 'outline'}
                 >

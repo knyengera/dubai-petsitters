@@ -19,6 +19,7 @@ export const entities = {
   AdoptionRequest: createEntityClient("adoption_requests"),
   Payment: createEntityClient("payments"),
   PartnerDeal: createEntityClient("partner_deals"),
+  PartnerInquiry: createEntityClient("partner_inquiries"),
   HostAvailability: createEntityClient("host_availability"),
   VetSubscription: createEntityClient("vet_subscriptions"),
   Review: createEntityClient("reviews"),

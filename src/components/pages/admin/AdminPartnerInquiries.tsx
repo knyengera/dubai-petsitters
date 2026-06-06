@@ -7,27 +7,29 @@ import AdminDataList from "@/components/admin/AdminDataList";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES } from "@/lib/admin/tables";
 
-const STATUSES = ["pending", "pending_payment", "active", "cancelled", "expired"];
+const STATUSES = ["new", "contacted", "converted", "closed"];
 
-export default function AdminSubscriptions() {
-  const { data: subs = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.vet_subscriptions,
-    "admin-subscriptions"
+export default function AdminPartnerInquiries() {
+  const { data: inquiries = [], isLoading, updateRow, deleteRow } = useAdminList(
+    ADMIN_TABLES.partner_inquiries,
+    "admin-partner-inquiries"
   );
 
   return (
     <div className="pb-10">
       <AdminPageHeader
-        title="Vet Subscriptions"
-        description="Vet advertising submissions from /vet-advertise."
+        title="Partner Inquiries"
+        description="Review partnership and advertising inquiries from /partners."
       />
       <AdminDataList
-        rows={subs}
+        rows={inquiries}
         isLoading={isLoading}
         columns={[
-          { key: "clinic_name", label: "Clinic" },
+          { key: "business_name", label: "Business" },
+          { key: "business_type", label: "Type" },
           { key: "contact_name", label: "Contact" },
-          { key: "contact_email", label: "Email" },
+          { key: "email", label: "Email" },
+          { key: "phone", label: "Phone" },
           { key: "city", label: "City" },
           { key: "plan", label: "Plan" },
           {
@@ -35,26 +37,20 @@ export default function AdminSubscriptions() {
             label: "Status",
             render: (row) => (
               <Badge variant="secondary" className="capitalize text-[10px]">
-                {String(row.status ?? "pending")}
+                {String(row.status ?? "new")}
               </Badge>
             ),
           },
           {
-            key: "amount_paid",
-            label: "Amount",
-            render: (row) => {
-              const amt = row.amount_paid ?? row.amount;
-              return amt ? `SAR ${amt}` : "—";
-            },
+            key: "message",
+            label: "Message",
+            className: "col-span-2",
           },
-          { key: "gateway", label: "Gateway" },
-          { key: "start_date", label: "Start" },
-          { key: "end_date", label: "End" },
         ]}
         rowActions={(row) => (
           <Select
-            value={String(row.status ?? "pending")}
-            onValueChange={(v) => updateRow(String(row.id), { status: v }, "Status updated")}
+            value={String(row.status ?? "new")}
+            onValueChange={(v) => updateRow(String(row.id), { status: v, updated_at: new Date().toISOString() }, "Status updated")}
           >
             <SelectTrigger className="w-28 h-8 rounded-lg text-xs">
               <SelectValue />
@@ -68,7 +64,9 @@ export default function AdminSubscriptions() {
             </SelectContent>
           </Select>
         )}
-        onDelete={(row) => deleteRow(String(row.id), "Delete subscription?")}
+        onDelete={(row) =>
+          deleteRow(String(row.id), `Delete inquiry from ${row.business_name}?`)
+        }
       />
     </div>
   );

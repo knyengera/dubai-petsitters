@@ -12,6 +12,7 @@ import {
   BookOpen,
   MessageSquare,
   Handshake,
+  Mail,
   CreditCard,
   Star,
   Receipt,
@@ -108,6 +109,13 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     href: "/admin/partners",
     icon: Handshake,
     description: "Partner promotions",
+    group: "commerce",
+  },
+  {
+    label: "Partner Inquiries",
+    href: "/admin/partner-inquiries",
+    icon: Mail,
+    description: "Partnership form submissions",
     group: "commerce",
   },
   {

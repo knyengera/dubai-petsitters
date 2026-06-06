@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { base44 } from '@/lib/data';
+import { entities } from '@/lib/data/entities';
 import { useToast } from '@/components/ui/use-toast';
 import { BadgeCheck, CheckCircle, Loader2, CreditCard, ArrowRight } from 'lucide-react';
 
@@ -59,16 +59,36 @@ export default function AdvertisePaymentModal({ plan, open, onClose }) {
     if (!selectedMethod) return;
     setLoading(true);
 
-    await base44.entities.Payment.create({
-      payment_type: 'vet_subscription',
-      gateway: selectedMethod,
-      amount,
-      currency: 'SAR',
-      status: 'pending',
-      payer_name: contact.contact_name,
-      payer_email: contact.email,
-      notes: `Advertising plan: ${plan.name} | Business: ${contact.business_name}`,
-    });
+    try {
+      await entities.PartnerInquiry.create({
+        business_name: contact.business_name,
+        contact_name: contact.contact_name,
+        email: contact.email,
+        phone: contact.phone || null,
+        plan: plan.name,
+        message: `Advertising plan signup via ${selectedMethod}`,
+        status: 'new',
+      });
+
+      await entities.Payment.create({
+        payment_type: 'partner_advertising',
+        gateway: selectedMethod,
+        amount,
+        currency: 'SAR',
+        status: 'pending',
+        payer_name: contact.contact_name,
+        payer_email: contact.email,
+        notes: `Advertising plan: ${plan.name} | Business: ${contact.business_name}`,
+      });
+    } catch (err) {
+      toast({
+        title: 'Submission failed',
+        description: err instanceof Error ? err.message : 'Please try again.',
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
+    }
 
     const gatewayUrls = {
       paypal: 'https://www.paypal.com/signin',
