@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BLOG_CATEGORIES } from "@/lib/blog/types";
+import { useBlogI18n } from "@/lib/i18n/use-blog-i18n";
 
 export type BlogSortOption = "newest" | "oldest" | "title_asc" | "title_desc";
 
@@ -31,13 +32,6 @@ type BlogFilterBarProps = {
   totalCount: number;
 };
 
-const SORT_OPTIONS: { value: BlogSortOption; label: string }[] = [
-  { value: "newest", label: "Newest first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "title_asc", label: "Title A–Z" },
-  { value: "title_desc", label: "Title Z–A" },
-];
-
 export function hasActiveFilters(filters: BlogFilters): boolean {
   return (
     filters.search.trim() !== "" ||
@@ -56,6 +50,8 @@ export default function BlogFilterBar({
   resultCount,
   totalCount,
 }: BlogFilterBarProps) {
+  const { s, getCategoryLabel, resultsLabel, searchChip, sortOptions } = useBlogI18n();
+
   const update = (patch: Partial<BlogFilters>) => {
     onChange({ ...filters, ...patch });
   };
@@ -76,9 +72,9 @@ export default function BlogFilterBar({
     <div className="w-full rounded-2xl border border-border bg-card shadow-sm overflow-hidden mb-8">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
         <SlidersHorizontal className="w-4 h-4 text-primary shrink-0" />
-        <span className="text-sm font-semibold text-foreground">Filter articles</span>
+        <span className="text-sm font-semibold text-foreground">{s.filterArticles}</span>
         <span className="text-xs text-muted-foreground ml-auto">
-          {resultCount} of {totalCount} article{totalCount === 1 ? "" : "s"}
+          {resultsLabel(resultCount, totalCount)}
         </span>
       </div>
 
@@ -86,7 +82,7 @@ export default function BlogFilterBar({
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by title, excerpt, author, or tag..."
+            placeholder={s.searchPlaceholder}
             value={filters.search}
             onChange={(e) => update({ search: e.target.value })}
             className="w-full pl-10 rounded-xl h-11"
@@ -96,13 +92,13 @@ export default function BlogFilterBar({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
           <Select value={filters.category} onValueChange={(v) => update({ category: v })}>
             <SelectTrigger className="w-full rounded-xl h-10">
-              <SelectValue placeholder="Category" />
+              <SelectValue placeholder={s.category} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
+              <SelectItem value="all">{s.allCategories}</SelectItem>
               {BLOG_CATEGORIES.map((cat) => (
                 <SelectItem key={cat.value} value={cat.value}>
-                  {cat.label}
+                  {getCategoryLabel(cat.value)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -110,10 +106,10 @@ export default function BlogFilterBar({
 
           <Select value={filters.tag} onValueChange={(v) => update({ tag: v })}>
             <SelectTrigger className="w-full rounded-xl h-10">
-              <SelectValue placeholder="Tag" />
+              <SelectValue placeholder={s.tag} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All tags</SelectItem>
+              <SelectItem value="all">{s.allTags}</SelectItem>
               {tags.map((t) => (
                 <SelectItem key={t} value={t}>
                   #{t}
@@ -124,10 +120,10 @@ export default function BlogFilterBar({
 
           <Select value={filters.author} onValueChange={(v) => update({ author: v })}>
             <SelectTrigger className="w-full rounded-xl h-10">
-              <SelectValue placeholder="Author" />
+              <SelectValue placeholder={s.author} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All authors</SelectItem>
+              <SelectItem value="all">{s.allAuthors}</SelectItem>
               {authors.map((a) => (
                 <SelectItem key={a} value={a}>
                   {a}
@@ -141,10 +137,10 @@ export default function BlogFilterBar({
             onValueChange={(v) => update({ sort: v as BlogSortOption })}
           >
             <SelectTrigger className="w-full rounded-xl h-10">
-              <SelectValue placeholder="Sort by" />
+              <SelectValue placeholder={s.sortBy} />
             </SelectTrigger>
             <SelectContent>
-              {SORT_OPTIONS.map((opt) => (
+              {sortOptions.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </SelectItem>
@@ -157,16 +153,13 @@ export default function BlogFilterBar({
           <div className="flex flex-wrap items-center gap-2 pt-1">
             {filters.search.trim() && (
               <FilterChip
-                label={`Search: "${filters.search.trim()}"`}
+                label={searchChip(filters.search.trim())}
                 onRemove={() => update({ search: "" })}
               />
             )}
             {filters.category !== "all" && (
               <FilterChip
-                label={
-                  BLOG_CATEGORIES.find((c) => c.value === filters.category)?.label ??
-                  filters.category
-                }
+                label={getCategoryLabel(filters.category) ?? filters.category}
                 onRemove={() => update({ category: "all" })}
               />
             )}
@@ -184,7 +177,7 @@ export default function BlogFilterBar({
             )}
             {filters.sort !== "newest" && (
               <FilterChip
-                label={SORT_OPTIONS.find((o) => o.value === filters.sort)?.label ?? filters.sort}
+                label={sortOptions.find((o) => o.value === filters.sort)?.label ?? filters.sort}
                 onRemove={() => update({ sort: "newest" })}
               />
             )}
@@ -196,7 +189,7 @@ export default function BlogFilterBar({
               onClick={clearAll}
             >
               <X className="w-3 h-3 mr-1" />
-              Clear all
+              {s.clearAll}
             </Button>
           </div>
         )}

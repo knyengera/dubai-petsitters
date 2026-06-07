@@ -194,6 +194,26 @@ export async function adminGetDashboardStats(): Promise<
     counts.pending_vets = pendingVets ?? 0;
     counts.pending_adoptions = pendingAdoptions ?? 0;
 
+    const [{ count: pendingForumTopics }, { count: pendingForumReplies }, { count: pendingForumReports }] =
+      await Promise.all([
+        supabase
+          .from(ADMIN_TABLES.forum_topics)
+          .select("*", { count: "exact", head: true })
+          .eq("moderation_status", "pending"),
+        supabase
+          .from(ADMIN_TABLES.forum_replies)
+          .select("*", { count: "exact", head: true })
+          .eq("moderation_status", "pending"),
+        supabase
+          .from(ADMIN_TABLES.forum_reports)
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending"),
+      ]);
+
+    counts.pending_forum_topics = pendingForumTopics ?? 0;
+    counts.pending_forum_replies = pendingForumReplies ?? 0;
+    counts.pending_forum_reports = pendingForumReports ?? 0;
+
     return { ok: true, data: counts };
   } catch (e) {
     return { ok: false, error: toErrorMessage(e) };

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -13,11 +12,7 @@ import {
   getPublicBlogComments,
   getPublicBlogPostBySlug,
 } from "@/lib/blog/actions";
-import { BLOG_CATEGORIES } from "@/lib/blog/types";
-
-const categoryLabels = Object.fromEntries(
-  BLOG_CATEGORIES.map((c) => [c.value, c.label])
-);
+import { useBlogI18n } from "@/lib/i18n/use-blog-i18n";
 
 type BlogPostPageProps = {
   slug: string;
@@ -25,6 +20,7 @@ type BlogPostPageProps = {
 
 export default function BlogPostPage({ slug }: BlogPostPageProps) {
   const queryClient = useQueryClient();
+  const { s, getCategoryLabel, commentsCountLabel } = useBlogI18n();
 
   const { data: post, isLoading } = useQuery({
     queryKey: ["blog-post", slug],
@@ -57,11 +53,11 @@ export default function BlogPostPage({ slug }: BlogPostPageProps) {
   if (!post) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
-        <h2 className="font-heading text-2xl font-bold mb-4">Post Not Found</h2>
+        <h2 className="font-heading text-2xl font-bold mb-4">{s.postNotFound}</h2>
         <Link href="/blog">
           <Button variant="outline" className="rounded-xl">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Blog
+            {s.backToBlog}
           </Button>
         </Link>
       </div>
@@ -78,7 +74,7 @@ export default function BlogPostPage({ slug }: BlogPostPageProps) {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Blog
+          {s.backToBlog}
         </Link>
 
         {post.cover_image && (
@@ -94,7 +90,7 @@ export default function BlogPostPage({ slug }: BlogPostPageProps) {
         <div className="flex flex-wrap items-center gap-3 mb-4">
           {post.category && (
             <Badge variant="secondary" className="capitalize">
-              {categoryLabels[post.category] || post.category}
+              {getCategoryLabel(post.category)}
             </Badge>
           )}
           <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -136,7 +132,7 @@ export default function BlogPostPage({ slug }: BlogPostPageProps) {
 
         <section className="mt-12 pt-8 border-t border-border space-y-6">
           <h2 className="font-heading text-xl font-bold">
-            Comments ({comments.length})
+            {commentsCountLabel(comments.length)}
           </h2>
           <BlogCommentList comments={comments} />
           <BlogCommentForm

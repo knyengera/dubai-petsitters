@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { submitBlogComment } from "@/lib/blog/actions";
+import { useBlogI18n } from "@/lib/i18n/use-blog-i18n";
 import { useToast } from "@/components/ui/use-toast";
 
 type BlogCommentFormProps = {
@@ -16,6 +17,7 @@ type BlogCommentFormProps = {
 
 export default function BlogCommentForm({ postId, onSubmitted }: BlogCommentFormProps) {
   const { toast } = useToast();
+  const { s } = useBlogI18n();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [content, setContent] = useState("");
@@ -34,7 +36,7 @@ export default function BlogCommentForm({ postId, onSubmitted }: BlogCommentForm
 
     if (result.ok === false) {
       toast({
-        title: "Comment failed",
+        title: s.commentFailed,
         description: result.error,
         variant: "destructive",
       });
@@ -43,8 +45,8 @@ export default function BlogCommentForm({ postId, onSubmitted }: BlogCommentForm
 
     setContent("");
     toast({
-      title: "Comment submitted",
-      description: "Your comment is pending moderation.",
+      title: s.commentSubmitted,
+      description: s.commentPendingDesc,
     });
     onSubmitted?.();
   };
@@ -53,11 +55,11 @@ export default function BlogCommentForm({ postId, onSubmitted }: BlogCommentForm
     <form onSubmit={handleSubmit} className="rounded-2xl border border-border p-5 space-y-4 bg-card">
       <div className="flex items-center gap-2">
         <MessageSquare className="w-4 h-4 text-primary" />
-        <h3 className="font-semibold text-foreground">Leave a comment</h3>
+        <h3 className="font-semibold text-foreground">{s.leaveComment}</h3>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>Name *</Label>
+          <Label>{s.name} *</Label>
           <Input
             required
             value={name}
@@ -66,7 +68,7 @@ export default function BlogCommentForm({ postId, onSubmitted }: BlogCommentForm
           />
         </div>
         <div>
-          <Label>Email *</Label>
+          <Label>{s.email} *</Label>
           <Input
             required
             type="email"
@@ -77,20 +79,18 @@ export default function BlogCommentForm({ postId, onSubmitted }: BlogCommentForm
         </div>
       </div>
       <div>
-        <Label>Comment *</Label>
+        <Label>{s.comment} *</Label>
         <Textarea
           required
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="rounded-xl mt-1 min-h-[100px]"
-          placeholder="Share your thoughts..."
+          placeholder={s.commentPlaceholder}
         />
       </div>
-      <p className="text-xs text-muted-foreground">
-        Comments are moderated before they appear publicly.
-      </p>
+      <p className="text-xs text-muted-foreground">{s.commentModerationNote}</p>
       <Button type="submit" disabled={submitting} className="rounded-xl">
-        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Post Comment"}
+        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : s.postComment}
       </Button>
     </form>
   );

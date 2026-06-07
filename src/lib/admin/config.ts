@@ -101,7 +101,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: "Forum",
     href: "/admin/forum",
     icon: MessageSquare,
-    description: "Moderate threads",
+    description: "Moderate topics, replies, reports, and boards",
     group: "content",
   },
   {

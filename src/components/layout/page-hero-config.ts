@@ -242,9 +242,9 @@ const PAGE_HERO_PATTERNS: {
     },
   },
   {
-    pattern: /^\/forum\/[^/]+$/,
+    pattern: /^\/forum\/[^/]+\/[^/]+$/,
     config: {
-      title: "Forum Thread",
+      title: "Forum Topic",
       subtitle: "Join the conversation with fellow pet owners",
       imageAlt: DEFAULT_ALT,
     },
@@ -260,10 +260,12 @@ const PAGE_HERO_PATTERNS: {
 ];
 
 /** Routes that keep their own full-page hero (no shared banner). */
-export const PAGE_HERO_EXCLUDED_PATHS = new Set(["/"]);
+export const PAGE_HERO_EXCLUDED_PATHS = new Set(["/", "/forum"]);
 
 export function getPageHeroConfig(pathname: string): PageHeroConfig | null {
   if (PAGE_HERO_EXCLUDED_PATHS.has(pathname)) return null;
+  // Forum board pages render their own hero with board-specific content.
+  if (/^\/forum\/[^/]+$/.test(pathname)) return null;
 
   const exact = PAGE_HERO_BY_PATH[pathname];
   if (exact) return exact;

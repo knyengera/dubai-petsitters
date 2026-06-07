@@ -1,5 +1,5 @@
-import Forum from "@/components/pages/Forum";
+import ForumHome from "@/components/pages/ForumHome";
 
 export default function Page() {
-  return <Forum />;
+  return <ForumHome />;
 }

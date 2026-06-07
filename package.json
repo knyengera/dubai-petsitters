@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "db:migrate": "node scripts/push-migrations.mjs",
-    "db:seed-blog": "node scripts/seed-blog.mjs"
+    "db:seed-blog": "node scripts/seed-blog.mjs",
+    "db:seed-forum": "node scripts/seed-forum.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
