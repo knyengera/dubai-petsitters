@@ -8,8 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import {
+  AdminRecordEditDialog,
+  AdminRecordViewDialog,
+  type AdminRecordField,
+} from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
-import { ADMIN_TABLES } from "@/lib/admin/tables";
+import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 
 const EMPTY = {
   title: "",
@@ -19,6 +24,15 @@ const EMPTY = {
   link_url: "",
   is_active: true,
 };
+const FIELDS: AdminRecordField[] = [
+  { key: "title", label: "Title", required: true },
+  { key: "description", label: "Description", type: "textarea", className: "col-span-2" },
+  { key: "partner_name", label: "Partner" },
+  { key: "discount", label: "Discount" },
+  { key: "image_url", label: "Image", type: "image", hideInView: true },
+  { key: "link_url", label: "Link URL" },
+  { key: "is_active", label: "Active", type: "checkbox" },
+];
 
 export default function AdminPartners() {
   const { data: deals = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
@@ -28,6 +42,8 @@ export default function AdminPartners() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [viewingDeal, setViewingDeal] = useState<Row | null>(null);
+  const [editingDeal, setEditingDeal] = useState<Row | null>(null);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +55,9 @@ export default function AdminPartners() {
     }
     setSaving(false);
   };
+
+  const handleEditSave = (id: string, payload: Row) =>
+    updateRow(id, payload, "Deal updated");
 
   return (
     <div className="pb-10">
@@ -60,6 +79,8 @@ export default function AdminPartners() {
           { key: "discount", label: "Discount" },
           { key: "is_active", label: "Active" },
         ]}
+        onView={setViewingDeal}
+        onEdit={setEditingDeal}
         rowActions={(row) => (
           <Button
             type="button"
@@ -92,6 +113,27 @@ export default function AdminPartners() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AdminRecordViewDialog
+        row={viewingDeal}
+        title="Partner Deal"
+        titleKey="title"
+        fields={FIELDS}
+        imageKey="image_url"
+        badges={(row) => (
+          <span className="text-[10px] rounded-full px-2 py-0.5 bg-muted text-muted-foreground">
+            {row.is_active ? "Active" : "Inactive"}
+          </span>
+        )}
+        onOpenChange={(open) => !open && setViewingDeal(null)}
+      />
+      <AdminRecordEditDialog
+        row={editingDeal}
+        title="Edit Partner Deal"
+        fields={FIELDS}
+        onSave={handleEditSave}
+        onOpenChange={(open) => !open && setEditingDeal(null)}
+      />
     </div>
   );
 }

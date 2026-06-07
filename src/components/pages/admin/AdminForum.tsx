@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 import {
   Check,
   Lock,
@@ -61,11 +62,12 @@ const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "ou
 };
 
 export default function AdminForum() {
+  const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [topicFilter, setTopicFilter] = useState<string>("pending");
-  const [replyFilter, setReplyFilter] = useState<string>("pending");
-  const [reportFilter, setReportFilter] = useState<string>("pending");
+  const [topicFilter, setTopicFilter] = useState<string>("all");
+  const [replyFilter, setReplyFilter] = useState<string>("all");
+  const [reportFilter, setReportFilter] = useState<string>("all");
   const [boardForm, setBoardForm] = useState({
     title: "",
     slug: "",
@@ -233,53 +235,90 @@ export default function AdminForum() {
       />
 
       <Tabs defaultValue="topics" className="space-y-6">
-        <TabsList className="rounded-xl flex flex-wrap h-auto">
-          <TabsTrigger value="topics" className="rounded-lg">
-            Topics
-            {(pendingCounts?.pending_topics ?? 0) > 0 && (
-              <Badge className="ml-2 text-[10px]" variant="secondary">
-                {pendingCounts?.pending_topics}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="replies" className="rounded-lg">
-            Replies
-            {(pendingCounts?.pending_replies ?? 0) > 0 && (
-              <Badge className="ml-2 text-[10px]" variant="secondary">
-                {pendingCounts?.pending_replies}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="rounded-lg">
-            Reports
-            {(pendingCounts?.pending_reports ?? 0) > 0 && (
-              <Badge className="ml-2 text-[10px]" variant="secondary">
-                {pendingCounts?.pending_reports}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="boards" className="rounded-lg">
-            Boards
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+          <TabsList className="rounded-xl flex flex-wrap h-auto w-full lg:flex-1">
+            <TabsTrigger value="topics" className="rounded-lg flex-1">
+              Topics
+              {(pendingCounts?.pending_topics ?? 0) > 0 && (
+                <Badge className="ml-2 text-[10px]" variant="secondary">
+                  {pendingCounts?.pending_topics}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="replies" className="rounded-lg flex-1">
+              Replies
+              {(pendingCounts?.pending_replies ?? 0) > 0 && (
+                <Badge className="ml-2 text-[10px]" variant="secondary">
+                  {pendingCounts?.pending_replies}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="rounded-lg flex-1">
+              Reports
+              {(pendingCounts?.pending_reports ?? 0) > 0 && (
+                <Badge className="ml-2 text-[10px]" variant="secondary">
+                  {pendingCounts?.pending_reports}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="boards" className="rounded-lg flex-1">
+              Boards
+            </TabsTrigger>
+          </TabsList>
+          <div className="w-full lg:w-56">
+            <TabsContent value="topics" className="m-0">
+              <Select value={topicFilter} onValueChange={setTopicFilter}>
+                <SelectTrigger className="w-full rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  {Object.entries(MODERATION_STATUS_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </TabsContent>
+            <TabsContent value="replies" className="m-0">
+              <Select value={replyFilter} onValueChange={setReplyFilter}>
+                <SelectTrigger className="w-full rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  {Object.entries(MODERATION_STATUS_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </TabsContent>
+            <TabsContent value="reports" className="m-0">
+              <Select value={reportFilter} onValueChange={setReportFilter}>
+                <SelectTrigger className="w-full rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  {Object.entries(REPORT_STATUS_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </TabsContent>
+          </div>
+        </div>
 
         <TabsContent value="topics" className="space-y-4">
-          <Select value={topicFilter} onValueChange={setTopicFilter}>
-            <SelectTrigger className="w-48 rounded-xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              {Object.entries(MODERATION_STATUS_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <AdminDataList
             rows={topics as unknown as Record<string, unknown>[]}
             isLoading={topicsLoading}
+            onEdit={(row) => router.push(`/admin/forum/topics/${row.id}/edit`)}
             columns={[
               { key: "title", label: "Title" },
               { key: "author_name", label: "Author" },
@@ -355,22 +394,10 @@ export default function AdminForum() {
         </TabsContent>
 
         <TabsContent value="replies" className="space-y-4">
-          <Select value={replyFilter} onValueChange={setReplyFilter}>
-            <SelectTrigger className="w-48 rounded-xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              {Object.entries(MODERATION_STATUS_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <AdminDataList
             rows={replies as unknown as Record<string, unknown>[]}
             isLoading={repliesLoading}
+            onEdit={(row) => router.push(`/admin/forum/replies/${row.id}/edit`)}
             columns={[
               {
                 key: "content",
@@ -434,22 +461,10 @@ export default function AdminForum() {
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
-          <Select value={reportFilter} onValueChange={setReportFilter}>
-            <SelectTrigger className="w-48 rounded-xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              {Object.entries(REPORT_STATUS_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <AdminDataList
             rows={reports as unknown as Record<string, unknown>[]}
             isLoading={reportsLoading}
+            onEdit={(row) => router.push(`/admin/forum/reports/${row.id}/edit`)}
             columns={[
               {
                 key: "target_type",
@@ -552,6 +567,7 @@ export default function AdminForum() {
           <AdminDataList
             rows={boards}
             isLoading={boardsLoading}
+            onEdit={(row) => router.push(`/admin/forum/boards/${row.id}/edit`)}
             columns={[
               { key: "title", label: "Title" },
               { key: "slug", label: "Slug" },

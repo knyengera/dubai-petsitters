@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 import { Plus, Loader2, Star, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,16 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
 import { useAdminList } from "@/components/admin/useAdminList";
-import BlogPostEditorForm from "@/components/blog/BlogPostEditorForm";
 import { ADMIN_TABLES } from "@/lib/admin/tables";
 import {
   adminDeleteBlogComment,
@@ -37,11 +31,6 @@ import {
   type BlogComment,
   type BlogPost,
 } from "@/lib/blog/types";
-import {
-  EMPTY_BLOG_POST_FORM,
-  normalizePostPayload,
-  postToFormValues,
-} from "@/lib/blog/utils";
 import { useToast } from "@/components/ui/use-toast";
 
 const STATUS_BADGE: Record<string, string> = {
@@ -52,13 +41,13 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export default function AdminBlog() {
+  const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const {
     data: posts = [],
     isLoading,
     updateRow,
-    createRow,
   } = useAdminList(ADMIN_TABLES.blog_posts, "admin-blog");
 
   const { data: comments = [], isLoading: commentsLoading } = useQuery({
@@ -73,10 +62,6 @@ export default function AdminBlog() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [commentFilter, setCommentFilter] = useState("all");
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  const [form, setForm] = useState(EMPTY_BLOG_POST_FORM);
-  const [saving, setSaving] = useState(false);
 
   const filteredPosts = useMemo(() => {
     let result = [...posts];
@@ -101,50 +86,11 @@ export default function AdminBlog() {
   }, [comments, commentFilter]);
 
   const openCreate = () => {
-    setEditingPost(null);
-    setForm(EMPTY_BLOG_POST_FORM);
-    setEditorOpen(true);
+    router.push("/admin/blog/new");
   };
 
   const openEdit = (row: Record<string, unknown>) => {
-    const post = row as BlogPost;
-    setEditingPost(post);
-    setForm(postToFormValues(post));
-    setEditorOpen(true);
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.content || form.content === "<p></p>") {
-      toast({
-        title: "Content required",
-        description: "Please add article content before saving.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSaving(true);
-    const payload = normalizePostPayload(form);
-
-    if (editingPost) {
-      if (editingPost.status === "published" && payload.status === "published") {
-        payload.published_at = editingPost.published_at;
-      }
-      const ok = await updateRow(String(editingPost.id), payload, "Post updated");
-      if (ok) {
-        setEditorOpen(false);
-        setEditingPost(null);
-        setForm(EMPTY_BLOG_POST_FORM);
-      }
-    } else {
-      const created = await createRow(payload, "Post created");
-      if (created) {
-        setEditorOpen(false);
-        setForm(EMPTY_BLOG_POST_FORM);
-      }
-    }
-    setSaving(false);
+    router.push(`/admin/blog/${row.id}/edit`);
   };
 
   const handleQuickStatus = async (row: Record<string, unknown>, status: string) => {
@@ -395,26 +341,6 @@ export default function AdminBlog() {
           )}
         </TabsContent>
       </Tabs>
-
-      <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
-        <SheetContent
-          side="right"
-          className="w-full sm:max-w-4xl overflow-y-auto p-6"
-        >
-          <SheetHeader className="mb-6">
-            <SheetTitle>
-              {editingPost ? "Edit Post" : "New Post"}
-            </SheetTitle>
-          </SheetHeader>
-          <BlogPostEditorForm
-            form={form}
-            onChange={setForm}
-            onSubmit={handleSave}
-            saving={saving}
-            submitLabel={editingPost ? "Update Post" : "Create Post"}
-          />
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

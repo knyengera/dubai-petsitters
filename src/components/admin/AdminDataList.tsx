@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Trash2 } from "lucide-react";
+import { Eye, Loader2, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Row } from "@/lib/admin/tables";
@@ -17,6 +17,7 @@ type AdminDataListProps = {
   columns: AdminColumn[];
   isLoading?: boolean;
   emptyMessage?: string;
+  onView?: (row: Row) => void;
   onEdit?: (row: Row) => void;
   onDelete?: (row: Row) => void;
   rowActions?: (row: Row) => React.ReactNode;
@@ -28,6 +29,7 @@ export default function AdminDataList({
   columns,
   isLoading,
   emptyMessage = "No records found.",
+  onView,
   onEdit,
   onDelete,
   rowActions,
@@ -49,7 +51,7 @@ export default function AdminDataList({
     );
   }
 
-  const hasActions = Boolean(onEdit || onDelete || rowActions);
+  const hasActions = Boolean(onView || onEdit || onDelete || rowActions);
 
   return (
     <div className="space-y-3">
@@ -75,6 +77,18 @@ export default function AdminDataList({
           {hasActions ? (
             <div className="flex items-center gap-2 shrink-0">
               {rowActions?.(row)}
+              {onView ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl gap-1"
+                  onClick={() => onView(row)}
+                >
+                  <Eye className="w-4 h-4" />
+                  View
+                </Button>
+              ) : null}
               {onEdit ? (
                 <Button
                   type="button"

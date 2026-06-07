@@ -4,6 +4,11 @@ import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import {
+  AdminRecordEditDialog,
+  AdminRecordViewDialog,
+  type AdminRecordField,
+} from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { adminUpdateProfileRole } from "@/lib/admin/actions";
@@ -12,15 +17,23 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 
 const ROLES = ["user", "admin", "host", "vet"] as const;
+const FIELDS: AdminRecordField[] = [
+  { key: "full_name", label: "Full Name" },
+  { key: "email", label: "Email" },
+  { key: "role", label: "Role", viewOnly: true },
+  { key: "avatar_url", label: "Avatar", type: "image", hideInView: true },
+];
 
 export default function AdminUsers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { data: users = [], isLoading, deleteRow } = useAdminList(
+  const { data: users = [], isLoading, updateRow, deleteRow } = useAdminList(
     ADMIN_TABLES.profiles,
     "admin-users"
   );
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [viewingUser, setViewingUser] = useState<Row | null>(null);
+  const [editingUser, setEditingUser] = useState<Row | null>(null);
 
   const handleRoleChange = async (user: Row, role: string) => {
     setUpdatingId(String(user.id));
@@ -33,6 +46,9 @@ export default function AdminUsers() {
     }
     setUpdatingId(null);
   };
+
+  const handleEditSave = (id: string, payload: Row) =>
+    updateRow(id, payload, "Profile updated");
 
   return (
     <div className="pb-10">
@@ -65,6 +81,8 @@ export default function AdminUsers() {
                 : "—",
           },
         ]}
+        onView={setViewingUser}
+        onEdit={setEditingUser}
         rowActions={(row) => (
           <Select
             value={String(row.role ?? "user")}
@@ -84,6 +102,27 @@ export default function AdminUsers() {
           </Select>
         )}
         onDelete={(row) => deleteRow(String(row.id), `Delete profile for ${row.email}?`)}
+      />
+
+      <AdminRecordViewDialog
+        row={viewingUser}
+        title="User Profile"
+        titleKey="email"
+        fields={FIELDS}
+        imageKey="avatar_url"
+        badges={(row) => (
+          <Badge variant="secondary" className="capitalize text-[10px]">
+            {String(row.role ?? "user")}
+          </Badge>
+        )}
+        onOpenChange={(open) => !open && setViewingUser(null)}
+      />
+      <AdminRecordEditDialog
+        row={editingUser}
+        title="Edit User Profile"
+        fields={FIELDS}
+        onSave={handleEditSave}
+        onOpenChange={(open) => !open && setEditingUser(null)}
       />
     </div>
   );
