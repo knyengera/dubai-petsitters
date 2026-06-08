@@ -5,15 +5,9 @@ import { Calendar, ArrowRight, User } from "lucide-react";
 import { format } from "date-fns";
 import { useBlogI18n } from "@/lib/i18n/use-blog-i18n";
 import type { BlogPost } from "@/lib/blog/types";
+import { blogCategoryColor } from "@/lib/ui/status-styles";
 
-const categoryColors: Record<string, string> = {
-  pet_care: "bg-orange-500",
-  health: "bg-emerald-500",
-  training: "bg-violet-500",
-  nutrition: "bg-sky-500",
-  lifestyle: "bg-rose-500",
-  news: "bg-amber-500",
-};
+const categoryColors = blogCategoryColor;
 
 const CATEGORY_IMAGES: Record<string, string> = {
   pet_care: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=700&q=80",

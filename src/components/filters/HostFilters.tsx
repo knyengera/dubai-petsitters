@@ -158,7 +158,7 @@ export default function HostFilters({ filters, onChange }) {
           <div>
             <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 block">Availability</Label>
             <div
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer transition-all ${filters.availableOnly ? 'bg-emerald-50 border-emerald-300' : 'border-border'}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer transition-all ${filters.availableOnly ? 'bg-success-muted border-success-border' : 'border-border'}`}
               onClick={() => set('availableOnly', !filters.availableOnly)}
             >
               <Checkbox checked={filters.availableOnly} onCheckedChange={v => set('availableOnly', v)} />
@@ -216,7 +216,7 @@ export default function HostFilters({ filters, onChange }) {
           {filters.neighborhood && filters.neighborhood.trim() && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('neighborhood', '')}>{filters.neighborhood}<X className="w-3 h-3" /></Badge>}
           {filters.services.map(s => <Badge key={s} variant="secondary" className="gap-1 cursor-pointer" onClick={() => toggleArr('services', s)}>{SERVICE_LABELS[s]}<X className="w-3 h-3" /></Badge>)}
           {filters.petTypes.map(p => <Badge key={p} variant="secondary" className="gap-1 capitalize cursor-pointer" onClick={() => toggleArr('petTypes', p)}>{p}<X className="w-3 h-3" /></Badge>)}
-          {filters.minRating > 0 && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('minRating', 0)}><Star className="w-3 h-3 fill-amber-400 text-amber-400" />{filters.minRating}+<X className="w-3 h-3" /></Badge>}
+          {filters.minRating > 0 && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('minRating', 0)}><Star className="w-3 h-3 fill-rating text-rating" />{filters.minRating}+<X className="w-3 h-3" /></Badge>}
           {filters.maxPrice < 2000 && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('maxPrice', 2000)}>≤ SAR {filters.maxPrice}<X className="w-3 h-3" /></Badge>}
         </div>
       )}

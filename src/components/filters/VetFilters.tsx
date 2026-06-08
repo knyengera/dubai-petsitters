@@ -145,7 +145,7 @@ export default function VetFilters({ filters, onChange }) {
           <div>
             <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 block">Availability</Label>
             <div
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer transition-all ${filters.emergencyOnly ? 'bg-red-50 border-red-300' : 'border-border'}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer transition-all ${filters.emergencyOnly ? 'bg-destructive/10 border-destructive/30' : 'border-border'}`}
               onClick={() => set('emergencyOnly', !filters.emergencyOnly)}
             >
               <Checkbox checked={filters.emergencyOnly} onCheckedChange={v => set('emergencyOnly', v)} />
@@ -204,7 +204,7 @@ export default function VetFilters({ filters, onChange }) {
           {filters.emergencyOnly && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('emergencyOnly', false)}>24/7 Emergency<X className="w-3 h-3" /></Badge>}
           {filters.specialties.map(s => <Badge key={s} variant="secondary" className="gap-1 cursor-pointer" onClick={() => toggleArr('specialties', s)}>{s}<X className="w-3 h-3" /></Badge>)}
           {filters.services.map(s => <Badge key={s} variant="secondary" className="gap-1 cursor-pointer" onClick={() => toggleArr('services', s)}>{s}<X className="w-3 h-3" /></Badge>)}
-          {filters.minRating > 0 && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('minRating', 0)}><Star className="w-3 h-3 fill-amber-400 text-amber-400" />{filters.minRating}+<X className="w-3 h-3" /></Badge>}
+          {filters.minRating > 0 && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('minRating', 0)}><Star className="w-3 h-3 fill-rating text-rating" />{filters.minRating}+<X className="w-3 h-3" /></Badge>}
         </div>
       )}
     </div>

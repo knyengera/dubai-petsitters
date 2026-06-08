@@ -26,7 +26,7 @@ export default function HostCard({ host, onSelect }) {
           </div>
         )}
         {host.is_featured && (
-          <div className="absolute top-3 left-3 bg-amber-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+          <div className="absolute top-3 left-3 bg-warning text-warning-foreground text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> Featured
           </div>
         )}
@@ -43,7 +43,7 @@ export default function HostCard({ host, onSelect }) {
         )}
         {host.rating && (
           <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm text-foreground text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow">
-            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+            <Star className="w-3 h-3 fill-rating text-rating" />
             {host.rating} {host.review_count ? `(${host.review_count})` : ''}
           </div>
         )}

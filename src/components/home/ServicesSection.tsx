@@ -11,28 +11,28 @@ const services = [
     title: 'Pet Adoption',
     description: 'Find your perfect furry companion from our verified adoption listings across Saudi Arabia.',
     link: '/adopt',
-    color: 'bg-pink-50 text-pink-600 border-pink-100',
+    color: 'bg-primary/10 text-primary border-primary/20',
   },
   {
     icon: Home,
     title: 'Pet Hosting',
     description: 'Trusted pet boarding, daycare, and home sitting services when you need them most.',
     link: '/hosting',
-    color: 'bg-blue-50 text-blue-600 border-blue-100',
+    color: 'bg-info-muted text-info border-info-border',
   },
   {
     icon: Stethoscope,
     title: 'Vet Directory',
     description: 'Access a comprehensive directory of veterinary clinics and emergency services.',
     link: '/vets',
-    color: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    color: 'bg-success-muted text-success border-success-border',
   },
   {
     icon: BookOpen,
     title: 'Pet Blog',
     description: 'Expert tips on pet care, health, training, and lifestyle in the Saudi climate.',
     link: '/blog',
-    color: 'bg-amber-50 text-amber-600 border-amber-100',
+    color: 'bg-warning-muted text-warning border-warning-border',
   },
 ];
 

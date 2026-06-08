@@ -146,10 +146,10 @@ export default function HostCalendar() {
         {/* Legend */}
         <div className="flex flex-wrap gap-3 mb-6">
           {[
-            { color: 'bg-red-200', label: 'Unavailable' },
-            { color: 'bg-amber-200', label: 'Custom Price' },
+            { color: 'bg-destructive/20', label: 'Unavailable' },
+            { color: 'bg-warning-muted', label: 'Custom Price' },
             { color: 'bg-primary/20', label: 'Booked' },
-            { color: 'bg-sky-200', label: 'Selected' },
+            { color: 'bg-info-muted', label: 'Selected' },
           ].map(l => (
             <div key={l.label} className="flex items-center gap-2 text-sm">
               <div className={`w-4 h-4 rounded-full ${l.color}`} />
@@ -164,10 +164,10 @@ export default function HostCalendar() {
             <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
               <style>{`
                 .rdp { --rdp-accent-color: hsl(var(--primary)); --rdp-background-color: hsl(var(--primary)/0.1); margin: 0; }
-                .rdp-day_unavailable { background-color: #fee2e2 !important; color: #b91c1c !important; border-radius: 6px; }
-                .rdp-day_custom_price { background-color: #fef3c7 !important; color: #92400e !important; border-radius: 6px; }
-                .rdp-day_booked { background-color: hsl(var(--primary)/0.18) !important; color: hsl(var(--primary)) !important; border-radius: 6px; font-weight: 600; }
-                .rdp-day_selected_custom { background-color: #bae6fd !important; color: #0369a1 !important; border-radius: 6px; outline: 2px solid #0ea5e9; }
+                .rdp-day_unavailable { background-color: color-mix(in srgb, var(--destructive) 20%, transparent) !important; color: var(--destructive) !important; border-radius: 6px; }
+                .rdp-day_custom_price { background-color: var(--warning-muted) !important; color: var(--warning) !important; border-radius: 6px; }
+                .rdp-day_booked { background-color: color-mix(in srgb, var(--primary) 18%, transparent) !important; color: var(--primary) !important; border-radius: 6px; font-weight: 600; }
+                .rdp-day_selected_custom { background-color: var(--info-muted) !important; color: var(--info) !important; border-radius: 6px; outline: 2px solid var(--info); }
                 .rdp-table { width: 100%; }
                 .rdp-head_cell, .rdp-cell { text-align: center; }
                 .rdp-button { width: 100%; height: 40px; border-radius: 6px; }
@@ -205,13 +205,13 @@ export default function HostCalendar() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setMode('unavailable')}
-                    className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium border transition-all ${mode === 'unavailable' ? 'bg-red-50 border-red-300 text-red-700' : 'border-border text-muted-foreground hover:bg-muted'}`}
+                    className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium border transition-all ${mode === 'unavailable' ? 'bg-destructive/10 border-destructive/30 text-destructive' : 'border-border text-muted-foreground hover:bg-muted'}`}
                   >
                     <CalendarX className="w-4 h-4 inline mr-1" />Block Off
                   </button>
                   <button
                     onClick={() => setMode('custom_price')}
-                    className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium border transition-all ${mode === 'custom_price' ? 'bg-amber-50 border-amber-300 text-amber-700' : 'border-border text-muted-foreground hover:bg-muted'}`}
+                    className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium border transition-all ${mode === 'custom_price' ? 'bg-warning-muted border-warning-border text-warning' : 'border-border text-muted-foreground hover:bg-muted'}`}
                   >
                     <DollarSign className="w-4 h-4 inline mr-1" />Custom Price
                   </button>
@@ -249,7 +249,7 @@ export default function HostCalendar() {
                   {[...availability].sort((a, b) => a.date.localeCompare(b.date)).map(a => (
                     <div key={a.id} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={a.type === 'unavailable' ? 'border-red-300 text-red-600 bg-red-50' : 'border-amber-300 text-amber-600 bg-amber-50'}>
+                        <Badge variant="outline" className={a.type === 'unavailable' ? 'border-destructive/30 text-destructive bg-destructive/10' : 'border-warning-border text-warning bg-warning-muted'}>
                           {format(parseISO(a.date), 'MMM d, yyyy')}
                         </Badge>
                         <span className="text-muted-foreground capitalize text-xs">{a.type === 'custom_price' ? `SAR ${a.custom_price}` : 'Blocked'}</span>

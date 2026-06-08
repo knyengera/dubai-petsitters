@@ -13,7 +13,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 
-const STATUS_STYLES = { lost: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', found: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', reunited: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' };
+import { lostPetStatus } from "@/lib/ui/status-styles";
+
+const STATUS_STYLES = lostPetStatus;
 const STATUS_LABELS = { lost: { en: 'Lost', ar: 'ضائع' }, found: { en: 'Found', ar: 'تم العثور' }, reunited: { en: 'Reunited', ar: 'عاد' } };
 
 const emptyForm = { pet_name: '', species: 'dog', breed: '', color: '', gender: 'unknown', age: '', photo_url: '', last_seen_location: '', last_seen_date: '', city: '', description: '', owner_name: '', owner_phone: '', owner_email: '', reward_offered: '' };
@@ -56,7 +58,7 @@ export default function LostPets() {
       <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => setShowForm(true)} className="rounded-2xl gap-2 bg-rose-500 hover:bg-rose-600">
+            <Button onClick={() => setShowForm(true)} className="rounded-2xl gap-2">
               <Plus className="w-4 h-4" /> {t('Report', 'بلّغ')}
             </Button>
           </div>
@@ -86,7 +88,7 @@ export default function LostPets() {
             <MapPin className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="font-heading text-xl font-bold text-foreground mb-2">{t('No reports found', 'لا توجد بلاغات')}</h3>
             <p className="text-muted-foreground mb-6">{t('Help reunite lost pets with their families', 'ساعد في إعادة الحيوانات الضائعة لأسرها')}</p>
-            <Button onClick={() => setShowForm(true)} className="rounded-2xl gap-2 bg-rose-500 hover:bg-rose-600"><Plus className="w-4 h-4" /> {t('File Report', 'تقديم بلاغ')}</Button>
+            <Button onClick={() => setShowForm(true)} className="rounded-2xl gap-2"><Plus className="w-4 h-4" /> {t('File Report', 'تقديم بلاغ')}</Button>
           </div>
         )}
 
@@ -96,7 +98,7 @@ export default function LostPets() {
               className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
               <div className="flex gap-4 p-4">
                 <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
-                  {pet.photo_url ? <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover" /> : <MapPin className="w-8 h-8 text-rose-400" />}
+                  {pet.photo_url ? <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover" /> : <MapPin className="w-8 h-8 text-destructive" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
@@ -165,7 +167,7 @@ export default function LostPets() {
                   <div><Label>{t('Phone', 'الهاتف')} *</Label><Input required value={form.owner_phone} onChange={e => setForm(f => ({ ...f, owner_phone: e.target.value }))} className="rounded-xl mt-1" /></div>
                 </div>
                 <div><Label>{t('Description', 'الوصف')}</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="rounded-xl mt-1" /></div>
-                <Button type="submit" disabled={loading} className="w-full rounded-2xl h-12 font-bold bg-rose-500 hover:bg-rose-600">
+                <Button type="submit" disabled={loading} className="w-full rounded-2xl h-12 font-bold">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin me-2" /> : null}{t('Submit Report', 'إرسال البلاغ')}
                 </Button>
               </form>

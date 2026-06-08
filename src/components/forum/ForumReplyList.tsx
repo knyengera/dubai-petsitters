@@ -56,7 +56,7 @@ export default function ForumReplyItem({
     <div className={depth > 0 ? "ml-4 md:ml-8 border-l-2 border-border pl-4" : ""}>
       <div
         className={`bg-card border rounded-2xl p-4 mb-3 ${
-          isPending && isAuthor ? "border-amber-300 bg-amber-50/40" : "border-border"
+          isPending && isAuthor ? "border-warning-border bg-warning-muted/40" : "border-border"
         }`}
       >
         <div className="flex gap-3">
@@ -77,7 +77,7 @@ export default function ForumReplyItem({
                 </Badge>
               )}
               {isPending && isAuthor && (
-                <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-700">
+                <Badge variant="outline" className="text-[10px] border-warning-border text-warning">
                   {s.pendingReview}
                 </Badge>
               )}

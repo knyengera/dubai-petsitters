@@ -53,7 +53,7 @@ export default function ForumTopicRow({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-1">
               {topic.pinned && (
-                <span className="inline-flex items-center gap-1 text-xs text-amber-600 font-medium">
+                <span className="inline-flex items-center gap-1 text-xs text-warning font-medium">
                   <Pin className="w-3 h-3" /> {s.pinned}
                 </span>
               )}

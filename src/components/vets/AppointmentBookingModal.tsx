@@ -73,7 +73,7 @@ export default function AppointmentBookingModal({ clinic, open, onClose }) {
 
         {success ? (
           <div className="flex flex-col items-center gap-4 py-10 text-center">
-            <CheckCircle2 className="w-16 h-16 text-emerald-500" />
+            <CheckCircle2 className="w-16 h-16 text-success" />
             <h3 className="font-heading text-xl font-bold text-foreground">Appointment Requested!</h3>
             <p className="text-muted-foreground text-sm max-w-xs">
               Your appointment request has been submitted. The clinic will confirm shortly.

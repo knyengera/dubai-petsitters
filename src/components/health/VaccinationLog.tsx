@@ -183,7 +183,7 @@ export default function VaccinationLog({ petId, vaccinations }) {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <CheckCircle2 className="w-5 h-5 text-success" />
                     <h3 className="font-semibold text-lg text-foreground">{vac.vaccine_name}</h3>
                   </div>
 

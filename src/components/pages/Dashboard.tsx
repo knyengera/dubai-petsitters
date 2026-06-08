@@ -14,12 +14,12 @@ import PetRemindersSection from '@/components/home/PetRemindersSection';
 import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
 
 const quickActions = [
-  { icon: Bot, color: 'bg-violet-500', en: 'AI Health Check', ar: 'فحص ذكي', openAssistant: true as const },
-  { icon: PawPrint, color: 'bg-primary', en: 'My Pets', ar: 'حيواناتي', to: '/pets' },
-  { icon: Calendar, color: 'bg-sky-500', en: 'Book Appointment', ar: 'احجز موعداً', to: '/appointments' },
-  { icon: Stethoscope, color: 'bg-emerald-500', en: 'Find a Vet', ar: 'ابحث عن طبيب', to: '/vets' },
-  { icon: CalendarDays, color: 'bg-indigo-500', en: 'My Calendar', ar: 'تقويمي', to: '/host-calendar' },
-  { icon: MapPin, color: 'bg-rose-500', en: 'Lost Pets', ar: 'الحيوانات الضائعة', to: '/lost-pets' },
+  { icon: Bot, color: 'bg-primary', en: 'AI Health Check', ar: 'فحص ذكي', openAssistant: true as const },
+  { icon: PawPrint, color: 'bg-accent', en: 'My Pets', ar: 'حيواناتي', to: '/pets' },
+  { icon: Calendar, color: 'bg-info', en: 'Book Appointment', ar: 'احجز موعداً', to: '/appointments' },
+  { icon: Stethoscope, color: 'bg-success', en: 'Find a Vet', ar: 'ابحث عن طبيب', to: '/vets' },
+  { icon: CalendarDays, color: 'bg-secondary', en: 'My Calendar', ar: 'تقويمي', to: '/host-calendar' },
+  { icon: MapPin, color: 'bg-warning', en: 'Lost Pets', ar: 'الحيوانات الضائعة', to: '/lost-pets' },
 ];
 
 export default function Dashboard() {
@@ -73,8 +73,8 @@ export default function Dashboard() {
             { val: dueSoon.length, en: 'Vaccines Due', ar: 'تطعيمات', icon: Syringe, to: '/pets', warn: dueSoon.length > 0 },
           ].map(stat => (
             <Link key={stat.en} href={stat.to}>
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border ${stat.warn ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800' : 'bg-card border-border'}`}>
-                <stat.icon className={`w-4 h-4 ${stat.warn ? 'text-orange-500' : 'text-primary'}`} />
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border ${stat.warn ? 'bg-warning-muted border-warning-border' : 'bg-card border-border'}`}>
+                <stat.icon className={`w-4 h-4 ${stat.warn ? 'text-warning' : 'text-primary'}`} />
                 <span className="font-bold text-foreground">{stat.val}</span>
                 <span className="text-xs text-muted-foreground">{t(stat.en, stat.ar)}</span>
               </div>
@@ -176,8 +176,8 @@ export default function Dashboard() {
             <div className="space-y-3">
               {appointments.slice(0, 3).map((appt) => (
                 <div key={appt.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-4">
-                  <div className="w-10 h-10 bg-sky-100 dark:bg-sky-900/30 rounded-xl flex items-center justify-center shrink-0">
-                    <Calendar className="w-5 h-5 text-sky-600" />
+                  <div className="w-10 h-10 bg-info-muted rounded-xl flex items-center justify-center shrink-0">
+                    <Calendar className="w-5 h-5 text-info" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground text-sm">{appt.pet_name} – {appt.type}</p>
@@ -192,14 +192,14 @@ export default function Dashboard() {
 
         {/* Admin Section */}
         {user?.role === 'admin' && (
-          <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-5">
+          <div className="bg-success-muted border border-success-border rounded-2xl p-5">
             <h2 className="font-heading text-base font-bold text-foreground flex items-center gap-2 mb-4">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" /> Admin Tools
+              <ShieldCheck className="w-5 h-5 text-success" /> Admin Tools
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Link href="/admin">
                 <div className="flex items-center gap-3 bg-white dark:bg-card border border-border rounded-xl p-4 hover:shadow-md transition-all sm:col-span-2">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-success flex items-center justify-center shrink-0">
                     <LayoutDashboard className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -214,8 +214,8 @@ export default function Dashboard() {
                 return (
                   <Link key={item.href} href={item.href}>
                     <div className="flex items-center gap-3 bg-white dark:bg-card border border-border rounded-xl p-4 hover:shadow-md transition-all">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5 text-emerald-600" />
+                      <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+                        <Icon className="w-5 h-5 text-success" />
                       </div>
                       <div>
                         <p className="font-semibold text-sm text-foreground">{item.label}</p>

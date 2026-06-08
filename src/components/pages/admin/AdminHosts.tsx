@@ -284,12 +284,12 @@ export default function AdminHosts() {
                 <DialogTitle className="font-heading flex items-center gap-2">
                   {String(viewingHost.full_name ?? "Pet Host")}
                   {viewingHost.is_available ? (
-                    <Badge className="bg-emerald-500 text-white">Available</Badge>
+                    <Badge variant="success">Available</Badge>
                   ) : (
                     <Badge variant="secondary">Unavailable</Badge>
                   )}
                   {viewingHost.is_featured ? (
-                    <Badge className="bg-amber-500 text-white">Featured</Badge>
+                    <Badge variant="warning">Featured</Badge>
                   ) : null}
                 </DialogTitle>
               </DialogHeader>
@@ -357,8 +357,8 @@ function HostRow({
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-foreground text-sm flex items-center gap-2">
           {String(host.full_name)}
-          {host.is_available && <Badge className="text-[10px] bg-emerald-500 text-white">Available</Badge>}
-          {host.is_featured && <Badge className="text-[10px] bg-amber-500 text-white">Featured</Badge>}
+          {host.is_available && <Badge variant="success" className="text-[10px]">Available</Badge>}
+          {host.is_featured && <Badge variant="warning" className="text-[10px]">Featured</Badge>}
         </p>
         <p className="text-xs text-muted-foreground">
           {[host.neighborhood, host.city].filter(Boolean).map(String).join(", ") || "No location"}
@@ -378,10 +378,10 @@ function HostRow({
         <button type="button" onClick={() => onEdit(host)} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit host record">
           <Pencil className="w-5 h-5" />
         </button>
-        <button type="button" onClick={() => onAvailability(host)} className={`p-2 rounded-lg transition-colors ${host.is_available ? "text-emerald-600 bg-emerald-50" : "text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50"}`} aria-label={host.is_available ? "Disable host" : "Enable host"}>
+        <button type="button" onClick={() => onAvailability(host)} className={`p-2 rounded-lg transition-colors ${host.is_available ? "text-success bg-success-muted" : "text-muted-foreground hover:text-success hover:bg-success-muted"}`} aria-label={host.is_available ? "Disable host" : "Enable host"}>
           <CheckCircle className="w-5 h-5" />
         </button>
-        <button type="button" onClick={() => onFeature(host)} className={`p-2 rounded-lg transition-colors ${host.is_featured ? "text-amber-500 bg-amber-50" : "text-muted-foreground hover:text-amber-500 hover:bg-amber-50"}`} aria-label={host.is_featured ? "Remove featured status" : "Feature host"}>
+        <button type="button" onClick={() => onFeature(host)} className={`p-2 rounded-lg transition-colors ${host.is_featured ? "text-warning bg-warning-muted" : "text-muted-foreground hover:text-warning hover:bg-warning-muted"}`} aria-label={host.is_featured ? "Remove featured status" : "Feature host"}>
           <Star className="w-5 h-5" />
         </button>
         <button type="button" onClick={() => onDelete(host)} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10" aria-label="Delete host record">

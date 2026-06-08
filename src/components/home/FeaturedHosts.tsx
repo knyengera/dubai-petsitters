@@ -31,7 +31,7 @@ function HostPreviewCard({ host, onSelect }) {
           </div>
         )}
         <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm text-foreground text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow">
-          <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+          <Star className="w-3 h-3 fill-rating text-rating" />
           {host.rating ?? '—'} {host.review_count ? `(${host.review_count})` : ''}
         </div>
         {host.is_available && (

@@ -130,7 +130,7 @@ export default function HostBookingModal({ host, open, onClose }) {
                   <DialogTitle className="font-heading text-xl">{host.full_name}</DialogTitle>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{host.city}</span>
-                    {host.rating && <span className="flex items-center gap-1"><Star className="w-3 h-3 fill-amber-400 text-amber-400" />{host.rating}</span>}
+                    {host.rating && <span className="flex items-center gap-1"><Star className="w-3 h-3 fill-rating text-rating" />{host.rating}</span>}
                   </div>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 export const FORUM_PAGE_SIZE = 15;
 
-/** Shared forum UI tokens aligned with site theme (primary pink, secondary brown, accent coral). */
+/** Shared forum UI tokens aligned with site theme. */
 export const FORUM_TABLE_HEADER_CLASS =
   "bg-secondary text-secondary-foreground";
 
@@ -13,16 +13,16 @@ export const FORUM_STATS_CARD_CLASS =
 export const FORUM_STATS_LABEL_CLASS = "text-primary-foreground/75";
 
 export const BOARD_COLORS: Record<string, string> = {
-  blue: "bg-primary/10 text-primary",
+  blue: "bg-info-muted text-info",
   pink: "bg-primary/10 text-primary",
   primary: "bg-primary/10 text-primary",
-  green: "bg-accent/20 text-[hsl(15_55%_38%)]",
+  green: "bg-success-muted text-success",
   red: "bg-destructive/10 text-destructive",
-  indigo: "bg-secondary/10 text-secondary",
+  indigo: "bg-secondary/10 text-secondary-foreground",
   purple: "bg-primary/15 text-primary",
-  amber: "bg-accent/25 text-[hsl(30_45%_32%)]",
+  amber: "bg-warning-muted text-warning",
   slate: "bg-muted text-muted-foreground",
-  secondary: "bg-secondary/10 text-secondary",
+  secondary: "bg-secondary/10 text-secondary-foreground",
 };
 
 export function slugify(text: string): string {

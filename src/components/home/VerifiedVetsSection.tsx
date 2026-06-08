@@ -52,13 +52,13 @@ export default function VerifiedVetsSection() {
   if (subscriptions.length === 0) return null;
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-y border-emerald-100 py-16">
+    <div className="bg-gradient-to-br from-success-muted to-info-muted border-y border-success-border py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center gap-1.5 bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+              <div className="flex items-center gap-1.5 bg-success text-success-foreground text-xs font-bold px-3 py-1 rounded-full">
                 <BadgeCheck className="w-3.5 h-3.5" />
                 {t('Verified Partners', 'شركاء معتمدون')}
               </div>
@@ -75,7 +75,7 @@ export default function VerifiedVetsSection() {
           </div>
           <Link
             href="/vets"
-            className="text-emerald-700 text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all shrink-0"
+            className="text-success text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all shrink-0"
           >
             {t('Browse all vets', 'تصفح جميع الأطباء')} <ChevronRight className="w-4 h-4" />
           </Link>
@@ -103,7 +103,7 @@ export default function VerifiedVetsSection() {
                 }}
                 className="block h-full cursor-pointer"
               >
-                <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden h-full flex flex-col">
+                <div className="bg-card rounded-2xl border border-success-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden h-full flex flex-col">
                   {/* Image */}
                   <div className="relative h-36 overflow-hidden">
                     <img
@@ -112,7 +112,7 @@ export default function VerifiedVetsSection() {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <div className="absolute top-2 right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <div className="absolute top-2 right-2 bg-success text-success-foreground text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                       <BadgeCheck className="w-3 h-3" /> {t('Verified', 'موثق')}
                     </div>
                   </div>
@@ -126,10 +126,10 @@ export default function VerifiedVetsSection() {
                       </div>
                     )}
                     {sub.promo_title && (
-                      <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1.5 mb-3">
-                        <p className="text-xs font-semibold text-emerald-700">{sub.promo_title}</p>
+                      <div className="bg-success-muted border border-success-border rounded-lg px-2.5 py-1.5 mb-3">
+                        <p className="text-xs font-semibold text-success">{sub.promo_title}</p>
                         {sub.promo_description && (
-                          <p className="text-xs text-emerald-600 mt-0.5 line-clamp-2">{sub.promo_description}</p>
+                          <p className="text-xs text-success/80 mt-0.5 line-clamp-2">{sub.promo_description}</p>
                         )}
                       </div>
                     )}
@@ -144,7 +144,7 @@ export default function VerifiedVetsSection() {
                       <a
                         href={`tel:${sub.contact_phone}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="mt-3 flex items-center gap-1.5 text-xs text-emerald-700 font-medium hover:underline"
+                        className="mt-3 flex items-center gap-1.5 text-xs text-success font-medium hover:underline"
                       >
                         <Phone className="w-3 h-3" /> {sub.contact_phone}
                       </a>
@@ -159,7 +159,7 @@ export default function VerifiedVetsSection() {
         {/* CTA */}
         <div className="mt-10 text-center">
           <Link href="/vet-advertise">
-            <span className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-md shadow-emerald-200">
+            <span className="inline-flex items-center gap-2 bg-success hover:bg-success/90 text-success-foreground font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-md shadow-success/20">
               <BadgeCheck className="w-4 h-4" />
               {t('Join as a Verified Partner', 'انضم كشريك معتمد')}
             </span>

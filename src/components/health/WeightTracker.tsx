@@ -160,9 +160,9 @@ export default function WeightTracker({ pet, petId }) {
       )}
 
       {/* Health Tips */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-        <h3 className="font-semibold text-blue-900 mb-3">Weight Monitoring Tips</h3>
-        <ul className="space-y-2 text-sm text-blue-800">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-info-muted border border-info-border rounded-xl p-6">
+        <h3 className="font-semibold text-info mb-3">Weight Monitoring Tips</h3>
+        <ul className="space-y-2 text-sm text-info/90">
           <li className="flex items-start gap-2">
             <span className="text-lg mt-0.5">📊</span>
             <span>Regular weigh-ins help track your pet's health and detect weight-related issues early</span>

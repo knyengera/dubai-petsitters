@@ -139,7 +139,7 @@ export default function HostDetail() {
         <h1 className="font-heading text-3xl lg:text-4xl font-extrabold text-foreground mb-1">{host.full_name}</h1>
         <div className="flex items-center gap-3 text-muted-foreground text-sm">
           <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{host.neighborhood ? `${host.neighborhood}, ` : ''}{host.city}</span>
-          {host.rating && <span className="flex items-center gap-1"><Star className="w-4 h-4 text-amber-400 fill-amber-400" />{host.rating} ({host.review_count || 0} reviews)</span>}
+          {host.rating && <span className="flex items-center gap-1"><Star className="w-4 h-4 fill-rating text-rating" />{host.rating} ({host.review_count || 0} reviews)</span>}
         </div>
       </div>
 
@@ -247,7 +247,7 @@ export default function HostDetail() {
                 </div>
                 {host.rating && (
                   <div className="flex items-center gap-1 text-sm font-semibold">
-                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />{host.rating}
+                    <Star className="w-4 h-4 fill-rating text-rating" />{host.rating}
                   </div>
                 )}
               </div>

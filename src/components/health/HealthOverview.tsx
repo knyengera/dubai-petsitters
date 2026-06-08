@@ -28,7 +28,7 @@ export default function HealthOverview({ pet, vaccinations, medicalRecords }) {
               <p className="text-sm text-muted-foreground mb-2">Total Vaccinations</p>
               <p className="text-3xl font-bold text-foreground">{vaccinations.length}</p>
             </div>
-            <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+            <CheckCircle2 className="w-8 h-8 text-success" />
           </div>
         </motion.div>
 
@@ -48,7 +48,7 @@ export default function HealthOverview({ pet, vaccinations, medicalRecords }) {
               <p className="text-sm text-muted-foreground mb-2">Allergies</p>
               <p className="text-3xl font-bold text-foreground">{allergies.length}</p>
             </div>
-            <AlertCircle className="w-8 h-8 text-amber-600" />
+            <AlertCircle className="w-8 h-8 text-warning" />
           </div>
         </motion.div>
 
@@ -67,14 +67,14 @@ export default function HealthOverview({ pet, vaccinations, medicalRecords }) {
 
       {/* Upcoming Vaccinations Alert */}
       {upcomingVaccines.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-warning-muted border border-warning-border rounded-xl p-6">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 text-warning mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-semibold text-amber-900 mb-2">Upcoming Vaccinations</h3>
+              <h3 className="font-semibold text-foreground mb-2">Upcoming Vaccinations</h3>
               <div className="space-y-2">
                 {upcomingVaccines.map(v => (
-                  <p key={v.id} className="text-sm text-amber-800">
+                  <p key={v.id} className="text-sm text-warning">
                     <span className="font-medium">{v.vaccine_name}</span> is due on {format(new Date(v.next_due_date), 'MMM dd, yyyy')}
                   </p>
                 ))}
@@ -131,7 +131,7 @@ export default function HealthOverview({ pet, vaccinations, medicalRecords }) {
                 <div key={i} className="flex items-center gap-3 pb-3 border-b border-border last:border-0">
                   {item.vaccine_name ? (
                     <>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.vaccine_name}</p>
                         <p className="text-xs text-muted-foreground">{format(new Date(item.date_given), 'MMM dd, yyyy')}</p>

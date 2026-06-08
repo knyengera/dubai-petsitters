@@ -52,7 +52,7 @@ export default function PetHealthAssistantWidget() {
           <div className="flex items-start justify-between gap-2 px-4 py-3 border-b border-border shrink-0 rounded-t-2xl bg-popover">
             <div className="min-w-0">
               <h2 className="font-heading text-base font-semibold text-foreground flex items-center gap-2">
-                <Bot className="w-5 h-5 text-violet-600 shrink-0" />
+                <Bot className="w-5 h-5 text-primary shrink-0" />
                 {t("AI Pet Health Assistant", "مساعد الصحة الذكي")}
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -86,7 +86,7 @@ export default function PetHealthAssistantWidget() {
         size="icon"
         aria-label={t("AI Pet Health Assistant", "مساعد الصحة الذكي")}
         aria-expanded={open}
-        className="fixed z-50 end-4 rounded-full w-14 h-14 shadow-lg shadow-violet-500/30 bg-violet-600 hover:bg-violet-700 text-white bottom-[calc(5.5rem+env(safe-area-inset-bottom))] lg:bottom-6"
+        className="fixed z-50 end-4 rounded-full w-14 h-14 shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground bottom-[calc(5.5rem+env(safe-area-inset-bottom))] lg:bottom-6"
       >
         <Bot className="w-6 h-6" />
       </Button>

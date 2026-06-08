@@ -70,7 +70,7 @@ export default function PetCard({ pet, onAdopt }) {
         </div>
         <div className="flex items-center gap-3 mb-4">
           {pet.vaccinated && (
-            <div className="flex items-center gap-1 text-xs text-emerald-600">
+            <div className="flex items-center gap-1 text-xs text-success">
               <Shield className="w-3.5 h-3.5" /> Vaccinated
             </div>
           )}

@@ -60,7 +60,7 @@ export default function HostDetailModal({ host, open, onClose }) {
                 <DialogTitle className="font-heading text-2xl">{host.full_name}</DialogTitle>
                 {host.rating && (
                   <div className="flex items-center gap-1 text-sm font-semibold">
-                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-rating text-rating" />
                     {host.rating}
                     {host.review_count && <span className="text-muted-foreground font-normal">({host.review_count} reviews)</span>}
                   </div>

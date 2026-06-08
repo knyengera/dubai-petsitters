@@ -12,8 +12,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 
+import { statusPill } from '@/lib/ui/status-styles';
+
 const TYPES = ['checkup', 'vaccination', 'emergency', 'consultation', 'grooming', 'dental'];
-const STATUSES = { pending: 'text-orange-500 bg-orange-50 dark:bg-orange-900/20', confirmed: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20', completed: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20', cancelled: 'text-red-500 bg-red-50 dark:bg-red-900/20' };
+const STATUSES = {
+  pending: statusPill.warning,
+  confirmed: statusPill.success,
+  completed: statusPill.info,
+  cancelled: statusPill.destructive,
+};
 
 const emptyForm = { pet_name: '', clinic_name: '', vet_name: '', date: '', time: '', type: '', owner_name: '', owner_email: '', owner_phone: '', notes: '' };
 
@@ -52,8 +59,8 @@ export default function Appointments() {
 
   const AppointmentCard = ({ appt }) => (
     <div className="bg-card border border-border rounded-2xl p-4 flex items-start gap-4">
-      <div className="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 rounded-2xl flex items-center justify-center shrink-0">
-        <Calendar className="w-6 h-6 text-sky-600" />
+      <div className="w-12 h-12 bg-info-muted rounded-2xl flex items-center justify-center shrink-0">
+        <Calendar className="w-6 h-6 text-info" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">

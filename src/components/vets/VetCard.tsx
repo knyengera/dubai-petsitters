@@ -133,7 +133,7 @@ export default function VetCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         {clinic.is_featured && (
           <div className="absolute top-3 left-3">
-            <Badge className="bg-amber-500 text-white border-0 shadow-lg text-xs">
+            <Badge variant="warning" className="border-0 shadow-lg text-xs">
               <Sparkles className="w-3 h-3 mr-1" />
               Sponsored
             </Badge>
@@ -165,7 +165,7 @@ export default function VetCard({
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                className={`w-3.5 h-3.5 ${i < Math.round(clinic.rating!) ? "text-amber-400 fill-amber-400" : "text-muted"}`}
+                className={`w-3.5 h-3.5 ${i < Math.round(clinic.rating!) ? "fill-rating text-rating" : "text-muted"}`}
               />
             ))}
             <span className="text-sm text-muted-foreground ml-1">

@@ -61,7 +61,7 @@ export default function Navbar() {
                 href={ADMIN_NAV_LINK.path}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   pathname.startsWith("/admin")
-                    ? "bg-emerald-500/10 text-emerald-600"
+                    ? "bg-success/10 text-success"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >

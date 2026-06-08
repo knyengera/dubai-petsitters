@@ -38,7 +38,7 @@ const adPlans = [
     name: 'Premium',
     price: 'SAR 1,999',
     period: '/month',
-    color: 'border-amber-400',
+    color: 'border-warning',
     features: ['Everything in Professional', 'Homepage spotlight', 'Priority search ranking', 'Unlimited impressions', 'Dedicated account manager', 'Custom landing page'],
   },
 ];

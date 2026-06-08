@@ -200,7 +200,7 @@ export default function ForumTopicPage() {
 
         <div
           className={`bg-card border rounded-2xl p-6 mb-8 shadow-sm ${
-            isPending && isAuthor ? "border-amber-300 bg-amber-50/30" : "border-border"
+            isPending && isAuthor ? "border-warning-border bg-warning-muted/30" : "border-border"
           }`}
         >
           <div className="flex gap-4">
@@ -219,7 +219,7 @@ export default function ForumTopicPage() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {topic.pinned && (
-                  <span className="inline-flex items-center gap-1 text-xs text-amber-600 font-medium">
+                  <span className="inline-flex items-center gap-1 text-xs text-warning font-medium">
                     <Pin className="w-3 h-3" /> {s.pinned}
                   </span>
                 )}
@@ -234,7 +234,7 @@ export default function ForumTopicPage() {
                   </span>
                 )}
                 {isPending && isAuthor && (
-                  <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-700">
+                  <Badge variant="outline" className="text-[10px] border-warning-border text-warning">
                     {s.pendingReview}
                   </Badge>
                 )}

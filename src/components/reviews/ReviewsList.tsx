@@ -15,7 +15,7 @@ function RatingBar({ star, count, total }) {
     <div className="flex items-center gap-2 text-xs">
       <span className="w-4 text-muted-foreground shrink-0">{star}</span>
       <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-        <div className="h-full rounded-full bg-amber-400 transition-all" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full bg-rating transition-all" style={{ width: `${pct}%` }} />
       </div>
       <span className="w-6 text-right text-muted-foreground shrink-0">{count}</span>
     </div>

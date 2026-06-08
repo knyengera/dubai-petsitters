@@ -42,7 +42,7 @@ export default function ReviewForm({ targetId, targetType, targetName, onReviewS
   if (done) {
     return (
       <div className="flex flex-col items-center text-center py-8 gap-3">
-        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+        <CheckCircle2 className="w-10 h-10 text-success" />
         <p className="font-semibold text-foreground">Thank you for your review!</p>
         <p className="text-sm text-muted-foreground">Your feedback helps other pet owners make great choices.</p>
       </div>

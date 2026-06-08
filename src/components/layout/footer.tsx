@@ -92,7 +92,7 @@ export default function Footer() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-2.5 rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
                   >
-                    <MapPin className="w-4 h-4 text-primary shrink-0" />
+                    <MapPin className="w-4 h-4 text-background shrink-0" />
                     {t("Khobar, Saudi Arabia", "الخبر، السعودية")}
                   </a>
                 </li>
@@ -101,7 +101,7 @@ export default function Footer() {
                     href="mailto:hello@saudipetsitters.com"
                     className="inline-flex items-center gap-2.5 rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
                   >
-                    <Mail className="w-4 h-4 text-primary shrink-0" />
+                    <Mail className="w-4 h-4 text-background shrink-0" />
                     hello@saudipetsitters.com
                   </a>
                 </li>
@@ -115,7 +115,7 @@ export default function Footer() {
           <div>
             <div className="rounded-2xl border border-background/10 bg-background/[0.04] p-5">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-background">
-                <HeartHandshake className="h-4 w-4 text-primary" />
+                <HeartHandshake className="h-4 w-4 text-background" />
                 {t("Need trusted pet care?", "تحتاج رعاية موثوقة؟")}
               </div>
               <p className="mb-4 text-sm leading-relaxed text-background/65">

@@ -20,11 +20,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+import { appointmentStatus } from '@/lib/ui/status-styles';
+
 const STATUS_CONFIG = {
-  pending:   { label: 'Pending',   className: 'bg-amber-100 text-amber-700 border-amber-200',   icon: Clock },
-  confirmed: { label: 'Confirmed', className: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
-  completed: { label: 'Completed', className: 'bg-blue-100 text-blue-700 border-blue-200',     icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', className: 'bg-slate-100 text-slate-500 border-slate-200',   icon: Ban },
+  pending:   { label: 'Pending',   className: appointmentStatus.pending,   icon: Clock },
+  confirmed: { label: 'Confirmed', className: appointmentStatus.confirmed, icon: CheckCircle2 },
+  completed: { label: 'Completed', className: appointmentStatus.completed, icon: CheckCircle2 },
+  cancelled: { label: 'Cancelled', className: 'bg-muted text-muted-foreground border border-border', icon: Ban },
 };
 
 const SERVICE_LABELS = {

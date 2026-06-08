@@ -17,7 +17,7 @@ export default function Disclaimer() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-10 text-sm text-amber-800">
+        <div className="bg-warning-muted border border-warning-border rounded-2xl p-5 mb-10 text-sm text-warning">
           <strong>Important:</strong> The information on Saudi Petsitters is not a substitute for professional veterinary advice. When in doubt, always consult a qualified vet.
         </div>
         <div className="space-y-8">

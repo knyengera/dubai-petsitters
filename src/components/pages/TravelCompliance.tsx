@@ -95,7 +95,7 @@ export default function TravelCompliance() {
                   ].map(opt => (
                     <button key={opt.val} onClick={() => { setDirection(opt.val); goNext(); }}
                       className={`p-6 rounded-2xl border-2 text-start hover:border-primary transition-all ${direction === opt.val ? 'border-primary bg-primary/5' : 'border-border bg-card'}`}>
-                      <opt.icon className="w-8 h-8 text-sky-500 mb-3" />
+                      <opt.icon className="w-8 h-8 text-info mb-3" />
                       <p className="font-heading font-bold text-foreground">{t(opt.en, opt.ar)}</p>
                       <p className="text-sm text-muted-foreground mt-1">{t(opt.desc_en, opt.desc_ar)}</p>
                     </button>
@@ -138,14 +138,14 @@ export default function TravelCompliance() {
               <div>
                 <h2 className="font-heading text-2xl font-bold text-foreground mb-6">{t('Requirements', 'المتطلبات')}</h2>
                 {direction === 'export' && dest && (
-                  <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-2xl p-4 mb-6">
-                    <p className="font-semibold text-sky-800 dark:text-sky-400">{t('Destination', 'الوجهة')}: {t(dest.en, dest.ar)}</p>
+                  <div className="bg-info-muted border border-info-border rounded-2xl p-4 mb-6">
+                    <p className="font-semibold text-info">{t('Destination', 'الوجهة')}: {t(dest.en, dest.ar)}</p>
                     <div className="flex gap-4 mt-2 text-sm">
-                      <span className={`flex items-center gap-1 ${dest.rabies ? 'text-red-600' : 'text-emerald-600'}`}>
+                      <span className={`flex items-center gap-1 ${dest.rabies ? 'text-destructive' : 'text-success'}`}>
                         {dest.rabies ? <AlertTriangle className="w-3.5 h-3.5" /> : <CheckCircle className="w-3.5 h-3.5" />}
                         {dest.rabies ? t('Rabies titer required', 'اختبار مستوى الأجسام المضادة للكلب مطلوب') : t('No rabies titer', 'لا يوجد اشتراط')}
                       </span>
-                      <span className="flex items-center gap-1 text-orange-600"><Clock className="w-3.5 h-3.5" />{dest.daysNotice} {t('days notice', 'يوم إشعار مسبق')}</span>
+                      <span className="flex items-center gap-1 text-warning"><Clock className="w-3.5 h-3.5" />{dest.daysNotice} {t('days notice', 'يوم إشعار مسبق')}</span>
                     </div>
                   </div>
                 )}
@@ -192,9 +192,9 @@ export default function TravelCompliance() {
                   })}
                 </div>
                 {checkedCount === (direction === 'import' ? SAUDI_IMPORT_CHECKLIST : reqs).length && (
-                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 flex items-center gap-3">
-                    <CheckCircle className="w-6 h-6 text-emerald-600" />
-                    <p className="font-semibold text-emerald-700 dark:text-emerald-400">{t('All requirements complete! Safe travels 🐾', 'اكتملت جميع المتطلبات! سفر آمن 🐾')}</p>
+                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-6 bg-success-muted border border-success-border rounded-2xl p-4 flex items-center gap-3">
+                    <CheckCircle className="w-6 h-6 text-success" />
+                    <p className="font-semibold text-success">{t('All requirements complete! Safe travels 🐾', 'اكتملت جميع المتطلبات! سفر آمن 🐾')}</p>
                   </motion.div>
                 )}
               </div>

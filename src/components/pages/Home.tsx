@@ -95,12 +95,12 @@ function getPetImageUrl(pet: FeaturedPet) {
 }
 
 const features = [
-  { icon: Bot, gradient: 'from-violet-600 to-purple-700', labelEn: 'AI Health Assistant', labelAr: 'مساعد الصحة الذكي', descEn: 'Symptom checker & emergency alerts', descAr: 'فحص الأعراض وتنبيهات الطوارئ', openAssistant: true as const, img: 'https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&q=80' },
-  { icon: PawPrint, gradient: 'from-orange-500 to-amber-600', labelEn: 'Pet Profiles', labelAr: 'ملفات الحيوانات', descEn: 'Vaccination records & health passports', descAr: 'سجلات التطعيم وجوازات الصحة', to: '/pets', img: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80' },
-  { icon: Stethoscope, gradient: 'from-emerald-500 to-teal-600', labelEn: 'Find a Vet', labelAr: 'ابحث عن طبيب', descEn: 'Nearby clinics & emergency care', descAr: 'عيادات قريبة ورعاية طارئة', to: '/vets', img: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=80' },
-  { icon: Plane, gradient: 'from-sky-500 to-blue-600', labelEn: 'Travel Compliance', labelAr: 'امتثال السفر', descEn: 'Import/export Saudi pet regulations', descAr: 'لوائح استيراد وتصدير الحيوانات', to: '/travel', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&q=80' },
-  { icon: Heart, gradient: 'from-rose-500 to-pink-600', labelEn: 'Adoption Center', labelAr: 'مركز التبني', descEn: 'Find your perfect companion', descAr: 'اعثر على رفيقك المثالي', to: '/adopt', img: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&q=80' },
-  { icon: MapPin, gradient: 'from-orange-500 to-red-500', labelEn: 'Lost & Found', labelAr: 'المفقودات', descEn: 'Report & find lost pets', descAr: 'أبلغ عن الحيوانات الضائعة', to: '/lost-pets', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80' },
+  { icon: Bot, gradient: 'from-primary to-primary/80', labelEn: 'AI Health Assistant', labelAr: 'مساعد الصحة الذكي', descEn: 'Symptom checker & emergency alerts', descAr: 'فحص الأعراض وتنبيهات الطوارئ', openAssistant: true as const, img: 'https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&q=80' },
+  { icon: PawPrint, gradient: 'from-accent to-warning', labelEn: 'Pet Profiles', labelAr: 'ملفات الحيوانات', descEn: 'Vaccination records & health passports', descAr: 'سجلات التطعيم وجوازات الصحة', to: '/pets', img: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80' },
+  { icon: Stethoscope, gradient: 'from-success to-success/80', labelEn: 'Find a Vet', labelAr: 'ابحث عن طبيب', descEn: 'Nearby clinics & emergency care', descAr: 'عيادات قريبة ورعاية طارئة', to: '/vets', img: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=80' },
+  { icon: Plane, gradient: 'from-info to-primary', labelEn: 'Travel Compliance', labelAr: 'امتثال السفر', descEn: 'Import/export Saudi pet regulations', descAr: 'لوائح استيراد وتصدير الحيوانات', to: '/travel', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&q=80' },
+  { icon: Heart, gradient: 'from-primary to-accent', labelEn: 'Adoption Center', labelAr: 'مركز التبني', descEn: 'Find your perfect companion', descAr: 'اعثر على رفيقك المثالي', to: '/adopt', img: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&q=80' },
+  { icon: MapPin, gradient: 'from-warning to-destructive', labelEn: 'Lost & Found', labelAr: 'المفقودات', descEn: 'Report & find lost pets', descAr: 'أبلغ عن الحيوانات الضائعة', to: '/lost-pets', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80' },
 ];
 
 const stats = [
@@ -124,8 +124,8 @@ function FeaturedVetsSection({ t }) {
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <BadgeCheck className="w-5 h-5 text-emerald-500" />
-            <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+            <BadgeCheck className="w-5 h-5 text-success" />
+            <span className="text-xs font-semibold text-success uppercase tracking-wider">
               {t('Verified & Trusted', 'موثق ومعتمد')}
             </span>
           </div>
@@ -147,7 +147,7 @@ function FeaturedVetsSection({ t }) {
       </div>
       <div className="mt-6 text-center">
         <Link href="/vet-advertise">
-          <span className="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium px-5 py-2.5 rounded-xl text-sm transition-all border border-emerald-200">
+          <span className="inline-flex items-center gap-2 bg-success-muted hover:bg-success-muted/80 text-success font-medium px-5 py-2.5 rounded-xl text-sm transition-all border border-success-border">
             <BadgeCheck className="w-4 h-4" /> {t('Get Your Clinic Featured', 'احصل على إدراج عيادتك')}
           </span>
         </Link>
@@ -407,7 +407,7 @@ export default function Home() {
 
       {/* CTA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="bg-gradient-to-r from-primary to-emerald-600 rounded-3xl p-8 lg:p-12 text-white text-center">
+        <div className="bg-gradient-to-r from-primary to-success rounded-3xl p-8 lg:p-12 text-white text-center">
           <h2 className="font-heading text-3xl font-bold mb-3">
             {t("Start Your Pet's Health Journey", 'ابدأ رحلة صحة حيوانك الأليف')}
           </h2>

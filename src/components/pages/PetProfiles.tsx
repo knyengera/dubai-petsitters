@@ -134,12 +134,12 @@ export default function PetProfiles() {
                   <p className="text-sm text-muted-foreground capitalize">{pet.species}{pet.breed ? ` · ${pet.breed}` : ''}{pet.age ? ` · ${pet.age}` : ''}</p>
                   <div className="flex gap-2 mt-1">
                     {vaccines.length > 0 && (
-                      <span className="text-xs px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-success-muted text-success rounded-full">
                         <Syringe className="w-3 h-3 inline me-1" />{vaccines.length} {t('vaccines', 'تطعيمات')}
                       </span>
                     )}
                     {pet.microchip_number && (
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-info-muted text-info rounded-full">
                         {t('Microchipped', 'محقون')}
                       </span>
                     )}
@@ -175,7 +175,7 @@ export default function PetProfiles() {
                         <p className="text-xs font-semibold text-muted-foreground mb-2">{t('Vaccination History', 'سجل التطعيمات')}</p>
                         <div className="space-y-2">
                           {vaccines.map(v => (
-                            <div key={v.id} className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 rounded-xl px-3 py-2 text-sm">
+                            <div key={v.id} className="flex items-center justify-between bg-success-muted rounded-xl px-3 py-2 text-sm">
                               <span className="font-medium text-foreground">{v.vaccine_name}</span>
                               <span className="text-muted-foreground">{v.date_given}{v.next_due_date ? ` → ${v.next_due_date}` : ''}</span>
                             </div>

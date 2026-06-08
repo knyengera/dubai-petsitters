@@ -157,7 +157,7 @@ export default function AdminVets() {
         <>
           <section className="mb-8">
             <h2 className="font-heading text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-emerald-500" /> Approved ({approved.length})
+              <CheckCircle className="w-5 h-5 text-success" /> Approved ({approved.length})
             </h2>
             <div className="space-y-3">
               {approved.map((vet) => (
@@ -178,7 +178,7 @@ export default function AdminVets() {
           {pending.length > 0 && (
             <section>
               <h2 className="font-heading text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                <XCircle className="w-5 h-5 text-orange-400" /> Pending ({pending.length})
+                <XCircle className="w-5 h-5 text-warning" /> Pending ({pending.length})
               </h2>
               <div className="space-y-3">
                 {pending.map((vet) => (
@@ -330,7 +330,7 @@ export default function AdminVets() {
                 <DialogTitle className="font-heading flex items-center gap-2">
                   {String(viewingVet.name ?? "Vet Clinic")}
                   {viewingVet.is_approved ? (
-                    <Badge className="bg-emerald-500 text-white">Approved</Badge>
+                    <Badge variant="success">Approved</Badge>
                   ) : (
                     <Badge variant="secondary">Pending</Badge>
                   )}
@@ -405,15 +405,15 @@ function VetRow({
       {vet.image_url ? (
         <img src={String(vet.image_url)} alt={String(vet.name)} className="w-12 h-12 rounded-xl object-cover shrink-0" />
       ) : (
-        <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-          <Stethoscope className="w-6 h-6 text-emerald-600" />
+        <div className="w-12 h-12 rounded-xl bg-success-muted flex items-center justify-center shrink-0">
+          <Stethoscope className="w-6 h-6 text-success" />
         </div>
       )}
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-foreground text-sm flex items-center gap-2">
           {String(vet.name)}
-          {vet.is_approved && <Badge className="text-[10px] bg-emerald-500 text-white">Approved</Badge>}
-          {vet.is_featured && <Badge className="text-[10px] bg-amber-500 text-white">Featured</Badge>}
+          {vet.is_approved && <Badge variant="success" className="text-[10px]">Approved</Badge>}
+          {vet.is_featured && <Badge variant="warning" className="text-[10px]">Featured</Badge>}
         </p>
         <p className="text-xs text-muted-foreground">
           {String(vet.city)}{vet.address ? ` · ${vet.address}` : ""}
@@ -429,10 +429,10 @@ function VetRow({
         <button type="button" onClick={() => onEdit(vet)} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit vet record">
           <Pencil className="w-5 h-5" />
         </button>
-        <button type="button" onClick={() => onApprove(vet)} className={`p-2 rounded-lg transition-colors ${vet.is_approved ? "text-emerald-600 bg-emerald-50" : "text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50"}`} aria-label={vet.is_approved ? "Remove approval" : "Approve vet"}>
+        <button type="button" onClick={() => onApprove(vet)} className={`p-2 rounded-lg transition-colors ${vet.is_approved ? "text-success bg-success-muted" : "text-muted-foreground hover:text-success hover:bg-success-muted"}`} aria-label={vet.is_approved ? "Remove approval" : "Approve vet"}>
           <CheckCircle className="w-5 h-5" />
         </button>
-        <button type="button" onClick={() => onFeature(vet)} className={`p-2 rounded-lg transition-colors ${vet.is_featured ? "text-amber-500 bg-amber-50" : "text-muted-foreground hover:text-amber-500 hover:bg-amber-50"}`} aria-label={vet.is_featured ? "Remove featured status" : "Feature vet"}>
+        <button type="button" onClick={() => onFeature(vet)} className={`p-2 rounded-lg transition-colors ${vet.is_featured ? "text-warning bg-warning-muted" : "text-muted-foreground hover:text-warning hover:bg-warning-muted"}`} aria-label={vet.is_featured ? "Remove featured status" : "Feature vet"}>
           <Star className="w-5 h-5" />
         </button>
         <button type="button" onClick={() => onDelete(vet)} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10" aria-label="Delete vet record">

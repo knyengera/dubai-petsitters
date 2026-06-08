@@ -112,7 +112,7 @@ export default function VetDetail() {
         <h1 className="font-heading text-3xl lg:text-4xl font-extrabold text-foreground mb-1">{clinic.name}</h1>
         <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-sm">
           <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{clinic.city}{clinic.address ? `, ${clinic.address}` : ''}</span>
-          {clinic.rating && <span className="flex items-center gap-1"><Star className="w-4 h-4 text-amber-400 fill-amber-400" />{clinic.rating}</span>}
+          {clinic.rating && <span className="flex items-center gap-1"><Star className="w-4 h-4 fill-rating text-rating" />{clinic.rating}</span>}
         </div>
       </div>
 
@@ -155,7 +155,7 @@ export default function VetDetail() {
                   <div>
                     <div className="flex items-center gap-0.5 mb-1">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className={`w-5 h-5 ${i < Math.round(clinic.rating) ? 'text-amber-400 fill-amber-400' : 'text-muted'}`} />
+                        <Star key={i} className={`w-5 h-5 ${i < Math.round(clinic.rating) ? 'fill-rating text-rating' : 'text-muted'}`} />
                       ))}
                     </div>
                     <p className="text-sm text-muted-foreground">Based on patient reviews</p>
@@ -226,7 +226,7 @@ export default function VetDetail() {
             <div className="bg-card border border-border rounded-2xl p-6 shadow-lg lg:sticky lg:top-24 space-y-3">
               <h2 className="font-heading text-lg font-bold text-foreground">Contact the Clinic</h2>
               {subscription && (
-               <Button onClick={() => setShowBooking(true)} className="w-full rounded-xl h-11 font-bold bg-emerald-600 hover:bg-emerald-700">
+               <Button onClick={() => setShowBooking(true)} className="w-full rounded-xl h-11 font-bold">
                  <CalendarDays className="w-4 h-4 mr-2" /> Book Appointment
                </Button>
               )}

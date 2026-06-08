@@ -90,7 +90,7 @@ export default function PetHealthAssistantChat() {
   if (!user) {
     return (
       <div className="flex h-full min-h-0 flex-col items-center justify-center bg-background px-6 text-center">
-        <Bot className="mb-3 h-8 w-8 text-violet-600" />
+        <Bot className="mb-3 h-8 w-8 text-primary" />
         <h2 className="font-heading text-lg font-bold text-foreground">
           {t("Sign in to use the AI assistant", "سجل الدخول لاستخدام المساعد الذكي")}
         </h2>
@@ -109,8 +109,8 @@ export default function PetHealthAssistantChat() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
         {messages.length === 0 && (
           <div className="flex flex-col items-center text-center pt-4 pb-4">
-            <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/30 rounded-3xl flex items-center justify-center mb-3">
-              <Bot className="w-8 h-8 text-violet-600" />
+            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mb-3">
+              <Bot className="w-8 h-8 text-primary" />
             </div>
             <h2 className="font-heading text-lg font-bold text-foreground mb-2">
               {t(
@@ -152,7 +152,7 @@ export default function PetHealthAssistantChat() {
               {msg.role === "assistant" && (
                 <div
                   className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-1 ${
-                    isEmergency(msg.content) ? "bg-red-500" : "bg-violet-600"
+                    isEmergency(msg.content) ? "bg-destructive" : "bg-primary"
                   }`}
                 >
                   {isEmergency(msg.content) ? (
@@ -167,7 +167,7 @@ export default function PetHealthAssistantChat() {
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-ee-sm"
                     : isEmergency(msg.content)
-                      ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-foreground rounded-es-sm"
+                      ? "bg-destructive/10 border border-destructive/20 text-foreground rounded-es-sm"
                       : "bg-card border border-border text-foreground rounded-es-sm"
                 }`}
               >
@@ -188,7 +188,7 @@ export default function PetHealthAssistantChat() {
             animate={{ opacity: 1 }}
             className="flex gap-3"
           >
-            <div className="w-8 h-8 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shrink-0">
               <Bot className="w-4 h-4 text-white" />
             </div>
             <div className="bg-card border border-border rounded-2xl rounded-es-sm px-4 py-3">

@@ -73,12 +73,12 @@ export default function MedicalLog({ petId, medicalRecords }) {
   };
 
   const typeColors = {
-    diagnosis: 'text-red-600',
-    treatment: 'text-blue-600',
-    surgery: 'text-purple-600',
-    lab_result: 'text-orange-600',
-    prescription: 'text-emerald-600',
-    note: 'text-slate-600',
+    diagnosis: 'text-destructive',
+    treatment: 'text-info',
+    surgery: 'text-primary',
+    lab_result: 'text-warning',
+    prescription: 'text-success',
+    note: 'text-muted-foreground',
   };
 
   return (
@@ -241,7 +241,7 @@ export default function MedicalLog({ petId, medicalRecords }) {
               </div>
 
               {record.follow_up_date && (
-                <div className="mt-3 text-sm text-amber-600 flex items-center gap-2">
+                <div className="mt-3 text-sm text-warning flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   Follow-up: {format(new Date(record.follow_up_date), 'MMM dd, yyyy')}
                 </div>

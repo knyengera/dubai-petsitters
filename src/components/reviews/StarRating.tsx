@@ -18,7 +18,7 @@ export default function StarRating({ value = 0, onChange, size = 'md', showValue
           className={cn('transition-transform', onChange && 'hover:scale-110 cursor-pointer', !onChange && 'cursor-default')}
         >
           <Star
-            className={cn(sizes[size], star <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-300 fill-slate-100')}
+            className={cn(sizes[size], star <= value ? 'fill-rating text-rating' : 'text-rating-muted fill-rating-muted')}
           />
         </button>
       ))}

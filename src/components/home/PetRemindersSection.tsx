@@ -8,10 +8,12 @@ import { motion } from 'framer-motion';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { Syringe, Pill, Stethoscope, AlertTriangle, Bell, ChevronRight, CheckCircle2 } from 'lucide-react';
 
+import { statusBadge } from '@/lib/ui/status-styles';
+
 function urgencyClass(days) {
-  if (days <= 3) return { bg: 'bg-red-50 border-red-200', icon: 'text-red-500', badge: 'bg-red-100 text-red-700', label: 'Urgent' };
-  if (days <= 7) return { bg: 'bg-orange-50 border-orange-200', icon: 'text-orange-500', badge: 'bg-orange-100 text-orange-700', label: 'This week' };
-  return { bg: 'bg-amber-50 border-amber-200', icon: 'text-amber-500', badge: 'bg-amber-100 text-amber-700', label: 'Upcoming' };
+  if (days <= 3) return { bg: 'bg-destructive/10 border-destructive/20', icon: 'text-destructive', badge: statusBadge.destructive, label: 'Urgent' };
+  if (days <= 7) return { bg: 'bg-warning-muted border-warning-border', icon: 'text-warning', badge: statusBadge.warning, label: 'This week' };
+  return { bg: 'bg-warning-muted/60 border-warning-border', icon: 'text-warning', badge: statusBadge.warning, label: 'Upcoming' };
 }
 
 export default function PetRemindersSection({ t }) {
@@ -116,10 +118,10 @@ export default function PetRemindersSection({ t }) {
       {/* Section header */}
       <div className="flex items-center justify-between">
         <h2 className="font-heading text-lg font-bold text-foreground flex items-center gap-2">
-          <Bell className={`w-5 h-5 ${urgent > 0 ? 'text-orange-500' : 'text-primary'}`} />
+          <Bell className={`w-5 h-5 ${urgent > 0 ? 'text-warning' : 'text-primary'}`} />
           {t ? t('Pet Reminders', 'تذكيرات الحيوانات') : 'Pet Reminders'}
           {urgent > 0 && (
-            <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{urgent}</span>
+            <span className="bg-destructive text-destructive-foreground text-xs font-bold px-2 py-0.5 rounded-full">{urgent}</span>
           )}
         </h2>
         <Link href="/pets" className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
@@ -159,7 +161,7 @@ export default function PetRemindersSection({ t }) {
       </div>
 
       {reminders.length === 0 && (
-        <div className="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+        <div className="flex items-center gap-2 text-sm text-success bg-success-muted border border-success-border rounded-xl px-4 py-3">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           All pets are up to date!
         </div>
