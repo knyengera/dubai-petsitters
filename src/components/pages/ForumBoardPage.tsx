@@ -54,10 +54,6 @@ export default function ForumBoardPage() {
     enabled: !!boardSlug,
   });
 
-  const displayTitle = getBoardTitle(board.slug, board.title);
-  const displayDescription =
-    getBoardDescription(board.slug, board.description) ?? s.browseTopicsDefault;
-
   const { data: boards = [] } = useQuery({
     queryKey: ["forum-boards"],
     queryFn: async () => {
@@ -139,6 +135,10 @@ export default function ForumBoardPage() {
       </div>
     );
   }
+
+  const displayTitle = getBoardTitle(board.slug, board.title);
+  const displayDescription =
+    getBoardDescription(board.slug, board.description) ?? s.browseTopicsDefault;
 
   return (
     <div className="min-h-screen bg-background">

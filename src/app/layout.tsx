@@ -6,6 +6,24 @@ export const metadata: Metadata = {
   title: "Saudi Petsitters",
   description:
     "Saudi Arabia's trusted pet care community — adoption, hosting, and veterinary resources.",
+  icons: {
+    icon: [{ url: "/logo-icon.png", type: "image/png" }],
+    shortcut: ["/logo-icon.png"],
+    apple: [{ url: "/logo-icon.png", type: "image/png" }],
+  },
+  openGraph: {
+    title: "Saudi Petsitters",
+    description:
+      "Saudi Arabia's trusted pet care community — adoption, hosting, and veterinary resources.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 656,
+        height: 200,
+        alt: "Saudi Petsitters",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

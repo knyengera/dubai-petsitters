@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, HeartHandshake, Mail, MapPin, PawPrint } from "lucide-react";
+import { ArrowRight, HeartHandshake, Mail, MapPin } from "lucide-react";
 import { PUBLIC_NAV_LINKS, type NavLinkItem } from "@/lib/auth/navigation";
 import { useLanguage } from "@/lib/language-context";
 
@@ -64,18 +64,15 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.25fr_0.85fr_0.85fr_1fr]">
           <div className="space-y-6">
-            <Link href="/" className="inline-flex items-center gap-2.5 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary transition-transform group-hover:scale-105">
-                <PawPrint className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <span className="font-heading text-lg font-bold text-background">
-                  Saudi
-                </span>
-                <span className="font-heading text-lg font-bold text-primary ml-1">
-                  Petsitters
-                </span>
-              </div>
+            <Link
+              href="/"
+              className="inline-flex transition-transform hover:scale-105"
+            >
+              <img
+                src="/logo-white.png"
+                alt="Saudi Petsitters"
+                className="h-12 w-auto"
+              />
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-background/65">
               {t(

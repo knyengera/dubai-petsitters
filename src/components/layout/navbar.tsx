@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { PawPrint, MessageCircle, LogOut } from "lucide-react";
+import { MessageCircle, LogOut } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -31,19 +31,12 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center group-hover:scale-105 transition-transform">
-              <PawPrint className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <span className="font-heading text-xl font-bold text-foreground leading-none">
-                Saudi
-              </span>
-              <span className="font-heading text-xl font-bold text-primary leading-none">
-                {" "}
-                Petsitters
-              </span>
-            </div>
+          <Link href="/" className="flex items-center group">
+            <img
+              src="/logo.png"
+              alt="Saudi Petsitters"
+              className="h-10 w-auto transition-transform group-hover:scale-105 lg:h-12"
+            />
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
