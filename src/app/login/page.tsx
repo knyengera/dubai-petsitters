@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
+import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -40,7 +42,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-8">
+    <div className="mt-10 w-full max-w-md space-y-8 lg:mt-14">
       <div className="text-center">
         <div className="inline-flex w-14 h-14 rounded-xl bg-primary items-center justify-center mb-4">
           <PawPrint className="w-7 h-7 text-primary-foreground" />
@@ -107,16 +109,26 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Suspense
-        fallback={
-          <div className="w-full max-w-md text-center text-muted-foreground">
-            Loading…
-          </div>
-        }
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navbar />
+      <main
+        className="flex-1 flex items-start justify-center px-4 py-8"
+        style={{
+          paddingTop: "calc(5rem + env(safe-area-inset-top))",
+          paddingBottom: "calc(2rem + env(safe-area-inset-bottom))",
+        }}
       >
-        <LoginForm />
-      </Suspense>
+        <Suspense
+          fallback={
+            <div className="w-full max-w-md text-center text-muted-foreground">
+              Loading…
+            </div>
+          }
+        >
+          <LoginForm />
+        </Suspense>
+      </main>
+      <Footer />
     </div>
   );
 }

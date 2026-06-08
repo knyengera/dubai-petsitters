@@ -67,7 +67,7 @@
   --font-heading: "Roboto", sans-serif;
   --font-body: "Poppins", sans-serif;
 
-  --background: hsl(0 0% 97%);
+  --background: hsl(0 0% 100%);
   --foreground: hsl(270 50% 13%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(270 50% 13%);
@@ -105,7 +105,7 @@
   --chart-4: hsl(255 22% 28%);
   --chart-5: hsl(264 50% 32%);
   --radius: 0.75rem;
-  --sidebar: hsl(0 0% 97%);
+  --sidebar: hsl(0 0% 100%);
   --sidebar-foreground: hsl(270 50% 13%);
   --sidebar-primary: hsl(260 60% 22%);
   --sidebar-primary-foreground: hsl(0 0% 100%);

@@ -68,7 +68,7 @@ export default function BlogPostPage({ slug }: BlogPostPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+      <article className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <Link
           href="/blog"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"

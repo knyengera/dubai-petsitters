@@ -22,6 +22,9 @@ const companyLinks: NavLinkItem[] = [
   { labelEn: "Advertise Your Vet Clinic", labelAr: "أعلن عن عيادتك", path: "/vet-advertise" },
 ];
 
+const footerLinkClass =
+  "inline-flex rounded-md transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-foreground";
+
 const legalLinks: NavLinkItem[] = [
   { labelEn: "Privacy", labelAr: "الخصوصية", path: "/privacy" },
   { labelEn: "Terms", labelAr: "الشروط", path: "/terms" },
@@ -45,7 +48,7 @@ function FooterLinkList({
           <li key={link.path}>
             <Link
               href={link.path}
-              className="inline-flex rounded-md text-sm text-background/65 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
+              className={`text-sm text-background/65 ${footerLinkClass}`}
             >
               {t(link.labelEn, link.labelAr)}
             </Link>
@@ -90,7 +93,7 @@ export default function Footer() {
                     href="https://www.google.com/maps/search/?api=1&query=Khobar%2C%20Saudi%20Arabia"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
+                    className={`items-center gap-2.5 ${footerLinkClass}`}
                   >
                     <MapPin className="w-4 h-4 text-background shrink-0" />
                     {t("Khobar, Saudi Arabia", "الخبر، السعودية")}
@@ -99,7 +102,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="mailto:hello@saudipetsitters.com"
-                    className="inline-flex items-center gap-2.5 rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
+                    className={`items-center gap-2.5 ${footerLinkClass}`}
                   >
                     <Mail className="w-4 h-4 text-background shrink-0" />
                     hello@saudipetsitters.com
@@ -145,7 +148,7 @@ export default function Footer() {
               <Link
                 key={link.path}
                 href={link.path}
-                className="rounded-md transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground"
+                className={`text-sm text-background/45 ${footerLinkClass}`}
               >
                 {t(link.labelEn, link.labelAr)}
               </Link>
