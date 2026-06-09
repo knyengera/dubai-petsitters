@@ -2,26 +2,17 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/language-context';
 import { useAuth } from '@/lib/auth-context';
-import { isNavPathVisible } from '@/lib/auth/navigation';
-import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
-import { Bot, Stethoscope, PawPrint, Plane, MapPin, Heart, Clock, ChevronLeft, ChevronRight, Star, ArrowRight, Users, BadgeCheck } from 'lucide-react';
+import { Stethoscope, MapPin, Clock, ChevronLeft, ChevronRight, Star, Users, BadgeCheck } from 'lucide-react';
 import VetCard from '@/components/vets/VetCard';
 import HostCard from '@/components/hosts/HostCard';
+import HeroSlider from '@/components/home/HeroSlider';
 import PartnerDealsSection from '@/components/home/PartnerDealsSection';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-const HERO_MAIN = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&q=80';
-const HERO_THUMB1 = 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=300&q=80';
-const HERO_THUMB2 = 'https://images.unsplash.com/photo-1560743641-3914f2c45636?w=300&q=80';
-const AVATAR1 = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&q=80';
-const AVATAR2 = 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=60&q=80';
-const AVATAR3 = 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=60&q=80';
 
 const PET_FALLBACKS = {
   dog: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&q=90',
@@ -92,15 +83,6 @@ function getPetImageUrl(pet: FeaturedPet) {
 
   return pet.image_url || PET_FALLBACKS[fallbackSpecies];
 }
-
-const features = [
-  { icon: Bot, gradient: 'from-primary to-primary/80', labelEn: 'AI Pet Care Assistant', labelAr: 'مساعد رعاية الحيوانات الذكي', descEn: 'Feeding, travel, heat safety & health guidance', descAr: 'إرشادات التغذية والسفر والحرارة والصحة', openAssistant: true as const, img: 'https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&q=80' },
-  { icon: PawPrint, gradient: 'from-accent to-warning', labelEn: 'Pet Profiles', labelAr: 'ملفات الحيوانات', descEn: 'Vaccination records & health passports', descAr: 'سجلات التطعيم وجوازات الصحة', to: '/pets', img: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80' },
-  { icon: Stethoscope, gradient: 'from-success to-success/80', labelEn: 'Find a Vet', labelAr: 'ابحث عن طبيب', descEn: 'Nearby clinics & emergency care', descAr: 'عيادات قريبة ورعاية طارئة', to: '/vets', img: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=80' },
-  { icon: Plane, gradient: 'from-info to-primary', labelEn: 'Travel Compliance', labelAr: 'امتثال السفر', descEn: 'Import/export Saudi pet regulations', descAr: 'لوائح استيراد وتصدير الحيوانات', to: '/travel', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&q=80' },
-  { icon: Heart, gradient: 'from-primary to-accent', labelEn: 'Adoption Center', labelAr: 'مركز التبني', descEn: 'Find your perfect companion', descAr: 'اعثر على رفيقك المثالي', to: '/adopt', img: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&q=80' },
-  { icon: MapPin, gradient: 'from-warning to-destructive', labelEn: 'Lost & Found', labelAr: 'المفقودات', descEn: 'Report & find lost pets', descAr: 'أبلغ عن الحيوانات الضائعة', to: '/lost-pets', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80' },
-];
 
 const trustStats = [
   { icon: Star, headlineEn: '4.9/5 Rating', headlineAr: 'تقييم ٤.٩/٥', subEn: 'From 8,000+ reviews', subAr: 'من أكثر من ٨٠٠٠ تقييم' },
@@ -198,8 +180,7 @@ function FeaturedVetsSection({ t }) {
 
 export default function Home() {
   const { t } = useLanguage();
-  const { user, navigateToLogin } = useAuth();
-  const { openAssistant } = usePetHealthAssistant();
+  const { user } = useAuth();
   const isAuthenticated = !!user;
 
   const { data: pets = [] } = useQuery({
@@ -219,147 +200,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className="relative overflow-hidden bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, ease: 'easeOut' }}>
-              <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight mb-5">
-                {t('Reliable &', 'رعاية موثوقة')}<br />
-                {t('Loving', 'وحانية')}<br />
-                <span className="text-primary italic">{t('Pet Care', 'لحيواناتك')}</span>
-              </h1>
-              <p className="text-base text-muted-foreground mb-8 max-w-md leading-relaxed">
-                {t(
-                  'Professional pet sitters, verified vets, AI pet care guidance, and travel compliance — all in one place for Saudi pet owners.',
-                  'مربيو حيوانات محترفون، أطباء معتمدون، إرشادات صحية بالذكاء الاصطناعي، وامتثال السفر — كل ذلك في مكان واحد.'
-                )}
-              </p>
-              <div className="flex flex-wrap gap-3 mb-10">
-                <Link
-                  href={isAuthenticated ? '/dashboard' : '/login'}
-                  className={cn(
-                    buttonVariants({ size: "lg" }),
-                    "bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-2xl px-8 shadow-lg shadow-primary/25"
-                  )}
-                >
-                  {t(isAuthenticated ? 'Go to Dashboard' : 'Get Started', isAuthenticated ? 'لوحة التحكم' : 'ابدأ الآن')}
-                  <ArrowRight className="w-4 h-4 ms-2" />
-                </Link>
-                {isAuthenticated ? (
-                  <Button
-                    type="button"
-                    size="lg"
-                    variant="outline"
-                    onClick={openAssistant}
-                    className="rounded-2xl px-8 border-border hover:border-primary hover:text-primary"
-                  >
-                    <Bot className="w-4 h-4 me-2" />
-                    {t('AI Pet Care', 'رعاية ذكية')}
-                  </Button>
-                ) : (
-                  <Link
-                    href="/vets"
-                    className={cn(
-                      buttonVariants({ size: "lg", variant: "outline" }),
-                      "rounded-2xl px-8 border-border hover:border-primary hover:text-primary"
-                    )}
-                  >
-                    <Stethoscope className="w-4 h-4 me-2" />
-                    {t('Find a Vet', 'ابحث عن طبيب')}
-                  </Link>
-                )}
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }} className="relative">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl" style={{ aspectRatio: '4/5', maxHeight: '580px' }}>
-                <img src={HERO_MAIN} alt="Happy pet owner with golden retriever" className="w-full h-full object-cover" />
-                <div className="absolute bottom-5 left-5 bg-white/95 backdrop-blur rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3">
-                  <div className="flex -space-x-2">
-                    <img src={AVATAR1} className="w-8 h-8 rounded-full border-2 border-white object-cover" alt="" />
-                    <img src={AVATAR2} className="w-8 h-8 rounded-full border-2 border-white object-cover" alt="" />
-                    <img src={AVATAR3} className="w-8 h-8 rounded-full border-2 border-white object-cover" alt="" />
-                  </div>
-                  <div>
-                    <div className="flex text-primary text-xs">★★★★★</div>
-                    <div className="text-xs font-semibold text-foreground">4.9 · 12,000+ {t('owners', 'مالك')}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute -top-4 -right-4 w-32 h-36 rounded-2xl overflow-hidden shadow-xl border-4 border-background hidden lg:block">
-                <img src={HERO_THUMB1} alt="Dogs playing" className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute -bottom-4 -right-6 w-28 h-28 rounded-2xl overflow-hidden shadow-xl border-4 border-background hidden lg:block">
-                <img src={HERO_THUMB2} alt="Cat" className="w-full h-full object-cover" />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-          <h2 className="font-heading text-3xl font-bold text-foreground mb-3">
-            {t('Everything Your Pet Needs', 'كل ما يحتاجه حيوانك الأليف')}
-          </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            {t('Comprehensive care ecosystem designed for Saudi pet owners', 'منظومة رعاية شاملة مصممة لأصحاب الحيوانات الأليفة في المملكة')}
-          </p>
-        </motion.div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map((f, i) => {
-            const featureHref = f.to && isNavPathVisible(f.to, isAuthenticated) ? f.to : '/login';
-            const featureCard = (
-              <div className="group relative rounded-2xl overflow-hidden border border-border hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer h-full">
-                <div className="relative h-40 overflow-hidden">
-                  <img src={f.img} alt={t(f.labelEn, f.labelAr)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                  <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient} opacity-70`} />
-                  <div className="absolute inset-0 flex flex-col justify-end p-4">
-                    <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mb-2">
-                      <f.icon className="w-5 h-5 text-white" />
-                    </div>
-                    <h3 className="font-heading font-bold text-white text-lg leading-tight drop-shadow">{t(f.labelEn, f.labelAr)}</h3>
-                  </div>
-                </div>
-                <div className="bg-card p-4 flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">{t(f.descEn, f.descAr)}</p>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 ms-2" />
-                </div>
-              </div>
-            );
-            return (
-              <motion.div key={f.labelEn} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
-                {"openAssistant" in f && f.openAssistant ? (
-                  <button type="button" onClick={isAuthenticated ? openAssistant : navigateToLogin} className="block h-full w-full text-start">
-                    {featureCard}
-                  </button>
-                ) : (
-                  <Link href={featureHref} className="block h-full">
-                    {featureCard}
-                  </Link>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Trust Badges */}
-      <div className="bg-primary border-y border-primary py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 text-center">
-          {trustStats.map((item) => (
-            <div key={item.headlineEn} className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-primary-foreground/15 flex items-center justify-center">
-                <item.icon className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div className="font-heading font-bold text-primary-foreground">{t(item.headlineEn, item.headlineAr)}</div>
-              <div className="text-sm text-primary-foreground/80">{t(item.subEn, item.subAr)}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <HeroSlider />
 
       {/* Featured Hosts */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -388,6 +229,21 @@ export default function Home() {
             </Link>
           </div>
         )}
+      </div>
+
+      {/* Trust Badges */}
+      <div className="bg-primary border-y border-primary py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 text-center">
+          {trustStats.map((item) => (
+            <div key={item.headlineEn} className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary-foreground/15 flex items-center justify-center">
+                <item.icon className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div className="font-heading font-bold text-primary-foreground">{t(item.headlineEn, item.headlineAr)}</div>
+              <div className="text-sm text-primary-foreground/80">{t(item.subEn, item.subAr)}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Featured Pets */}
