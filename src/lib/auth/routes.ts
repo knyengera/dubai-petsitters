@@ -1,3 +1,8 @@
+/** Routes accessible during onboarding (authenticated but profile incomplete). */
+const ONBOARDING_EXEMPT_EXACT = new Set([
+  "/profile/complete",
+]);
+
 /** Routes that require an authenticated session. */
 const PROTECTED_EXACT = new Set([
   "/dashboard",
@@ -12,6 +17,13 @@ const PROTECTED_EXACT = new Set([
 ]);
 
 const PET_HEALTH_PATH = /^\/pets\/[^/]+\/health$/;
+
+export function isOnboardingExemptPath(pathname: string): boolean {
+  if (pathname === "/login") return true;
+  if (pathname.startsWith("/auth/callback")) return true;
+  if (ONBOARDING_EXEMPT_EXACT.has(pathname)) return true;
+  return false;
+}
 
 export function isProtectedPath(pathname: string): boolean {
   if (pathname.startsWith("/admin")) return true;

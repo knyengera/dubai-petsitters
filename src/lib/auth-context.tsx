@@ -9,6 +9,9 @@ import React, {
 } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { toE164Phone } from "@/lib/auth/onboarding";
+
+type OAuthProvider = "google" | "apple";
 
 type AuthContextValue = {
   user: User | null;
@@ -16,8 +19,20 @@ type AuthContextValue = {
   role: string | null;
   isAdmin: boolean;
   isLoadingAuth: boolean;
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (
+    email: string,
+    password: string,
+    redirectTo?: string
+  ) => Promise<{ needsEmailConfirmation: boolean }>;
+  signInWithOAuth: (provider: OAuthProvider, redirectTo: string) => Promise<void>;
+  signInWithGoogle: (redirectTo: string) => Promise<void>;
+  signInWithApple: (redirectTo: string) => Promise<void>;
+  resendVerificationEmail: () => Promise<void>;
+  sendPhoneOtp: (phone: string) => Promise<string>;
+  verifyPhoneOtp: (phone: string, token: string) => Promise<void>;
   signOut: () => Promise<void>;
   navigateToLogin: () => void;
 };
@@ -28,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -59,23 +75,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signUpWithEmail = useCallback(
-    async (email: string, password: string) => {
-      const { error } = await createClient().auth.signUp({ email, password });
+    async (email: string, password: string, redirectTo?: string) => {
+      const { data, error } = await createClient().auth.signUp({
+        email,
+        password,
+        options: redirectTo
+          ? { emailRedirectTo: redirectTo }
+          : undefined,
+      });
+      if (error) throw error;
+      const needsEmailConfirmation = !data.session;
+      return { needsEmailConfirmation };
+    },
+    []
+  );
+
+  const signInWithOAuth = useCallback(
+    async (provider: OAuthProvider, redirectTo: string) => {
+      const { error } = await createClient().auth.signInWithOAuth({
+        provider,
+        options: { redirectTo },
+      });
       if (error) throw error;
     },
     []
   );
+
+  const signInWithGoogle = useCallback(
+    (redirectTo: string) => signInWithOAuth("google", redirectTo),
+    [signInWithOAuth]
+  );
+
+  const signInWithApple = useCallback(
+    (redirectTo: string) => signInWithOAuth("apple", redirectTo),
+    [signInWithOAuth]
+  );
+
+  const resendVerificationEmail = useCallback(async () => {
+    const supabase = createClient();
+    const email = (await supabase.auth.getUser()).data.user?.email;
+    if (!email) throw new Error("No email address found.");
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+    if (error) throw error;
+  }, []);
+
+  const sendPhoneOtp = useCallback(async (phone: string) => {
+    const e164 = toE164Phone(phone);
+    const { error } = await createClient().auth.updateUser({ phone: e164 });
+    if (error) throw error;
+    return e164;
+  }, []);
+
+  const verifyPhoneOtp = useCallback(async (phone: string, token: string) => {
+    const e164 = toE164Phone(phone);
+    const { error } = await createClient().auth.verifyOtp({
+      phone: e164,
+      token,
+      type: "phone_change",
+    });
+    if (error) throw error;
+  }, []);
 
   const signOut = useCallback(async () => {
     await createClient().auth.signOut();
   }, []);
 
   const navigateToLogin = useCallback(() => {
-    window.location.href = "/login";
+    const next =
+      typeof window !== "undefined"
+        ? encodeURIComponent(
+            window.location.pathname + window.location.search
+          )
+        : "";
+    window.location.href = next ? `/login?next=${next}` : "/login";
   }, []);
 
   const role = (user?.app_metadata?.role as string) ?? null;
   const isAdmin = role === "admin";
+  const isEmailVerified = !!user?.email_confirmed_at;
+  const isPhoneVerified = !!user?.phone_confirmed_at;
 
   return (
     <AuthContext.Provider
@@ -85,8 +166,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role,
         isAdmin,
         isLoadingAuth,
+        isEmailVerified,
+        isPhoneVerified,
         signInWithEmail,
         signUpWithEmail,
+        signInWithOAuth,
+        signInWithGoogle,
+        signInWithApple,
+        resendVerificationEmail,
+        sendPhoneOtp,
+        verifyPhoneOtp,
         signOut,
         navigateToLogin,
       }}
