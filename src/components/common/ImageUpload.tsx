@@ -1,42 +1,91 @@
 "use client";
 
-import { useState, useRef } from 'react';
-import { base44 } from "@/lib/data";
-import { Upload, X, Loader2, ImageIcon } from 'lucide-react';
+import { useState, useRef } from "react";
+import { Upload, X, Loader2, ImageIcon } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/auth-context";
+import {
+  uploadAppFile,
+  type UploadBucket,
+  type UploadCategory,
+} from "@/lib/storage/upload";
 
-/**
- * Reusable image upload component.
- * Props:
- *  - value: current image URL (string)
- *  - onChange: called with the uploaded file URL
- *  - label: optional label text
- *  - className: wrapper class
- *  - variant: 'square' (default) | 'circle' | 'wide'
- */
-export default function ImageUpload({ value, onChange, label = 'Upload Image', className = '', variant = 'square' }) {
+type ImageUploadProps = {
+  value: string;
+  onChange: (url: string) => void;
+  category: UploadCategory;
+  label?: string;
+  className?: string;
+  variant?: "square" | "circle" | "wide";
+  bucket?: UploadBucket;
+  uploadLabel?: string;
+};
+
+export default function ImageUpload({
+  value,
+  onChange,
+  category,
+  label = "Upload Image",
+  className = "",
+  variant = "square",
+  bucket = "public-uploads",
+  uploadLabel,
+}: ImageUploadProps) {
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = async (e) => {
-    const file = e.target.files[0];
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to upload images.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
-    const res = await base44.integrations.Core.UploadFile({ file });
-    onChange(res.file_url);
-    setUploading(false);
+    try {
+      const url = await uploadAppFile(
+        bucket,
+        file,
+        user.id,
+        category,
+        uploadLabel ?? category
+      );
+      onChange(url);
+    } catch (err) {
+      toast({
+        title: "Upload failed",
+        description: err instanceof Error ? err.message : "Could not upload image",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
   };
 
   const shapeClass = {
-    circle: 'rounded-full w-24 h-24',
-    square: 'rounded-2xl w-24 h-24',
-    wide: 'rounded-2xl w-full h-40',
+    circle: "rounded-full w-24 h-24",
+    square: "rounded-2xl w-24 h-24",
+    wide: "rounded-2xl w-full h-40",
   }[variant];
+
+  const disabled = uploading || !user;
 
   return (
     <div className={`flex flex-col items-center gap-2 ${className}`}>
       <div
-        className={`relative overflow-hidden border-2 border-dashed border-border bg-muted flex items-center justify-center cursor-pointer hover:border-primary/60 transition-colors ${shapeClass}`}
-        onClick={() => !uploading && inputRef.current?.click()}
+        className={`relative overflow-hidden border-2 border-dashed border-border bg-muted flex items-center justify-center transition-colors ${shapeClass} ${
+          disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary/60"
+        }`}
+        onClick={() => !disabled && inputRef.current?.click()}
       >
         {uploading ? (
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -50,7 +99,7 @@ export default function ImageUpload({ value, onChange, label = 'Upload Image', c
         ) : (
           <div className="flex flex-col items-center gap-1 text-muted-foreground p-3 text-center">
             <ImageIcon className="w-6 h-6" />
-            {variant !== 'circle' && <span className="text-[10px]">Click to upload</span>}
+            {variant !== "circle" && <span className="text-[10px]">Click to upload</span>}
           </div>
         )}
       </div>
@@ -58,15 +107,16 @@ export default function ImageUpload({ value, onChange, label = 'Upload Image', c
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={() => !uploading && inputRef.current?.click()}
-          className="text-xs font-medium text-primary hover:underline"
+          onClick={() => !disabled && inputRef.current?.click()}
+          disabled={disabled}
+          className="text-xs font-medium text-primary hover:underline disabled:opacity-60"
         >
-          {value ? 'Change' : label}
+          {value ? "Change" : label}
         </button>
         {value && (
           <button
             type="button"
-            onClick={() => onChange('')}
+            onClick={() => onChange("")}
             className="text-xs text-muted-foreground hover:text-destructive"
           >
             <X className="w-3 h-3" />
@@ -74,7 +124,14 @@ export default function ImageUpload({ value, onChange, label = 'Upload Image', c
         )}
       </div>
 
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+        disabled={disabled}
+      />
     </div>
   );
 }

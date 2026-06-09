@@ -26,11 +26,10 @@ export const integrations = {
         ? { success: true }
         : { success: false, error: result.error };
     },
-    async UploadFile({ file }: { file: File }) {
-      console.warn(
-        "[integrations.Core.UploadFile] Not configured — use Supabase Storage."
+    async UploadFile() {
+      throw new Error(
+        "UploadFile is deprecated. Use uploadAppFile from @/lib/storage/upload or the ImageUpload component."
       );
-      return { file_url: URL.createObjectURL(file) };
     },
     async InvokeLLM(_payload: { prompt: string }) {
       if (typeof window !== "undefined") {

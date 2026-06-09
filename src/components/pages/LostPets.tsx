@@ -201,6 +201,7 @@ export default function LostPets() {
                     onChange={(url) =>
                       setForm((f) => ({ ...f, photo_url: url }))
                     }
+                    category="lost-pets"
                     label="Upload Pet Photo"
                     variant="square"
                   />

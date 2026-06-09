@@ -33,7 +33,7 @@ import {
   syncPhoneVerified,
   type ProfileDetailsInput,
 } from "@/lib/profile/actions";
-import { uploadUserFile } from "@/lib/storage/upload";
+import { uploadAppFile } from "@/lib/storage/upload";
 import { createClient } from "@/lib/supabase/client";
 
 type Step = "legal" | "profile" | "email" | "phone";
@@ -113,6 +113,23 @@ export default function ProfileCompletionWizard() {
     }
     if (user) loadProfile();
   }, [user, isLoadingAuth, router, loadProfile]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const oauthAvatar =
+      (typeof user.user_metadata?.avatar_url === "string"
+        ? user.user_metadata.avatar_url
+        : undefined) ||
+      (typeof user.user_metadata?.picture === "string"
+        ? user.user_metadata.picture
+        : undefined);
+
+    if (oauthAvatar) {
+      setForm((f) => (f.avatar_url ? f : { ...f, avatar_url: oauthAvatar }));
+      setAvatarPreview((prev) => prev ?? oauthAvatar);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!user || isLoadingAuth) return;
@@ -200,19 +217,30 @@ export default function ProfileCompletionWizard() {
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    if (!avatarFile && !form.avatar_url.trim()) {
+      toast({ title: "Profile photo is required.", variant: "destructive" });
+      return;
+    }
+    if (!idDocFile && !form.id_document_path.trim()) {
+      toast({ title: "ID document upload is required.", variant: "destructive" });
+      return;
+    }
+
     setLoading(true);
     try {
       let avatarUrl = form.avatar_url;
       let idDocumentPath = form.id_document_path;
 
       if (avatarFile) {
-        avatarUrl = await uploadUserFile("avatars", avatarFile, user.id, "avatar");
+        avatarUrl = await uploadAppFile("avatars", avatarFile, user.id, "avatar", "avatar");
       }
       if (idDocFile) {
-        idDocumentPath = await uploadUserFile(
+        idDocumentPath = await uploadAppFile(
           "kyc-documents",
           idDocFile,
           user.id,
+          "id-document",
           "id-document"
         );
       }
@@ -408,6 +436,7 @@ export default function ProfileCompletionWizard() {
               id="avatar-input"
               type="file"
               accept="image/*"
+              required={!form.avatar_url}
               className="hidden"
               onChange={handleAvatarChange}
             />

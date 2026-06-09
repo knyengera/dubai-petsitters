@@ -249,7 +249,7 @@ export default function AdminHosts() {
               </div>
               <div className="col-span-2 flex flex-col items-center">
                 <Label className="mb-2 block self-start">Host Photo</Label>
-                <ImageUpload value={form.photo_url} onChange={(url) => setForm((f) => ({ ...f, photo_url: url }))} label="Upload Host Photo" variant="wide" className="w-full" />
+                <ImageUpload value={form.photo_url} onChange={(url) => setForm((f) => ({ ...f, photo_url: url }))} category="hosts" label="Upload Host Photo" variant="wide" className="w-full" />
               </div>
               <CheckboxField id="has-yard" label="Has Yard" checked={form.has_yard} onChange={(checked) => setForm((f) => ({ ...f, has_yard: checked }))} />
               <CheckboxField id="non-smoking" label="Non-Smoking" checked={form.non_smoking} onChange={(checked) => setForm((f) => ({ ...f, non_smoking: checked }))} />

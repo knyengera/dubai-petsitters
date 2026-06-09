@@ -22,6 +22,9 @@ import {
   type BlogPostFormValues,
 } from "@/lib/blog/types";
 import { slugify } from "@/lib/blog/utils";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/components/ui/use-toast";
+import { uploadAppFile } from "@/lib/storage/upload";
 
 type BlogPostEditorFormProps = {
   form: BlogPostFormValues;
@@ -38,6 +41,8 @@ export default function BlogPostEditorForm({
   saving = false,
   submitLabel = "Save Post",
 }: BlogPostEditorFormProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [slugTouched, setSlugTouched] = useState(Boolean(form.slug));
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [editorImageHandler, setEditorImageHandler] = useState<
@@ -57,13 +62,29 @@ export default function BlogPostEditorForm({
   };
 
   const handleImageUpload = async (file: File) => {
-    const { base44 } = await import("@/lib/data");
-    const res = await base44.integrations.Core.UploadFile({ file });
-    if (editorImageHandler) {
-      editorImageHandler(res.file_url);
-      setEditorImageHandler(null);
-    } else {
-      update({ cover_image: res.file_url });
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to upload images.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const url = await uploadAppFile("public-uploads", file, user.id, "blog", "inline");
+      if (editorImageHandler) {
+        editorImageHandler(url);
+        setEditorImageHandler(null);
+      } else {
+        update({ cover_image: url });
+      }
+    } catch (err) {
+      toast({
+        title: "Upload failed",
+        description: err instanceof Error ? err.message : "Could not upload image",
+        variant: "destructive",
+      });
     }
   };
 
@@ -215,6 +236,7 @@ export default function BlogPostEditorForm({
             <ImageUpload
               value={form.cover_image}
               onChange={(url) => update({ cover_image: url })}
+              category="blog"
               label="Cover image"
               variant="wide"
               className="w-full"

@@ -29,7 +29,7 @@ const FIELDS: AdminRecordField[] = [
   { key: "description", label: "Description", type: "textarea", className: "col-span-2" },
   { key: "partner_name", label: "Partner" },
   { key: "discount", label: "Discount" },
-  { key: "image_url", label: "Image", type: "image", hideInView: true },
+  { key: "image_url", label: "Image", type: "image", hideInView: true, uploadCategory: "partners" },
   { key: "link_url", label: "Link URL" },
   { key: "is_active", label: "Active", type: "checkbox" },
 ];

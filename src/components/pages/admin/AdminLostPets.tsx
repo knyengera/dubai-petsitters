@@ -19,7 +19,7 @@ const FIELDS: AdminRecordField[] = [
   { key: "species", label: "Species" },
   { key: "breed", label: "Breed" },
   { key: "description", label: "Description", type: "textarea", className: "col-span-2" },
-  { key: "image_url", label: "Photo", type: "image", hideInView: true },
+  { key: "image_url", label: "Photo", type: "image", hideInView: true, uploadCategory: "lost-pets" },
   { key: "last_seen_location", label: "Last Seen Location" },
   { key: "last_seen_date", label: "Last Seen Date", type: "date" },
   { key: "contact_name", label: "Contact Name" },

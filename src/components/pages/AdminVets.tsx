@@ -287,7 +287,7 @@ export default function AdminVets() {
               </div>
               <div className="col-span-2 flex flex-col items-center">
                 <Label className="mb-2 block self-start">Clinic Photo</Label>
-                <ImageUpload value={form.image_url} onChange={(url) => setForm((f) => ({ ...f, image_url: url }))} label="Upload Clinic Photo" variant="wide" className="w-full" />
+                <ImageUpload value={form.image_url} onChange={(url) => setForm((f) => ({ ...f, image_url: url }))} category="vets" label="Upload Clinic Photo" variant="wide" className="w-full" />
               </div>
               <div className="flex items-center gap-2 rounded-xl border border-border p-3">
                 <input type="checkbox" id="emergency" checked={form.emergency_available} onChange={(e) => setForm((f) => ({ ...f, emergency_available: e.target.checked }))} />

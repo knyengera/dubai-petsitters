@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/common/ImageUpload";
 import type { Row } from "@/lib/admin/tables";
+import type { UploadBucket, UploadCategory } from "@/lib/storage/upload";
 
 export type AdminRecordField = {
   key: string;
@@ -22,6 +23,8 @@ export type AdminRecordField = {
   hideInView?: boolean;
   placeholder?: string;
   className?: string;
+  uploadCategory?: UploadCategory;
+  uploadBucket?: UploadBucket;
 };
 
 type AdminRecordViewDialogProps = {
@@ -234,6 +237,8 @@ function FieldInput({
         <ImageUpload
           value={String(value)}
           onChange={(url) => onChange(url)}
+          category={field.uploadCategory ?? "pets"}
+          bucket={field.uploadBucket ?? "public-uploads"}
           label={field.placeholder ?? "Upload Image"}
           variant="wide"
           className="w-full"

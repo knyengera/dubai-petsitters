@@ -1,7 +1,5 @@
 "use client";
 
-import { base44 } from "@/lib/data";
-
 import React, { useState } from 'react';
 import { entities } from '@/lib/data/entities';
 import { Button } from '@/components/ui/button';
@@ -10,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/lib/auth-context';
+import { uploadAppFile } from '@/lib/storage/upload';
 import { CheckCircle, Upload, Home, Sun, Dog, Footprints, Star, Users, DollarSign, Shield, Loader2 } from 'lucide-react';
 
 const perks = [
@@ -28,6 +28,7 @@ const serviceOptions = [
 
 export default function BecomeHost() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
@@ -59,25 +60,37 @@ export default function BecomeHost() {
       toast({ title: 'Please select at least one service', variant: 'destructive' });
       return;
     }
-    setLoading(true);
-    let photo_url = null;
-    if (photoFile) {
-      const res = await base44.integrations.Core.UploadFile({ file: photoFile });
-      photo_url = res.file_url;
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'Please sign in to submit a host application.', variant: 'destructive' });
+      return;
     }
-    await entities.PetHost.create({
-      ...form,
-      photo_url,
-      services: selectedServices,
-      price_per_night: parseFloat(form.price_per_night) || null,
-      price_per_day: parseFloat(form.price_per_day) || null,
-      languages: form.languages ? form.languages.split(',').map(l => l.trim()) : [],
-      accepted_pet_types: form.accepted_pet_types ? form.accepted_pet_types.split(',').map(p => p.trim()) : [],
-      is_available: true,
-    });
-    toast({ title: 'Application submitted!' });
-    setLoading(false);
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      let photo_url = null;
+      if (photoFile) {
+        photo_url = await uploadAppFile("public-uploads", photoFile, user.id, "hosts", "profile");
+      }
+      await entities.PetHost.create({
+        ...form,
+        photo_url,
+        services: selectedServices,
+        price_per_night: parseFloat(form.price_per_night) || null,
+        price_per_day: parseFloat(form.price_per_day) || null,
+        languages: form.languages ? form.languages.split(',').map(l => l.trim()) : [],
+        accepted_pet_types: form.accepted_pet_types ? form.accepted_pet_types.split(',').map(p => p.trim()) : [],
+        is_available: true,
+      });
+      toast({ title: 'Application submitted!' });
+      setSubmitted(true);
+    } catch (err) {
+      toast({
+        title: 'Submission failed',
+        description: err instanceof Error ? err.message : 'Could not submit application',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {

@@ -210,7 +210,7 @@ export default function PetProfiles() {
               </div>
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="flex justify-center">
-                  <ImageUpload value={form.photo_url} onChange={url => setForm(f => ({ ...f, photo_url: url }))} label="Upload Pet Photo" variant="circle" />
+                  <ImageUpload value={form.photo_url} onChange={url => setForm(f => ({ ...f, photo_url: url }))} category="pets" label="Upload Pet Photo" variant="circle" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><Label>{t('Name', 'الاسم')} *</Label><Input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="rounded-xl mt-1" /></div>

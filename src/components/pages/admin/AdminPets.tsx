@@ -42,7 +42,7 @@ const FIELDS: AdminRecordField[] = [
   { key: "gender", label: "Gender", type: "select", options: ["male", "female"] },
   { key: "size", label: "Size", type: "select", options: ["small", "medium", "large"] },
   { key: "description", label: "Description", type: "textarea", className: "col-span-2" },
-  { key: "image_url", label: "Photo", type: "image", hideInView: true },
+  { key: "image_url", label: "Photo", type: "image", hideInView: true, uploadCategory: "pets" },
   { key: "location", label: "Location" },
   { key: "vaccinated", label: "Vaccinated", type: "checkbox" },
   { key: "neutered", label: "Neutered", type: "checkbox" },
@@ -133,7 +133,7 @@ export default function AdminPets() {
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4">
             <div className="flex justify-center">
-              <ImageUpload value={form.image_url} onChange={(url) => setForm((f) => ({ ...f, image_url: url }))} label="Pet Photo" variant="square" />
+              <ImageUpload value={form.image_url} onChange={(url) => setForm((f) => ({ ...f, image_url: url }))} category="pets" label="Pet Photo" variant="square" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
