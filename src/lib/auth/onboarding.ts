@@ -110,9 +110,33 @@ export function validatePassport(idNumber: string): boolean {
 
 export function toE164Phone(phone: string, defaultCountryCode = "+966"): string {
   const trimmed = phone.trim();
-  if (trimmed.startsWith("+")) return trimmed;
+  if (!trimmed) return defaultCountryCode;
+
+  if (trimmed.startsWith("+")) {
+    const digits = trimmed.slice(1).replace(/\D/g, "");
+    return digits ? `+${digits}` : defaultCountryCode;
+  }
+
   const digits = trimmed.replace(/\D/g, "");
+  if (!digits) return defaultCountryCode;
+
   if (digits.startsWith("966")) return `+${digits}`;
   if (digits.startsWith("0")) return `${defaultCountryCode}${digits.slice(1)}`;
+  if (/^5\d{8}$/.test(digits)) return `${defaultCountryCode}${digits}`;
+  if (digits.length >= 10) return `+${digits}`;
+
   return `${defaultCountryCode}${digits}`;
+}
+
+export function sanitizePhoneInput(value: string): string {
+  const trimmed = value.trimStart();
+  if (trimmed.startsWith("+")) {
+    return `+${trimmed.slice(1).replace(/\D/g, "")}`;
+  }
+  return trimmed.replace(/\D/g, "");
+}
+
+export function isValidE164Phone(phone: string): boolean {
+  const e164 = toE164Phone(phone);
+  return /^\+\d{8,15}$/.test(e164);
 }

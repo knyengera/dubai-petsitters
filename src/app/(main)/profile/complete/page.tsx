@@ -4,9 +4,9 @@ import ProfileCompletionWizard from "@/components/profile/ProfileCompletionWizar
 export default function ProfileCompletePage() {
   return (
     <div
-      className="mx-auto max-w-3xl px-4 py-8"
+      className="mx-auto mt-10 max-w-3xl px-4 py-8 lg:mt-14"
       style={{
-        paddingTop: "calc(1rem + env(safe-area-inset-top))",
+        paddingTop: "calc(5rem + env(safe-area-inset-top))",
         paddingBottom: "calc(2rem + env(safe-area-inset-bottom))",
       }}
     >

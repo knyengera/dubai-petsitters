@@ -36,6 +36,7 @@ type AuthContextValue = {
   signInWithApple: (redirectTo: string) => Promise<void>;
   resendVerificationEmail: () => Promise<void>;
   sendPhoneOtp: (phone: string) => Promise<string>;
+  resendPhoneOtp: (phone: string) => Promise<string>;
   verifyPhoneOtp: (phone: string, token: string) => Promise<void>;
   signOut: () => Promise<void>;
   navigateToLogin: () => void;
@@ -146,14 +147,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return e164;
   }, []);
 
+  const resendPhoneOtp = useCallback(async (phone: string) => {
+    const e164 = toE164Phone(phone);
+    const supabase = createClient();
+    const { error: resendError } = await supabase.auth.resend({
+      type: "phone_change",
+      phone: e164,
+    });
+    if (!resendError) return e164;
+
+    const { error: updateError } = await supabase.auth.updateUser({ phone: e164 });
+    if (updateError) throw updateError;
+    return e164;
+  }, []);
+
   const verifyPhoneOtp = useCallback(async (phone: string, token: string) => {
     const e164 = toE164Phone(phone);
-    const { error } = await createClient().auth.verifyOtp({
+    const supabase = createClient();
+
+    const { error: phoneChangeError } = await supabase.auth.verifyOtp({
       phone: e164,
       token,
       type: "phone_change",
     });
-    if (error) throw error;
+    if (!phoneChangeError) return;
+
+    const { error: smsError } = await supabase.auth.verifyOtp({
+      phone: e164,
+      token,
+      type: "sms",
+    });
+    if (smsError) throw smsError;
   }, []);
 
   const signOut = useCallback(async () => {
@@ -192,6 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithApple,
         resendVerificationEmail,
         sendPhoneOtp,
+        resendPhoneOtp,
         verifyPhoneOtp,
         signOut,
         navigateToLogin,

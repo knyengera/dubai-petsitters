@@ -3,11 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   isAdminPath,
   isAdminRole,
+  isGuestOnlyPath,
   isOnboardingExemptPath,
   isProtectedPath,
 } from "@/lib/auth/routes";
 import {
   isOnboardingComplete,
+  resolvePostAuthRedirect,
   type ProfileRow,
 } from "@/lib/auth/onboarding";
 import { getSupabasePublicKey, getSupabaseUrl } from "@/lib/supabase/env";
@@ -49,6 +51,28 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
+
+  if (user && isGuestOnlyPath(pathname)) {
+    const next = request.nextUrl.searchParams.get("next");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select(
+        "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version"
+      )
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const redirectPath = resolvePostAuthRedirect(
+      user,
+      profile as ProfileRow | null,
+      next
+    );
+    const redirectResponse = NextResponse.redirect(
+      new URL(redirectPath, request.url)
+    );
+    copyCookies(supabaseResponse, redirectResponse);
+    return redirectResponse;
+  }
 
   if (isProtectedPath(pathname) && !user) {
     const loginUrl = request.nextUrl.clone();

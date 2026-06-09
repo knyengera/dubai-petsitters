@@ -22,7 +22,10 @@ import {
   hasLegalAcceptance,
   hasProfileDetails,
   isOnboardingComplete,
+  isValidE164Phone,
   resolvePostAuthRedirect,
+  sanitizePhoneInput,
+  toE164Phone,
 } from "@/lib/auth/onboarding";
 import LegalAcceptanceCheckbox from "@/components/legal/LegalAcceptanceCheckbox";
 import { PENDING_LEGAL_ACCEPTANCE_KEY } from "@/lib/legal/constants";
@@ -57,6 +60,7 @@ export default function ProfileCompletionWizard() {
     isPhoneVerified,
     resendVerificationEmail,
     sendPhoneOtp,
+    resendPhoneOtp,
     verifyPhoneOtp,
   } = useAuth();
 
@@ -99,7 +103,7 @@ export default function ProfileCompletionWizard() {
           id_document_path: profile.id_document_path ?? "",
         });
         if (profile.avatar_url) setAvatarPreview(profile.avatar_url);
-        if (profile.phone) setPhone(profile.phone.replace(/^\+966/, ""));
+        if (profile.phone) setPhone(profile.phone);
       }
     } catch {
       // Profile may not exist yet for new users
@@ -293,12 +297,25 @@ export default function ProfileCompletionWizard() {
       toast({ title: "Enter your phone number", variant: "destructive" });
       return;
     }
+    if (!isValidE164Phone(phone)) {
+      toast({
+        title: "Invalid phone number",
+        description: "Include your country code, e.g. +966 5XX XXX XXXX or +1 555 123 4567.",
+        variant: "destructive",
+      });
+      return;
+    }
     setLoading(true);
     try {
-      const e164 = await sendPhoneOtp(phone);
+      const e164 = otpSent
+        ? await resendPhoneOtp(phone)
+        : await sendPhoneOtp(phone);
       setVerifiedPhone(e164);
       setOtpSent(true);
-      toast({ title: "Verification code sent" });
+      toast({
+        title: otpSent ? "Verification code resent" : "Verification code sent",
+        description: `Check SMS for ${toE164Phone(phone)}`,
+      });
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Failed to send code",
@@ -310,8 +327,15 @@ export default function ProfileCompletionWizard() {
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp.trim()) {
-      toast({ title: "Enter the verification code", variant: "destructive" });
+    if (!otpSent) {
+      toast({
+        title: "Send a verification code first",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!otp.trim() || otp.length < 6) {
+      toast({ title: "Enter the 6-digit verification code", variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -344,7 +368,7 @@ export default function ProfileCompletionWizard() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-lg space-y-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <div className="text-center">
         <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
           <Shield className="h-7 w-7 text-primary-foreground" />
@@ -355,7 +379,7 @@ export default function ProfileCompletionWizard() {
         </p>
       </div>
 
-      <div className="flex justify-center gap-2">
+      <div className="flex w-full flex-wrap justify-center gap-2">
         {STEPS.map((s, i) => {
           const Icon = s.icon;
           const isActive = s.id === step;
@@ -364,7 +388,7 @@ export default function ProfileCompletionWizard() {
           return (
             <div
               key={s.id}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap ${
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : isDone
@@ -373,11 +397,11 @@ export default function ProfileCompletionWizard() {
               }`}
             >
               {isDone ? (
-                <CheckCircle className="h-3.5 w-3.5" />
+                <CheckCircle className="h-3.5 w-3.5 shrink-0" />
               ) : (
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-3.5 w-3.5 shrink-0" />
               )}
-              <span className="hidden sm:inline">{s.label}</span>
+              <span>{s.label}</span>
             </div>
           );
         })}
@@ -641,64 +665,94 @@ export default function ProfileCompletionWizard() {
             </div>
           ) : (
             <>
+              <p className="text-center text-sm text-muted-foreground">
+                Enter your mobile number with country code. We&apos;ll text you a
+                6-digit code to verify it.
+              </p>
+
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone number *</Label>
-                <div className="flex gap-2">
-                  <span className="flex h-10 items-center rounded-xl border border-input bg-muted px-3 text-sm text-muted-foreground">
-                    +966
-                  </span>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                    placeholder="5XXXXXXXX"
-                    className="rounded-xl"
-                    disabled={otpSent}
-                  />
-                </div>
+                <Input
+                  id="phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(sanitizePhoneInput(e.target.value))}
+                  placeholder="+966 5XX XXX XXXX or +1 555 123 4567"
+                  className="rounded-xl"
+                  disabled={loading}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Saudi numbers can be entered as 5XXXXXXXX — we&apos;ll add +966
+                  automatically.
+                </p>
               </div>
 
-              {!otpSent ? (
-                <Button
-                  className="w-full rounded-xl"
-                  onClick={handleSendOtp}
-                  disabled={loading}
+              <Button
+                type="button"
+                variant={otpSent ? "outline" : "default"}
+                className="w-full rounded-xl"
+                onClick={handleSendOtp}
+                disabled={loading || !phone.trim()}
+              >
+                {loading
+                  ? "Sending…"
+                  : otpSent
+                    ? "Resend verification code"
+                    : "Send verification code"}
+              </Button>
+
+              {otpSent ? (
+                <p className="text-center text-xs text-muted-foreground">
+                  Code sent to {toE164Phone(verifiedPhone || phone)}
+                </p>
+              ) : null}
+
+              <div className="space-y-2">
+                <Label htmlFor="otp">Verification code *</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  placeholder={otpSent ? "Enter 6-digit code" : "Send code first"}
+                  maxLength={6}
+                  className="rounded-xl text-center text-lg tracking-widest"
+                  disabled={!otpSent || loading}
+                />
+                {!otpSent ? (
+                  <p className="text-xs text-muted-foreground">
+                    Tap &quot;Send verification code&quot; above, then enter the code
+                    from your SMS here.
+                  </p>
+                ) : null}
+              </div>
+
+              <Button
+                type="button"
+                className="w-full rounded-xl"
+                onClick={handleVerifyOtp}
+                disabled={loading || !otpSent || otp.length < 6}
+              >
+                {loading ? "Verifying…" : "Verify phone"}
+              </Button>
+
+              {otpSent ? (
+                <button
+                  type="button"
+                  className="w-full text-sm text-primary hover:underline"
+                  onClick={() => {
+                    setOtpSent(false);
+                    setOtp("");
+                    setVerifiedPhone("");
+                  }}
                 >
-                  {loading ? "Sending…" : "Send verification code"}
-                </Button>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="otp">Verification code</Label>
-                    <Input
-                      id="otp"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                      placeholder="6-digit code"
-                      maxLength={6}
-                      className="rounded-xl text-center text-lg tracking-widest"
-                    />
-                  </div>
-                  <Button
-                    className="w-full rounded-xl"
-                    onClick={handleVerifyOtp}
-                    disabled={loading}
-                  >
-                    {loading ? "Verifying…" : "Verify phone"}
-                  </Button>
-                  <button
-                    type="button"
-                    className="w-full text-sm text-primary hover:underline"
-                    onClick={() => {
-                      setOtpSent(false);
-                      setOtp("");
-                    }}
-                  >
-                    Use a different number
-                  </button>
-                </>
-              )}
+                  Use a different number
+                </button>
+              ) : null}
             </>
           )}
         </div>

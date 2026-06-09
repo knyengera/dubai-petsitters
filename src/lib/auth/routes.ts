@@ -1,3 +1,6 @@
+/** Auth pages only for signed-out users. */
+const GUEST_ONLY_EXACT = new Set(["/login"]);
+
 /** Routes accessible during onboarding (authenticated but profile incomplete). */
 const ONBOARDING_EXEMPT_EXACT = new Set([
   "/profile/complete",
@@ -17,6 +20,10 @@ const PROTECTED_EXACT = new Set([
 ]);
 
 const PET_HEALTH_PATH = /^\/pets\/[^/]+\/health$/;
+
+export function isGuestOnlyPath(pathname: string): boolean {
+  return GUEST_ONLY_EXACT.has(pathname);
+}
 
 export function isOnboardingExemptPath(pathname: string): boolean {
   if (pathname === "/login") return true;
