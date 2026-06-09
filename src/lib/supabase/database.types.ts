@@ -41,9 +41,78 @@ export interface Database {
       vet_subscriptions: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       reviews: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       profiles: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      platform_fee_settings: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      escrow_accounts: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      ledger_entries: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      host_balances: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      host_payout_requests: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      monetisation_quote_booking: {
+        Args: {
+          p_host_id: string;
+          p_service_type: string;
+          p_start_date: string;
+          p_end_date?: string | null;
+          p_currency?: string;
+        };
+        Returns: Json;
+      };
+      monetisation_create_hosting_booking: {
+        Args: {
+          p_host_id: string;
+          p_service_type: string;
+          p_start_date: string;
+          p_end_date?: string | null;
+          p_pet_name: string;
+          p_pet_type: string;
+          p_owner_name: string;
+          p_owner_email: string;
+          p_owner_phone?: string | null;
+          p_city?: string | null;
+          p_special_instructions?: string | null;
+          p_payment_provider?: string;
+          p_idempotency_key?: string | null;
+        };
+        Returns: Json;
+      };
+      monetisation_capture_booking_payment: {
+        Args: {
+          p_booking_id: string;
+          p_provider_payment_id?: string | null;
+          p_idempotency_key?: string | null;
+        };
+        Returns: Json;
+      };
+      monetisation_mark_booking_completed: {
+        Args: { p_booking_id: string };
+        Returns: Json;
+      };
+      monetisation_release_escrow: {
+        Args: { p_booking_id: string };
+        Returns: Json;
+      };
+      monetisation_request_host_payout: {
+        Args: {
+          p_host_id: string;
+          p_gross_amount: number;
+          p_payment_provider?: string;
+          p_notes?: string | null;
+          p_idempotency_key?: string | null;
+        };
+        Returns: Json;
+      };
+      monetisation_admin_update_payout_status: {
+        Args: {
+          p_payout_id: string;
+          p_status: string;
+          p_admin_notes?: string | null;
+          p_provider_payout_id?: string | null;
+        };
+        Returns: Json;
+      };
+    };
     Enums: Record<string, never>;
   };
 }

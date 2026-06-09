@@ -16,6 +16,9 @@ import {
   CreditCard,
   Star,
   Receipt,
+  Percent,
+  Lock,
+  BookOpenCheck,
 } from "lucide-react";
 
 export type AdminNavItem = {
@@ -130,6 +133,34 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     href: "/admin/payments",
     icon: CreditCard,
     description: "Payment records",
+    group: "commerce",
+  },
+  {
+    label: "Platform Fees",
+    href: "/admin/fees",
+    icon: Percent,
+    description: "Guest and host payout fees",
+    group: "commerce",
+  },
+  {
+    label: "Escrow",
+    href: "/admin/escrow",
+    icon: Lock,
+    description: "Held funds and releases",
+    group: "commerce",
+  },
+  {
+    label: "Payouts",
+    href: "/admin/payouts",
+    icon: Receipt,
+    description: "Host withdrawal requests",
+    group: "commerce",
+  },
+  {
+    label: "Ledger",
+    href: "/admin/ledger",
+    icon: BookOpenCheck,
+    description: "Financial audit trail",
     group: "commerce",
   },
   {

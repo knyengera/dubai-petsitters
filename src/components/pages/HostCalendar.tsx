@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { format, isSameDay, parseISO, isBefore, startOfToday } from 'date-fns';
 import { CalendarX, DollarSign, Loader2, Trash2, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import BookingTimeline from '@/components/host/BookingTimeline';
+import HostEarningsPanel from '@/components/host/HostEarningsPanel';
+import { getHostBalance } from '@/lib/monetisation/actions';
 
 const today = startOfToday();
 
@@ -48,6 +50,15 @@ export default function HostCalendar() {
   const { data: bookings = [] } = useQuery({
     queryKey: ['host-bookings', hostProfile?.id],
     queryFn: () => entities.HostingBooking.filter({ host_id: hostProfile.id }, '-start_date', 100),
+    enabled: !!hostProfile?.id,
+  });
+
+  const { data: hostBalance, refetch: refetchBalance } = useQuery({
+    queryKey: ['host-balance', hostProfile?.id],
+    queryFn: async () => {
+      const result = await getHostBalance(hostProfile.id);
+      return result.ok ? result.data : null;
+    },
     enabled: !!hostProfile?.id,
   });
 
@@ -268,8 +279,13 @@ export default function HostCalendar() {
             )}
           </div>
 
-          {/* Right — Timeline */}
-          <div>
+          {/* Right — Timeline + Earnings */}
+          <div className="space-y-5">
+            <HostEarningsPanel
+              hostId={hostProfile.id}
+              balance={hostBalance}
+              onUpdated={() => refetchBalance()}
+            />
             <button
               onClick={() => setShowTimeline(v => !v)}
               className="w-full flex items-center justify-between p-4 bg-card border border-border rounded-2xl mb-3"

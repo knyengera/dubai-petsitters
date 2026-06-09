@@ -17,6 +17,9 @@ import { Star, MapPin, Clock, CheckCircle, ArrowLeft, Home, Sun, Dog, Footprints
 import PhotoGallery from '@/components/common/PhotoGallery';
 import StartChatButton from '@/components/messaging/StartChatButton';
 import ReviewsList from '@/components/reviews/ReviewsList';
+import { createHostingBookingWithEscrow, captureBookingPayment } from '@/lib/monetisation/actions';
+import { quoteToSummary } from '@/lib/monetisation/pricing';
+import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
 
 const serviceLabels = {
   boarding: 'Boarding', daycare: 'Daycare',
@@ -31,7 +34,7 @@ export default function HostDetail() {
   const [loading, setLoading] = useState(false);
   const [booked, setBooked] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
-  const [pendingBooking, setPendingBooking] = useState(null);
+  const [bookingId, setBookingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     pet_name: '', pet_type: '', service_type: '', start_date: '', end_date: '',
     owner_name: '', owner_email: '', owner_phone: '', special_instructions: '',
@@ -54,56 +57,66 @@ export default function HostDetail() {
     }
   }, [host]);
 
-  const calcFee = () => {
-    if (!host) return { base: 0, fee: 0, total: 0 };
-    const pricePerUnit = host.price_per_night || host.price_per_day || 0;
-    let nights = 1;
-    if (form.start_date && form.end_date) {
-      const diff = (new Date(form.end_date) - new Date(form.start_date)) / (1000 * 60 * 60 * 24);
-      nights = Math.max(1, diff);
-    }
-    const base = pricePerUnit * nights;
-    const fee = parseFloat((base * 0.1).toFixed(2));
-    const total = parseFloat((base + fee).toFixed(2));
-    return { base, fee, total, nights };
-  };
+  const { quote, loading: quoteLoading, error: quoteError } = useHostingBookingQuote({
+    hostId: host?.id,
+    serviceType: form.service_type,
+    startDate: form.start_date,
+    endDate: form.end_date,
+    enabled: !!host?.id,
+  });
 
   const handleBook = async (e) => {
     e.preventDefault();
-    setPendingBooking({ ...form });
+    if (!quote || !host) {
+      toast({ title: 'Unable to quote', description: quoteError || 'Check booking details.', variant: 'destructive' });
+      return;
+    }
     setShowPayment(true);
   };
 
   const handlePayConfirm = async (gateway) => {
-    const { base, fee, total } = calcFee();
     setLoading(true);
-    const booking = await entities.HostingBooking.create({
-      ...pendingBooking,
-      host_id: host.id, host_name: host.full_name, city: host.city,
-      quoted_price: base,
-      platform_fee: fee,
-      total_price: total,
-      payment_status: 'fee_paid',
+    const result = await createHostingBookingWithEscrow({
+      hostId: host.id,
+      serviceType: form.service_type,
+      startDate: form.start_date,
+      endDate: form.end_date || null,
+      petName: form.pet_name,
+      petType: form.pet_type,
+      ownerName: form.owner_name,
+      ownerEmail: form.owner_email,
+      ownerPhone: form.owner_phone || null,
+      city: host.city,
+      specialInstructions: form.special_instructions || null,
+      paymentProvider: gateway,
+      idempotencyKey: crypto.randomUUID(),
     });
-    await entities.Payment.create({
-      payment_type: 'booking_fee',
-      gateway,
-      amount: fee,
-      currency: 'SAR',
-      status: 'pending',
-      reference_id: booking.id,
-      payer_name: pendingBooking.owner_name,
-      payer_email: pendingBooking.owner_email,
+    if (result.ok === false) {
+      setLoading(false);
+      toast({ title: 'Booking failed', description: result.error, variant: 'destructive' });
+      throw new Error(result.error);
+    }
+    const id = String(result.data.booking.id);
+    setBookingId(id);
+    const capture = await captureBookingPayment({
+      bookingId: id,
+      providerPaymentId: `placeholder-${gateway}-${Date.now()}`,
+      idempotencyKey: crypto.randomUUID(),
     });
+    setLoading(false);
+    if (capture.ok === false) {
+      toast({ title: 'Payment failed', description: capture.error, variant: 'destructive' });
+      throw new Error(capture.error);
+    }
     if (window.gtag) {
       window.gtag('event', 'booking_request', {
         host_id: host.id, host_name: host.full_name,
-        host_city: host.city, service_type: pendingBooking.service_type,
-        platform_fee: fee, gateway,
+        host_city: host.city, service_type: form.service_type,
+        platform_fee: quote?.guest_fee_amount, gateway,
       });
     }
-    toast({ title: 'Booking Requested!', description: `Your request to stay with ${host.full_name} has been sent.` });
-    setLoading(false);
+    toast({ title: 'Booking confirmed!', description: 'Payment is held in escrow until service completion.' });
+    setShowPayment(false);
     setBooked(true);
   };
 
@@ -115,8 +128,10 @@ export default function HostDetail() {
   }
 
   const galleryPhotos = [host.photo_url, ...(host.gallery || [])].filter(Boolean);
-  const { base, fee, total, nights } = calcFee();
   const mapQuery = encodeURIComponent([host.neighborhood, host.city, 'Saudi Arabia'].filter(Boolean).join(', '));
+  const paymentSummary = quote
+    ? quoteToSummary(quote, `Booking with ${host.full_name}`)
+    : { title: `Booking with ${host.full_name}`, lines: [], total: '—' };
 
   return (
     <div className="min-h-screen bg-background">
@@ -288,12 +303,29 @@ export default function HostDetail() {
                   <div><Label className="text-xs">Phone</Label><Input value={form.owner_phone} onChange={e => setForm(f => ({ ...f, owner_phone: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
                   <div><Label className="text-xs">Notes</Label><Textarea value={form.special_instructions} onChange={e => setForm(f => ({ ...f, special_instructions: e.target.value }))} className="rounded-xl mt-1 text-sm" rows={2} /></div>
 
-                  {/* Fee preview */}
-                  {(host.price_per_night || host.price_per_day) && base > 0 && (
+                  {/* Fee preview — server-authoritative */}
+                  {quoteLoading && form.service_type && form.start_date && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Calculating price...
+                    </div>
+                  )}
+                  {quoteError && (
+                    <div className="text-xs text-destructive bg-destructive/10 rounded-xl p-2">{quoteError}</div>
+                  )}
+                  {quote && (
                     <div className="bg-secondary rounded-xl p-3 text-xs space-y-1">
-                      <div className="flex justify-between text-muted-foreground"><span>Service ({nights} {host.price_per_night ? 'night(s)' : 'day(s)'})</span><span>SAR {base}</span></div>
-                      <div className="flex justify-between text-muted-foreground"><span>Platform fee (10%)</span><span>SAR {fee}</span></div>
-                      <div className="flex justify-between font-bold text-foreground border-t border-border pt-1"><span>Total</span><span>SAR {total}</span></div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Service ({quote.units} unit{quote.units !== 1 ? 's' : ''})</span>
+                        <span>{quote.currency} {quote.base_amount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Platform fee ({quote.guest_service_fee_pct}%)</span>
+                        <span>{quote.currency} {quote.guest_fee_amount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-foreground border-t border-border pt-1">
+                        <span>Total due now</span>
+                        <span>{quote.currency} {quote.total_amount.toFixed(2)}</span>
+                      </div>
                     </div>
                   )}
 
@@ -304,7 +336,7 @@ export default function HostDetail() {
                     subject={`Question about hosting with ${host.full_name}`}
                     className="w-full h-10"
                   />
-                   <Button type="submit" className="w-full rounded-xl bg-primary h-11 font-bold" disabled={loading || !form.service_type || !form.pet_type || !form.start_date}>
+                   <Button type="submit" className="w-full rounded-xl bg-primary h-11 font-bold" disabled={loading || quoteLoading || !quote || !form.service_type || !form.pet_type || !form.start_date}>
                      {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                      Request & Pay
                    </Button>
@@ -318,14 +350,7 @@ export default function HostDetail() {
       <PaymentModal
         open={showPayment}
         onClose={() => setShowPayment(false)}
-        summary={{
-          title: `Booking with ${host.full_name}`,
-          lines: [
-            { label: `Service (${nights} ${host.price_per_night ? 'night(s)' : 'day(s)'})`, value: `SAR ${base}` },
-            { label: 'Platform fee (10%)', value: `SAR ${fee}` },
-          ],
-          total: `SAR ${total}`,
-        }}
+        summary={paymentSummary}
         onConfirm={handlePayConfirm}
       />
     </div>

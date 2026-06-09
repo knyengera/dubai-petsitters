@@ -1,54 +1,43 @@
 "use client";
 
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Loader2, ExternalLink } from 'lucide-react';
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, Loader2, ExternalLink } from "lucide-react";
+import { SUPPORTED_PAYMENT_PROVIDERS } from "@/lib/monetisation/constants";
 
-const GATEWAYS = [
-  {
-    id: 'paypal',
-    name: 'PayPal',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/124px-PayPal.svg.png',
-    desc: 'Pay securely with PayPal',
-    currencies: 'USD / SAR',
-  },
-  {
-    id: 'payfast',
-    name: 'PayFast',
-    logo: 'https://www.payfast.co.za/assets/images/logo/payfast-logo.svg',
-    desc: 'South Africa\'s leading payment gateway',
-    currencies: 'ZAR / SAR',
-  },
-  {
-    id: 'salla',
-    name: 'Salla',
-    logo: 'https://salla.com/assets/images/brand/salla-logo.svg',
-    desc: 'Saudi Arabia\'s trusted checkout',
-    currencies: 'SAR',
-  },
-];
-
-const GATEWAY_URLS = {
-  paypal: 'https://www.paypal.com/checkoutnow',
-  payfast: 'https://www.payfast.co.za/eng/process',
-  salla: 'https://checkout.salla.sa/',
+const GATEWAY_URLS: Record<string, string> = {
+  paypal: "https://www.paypal.com/checkoutnow",
+  payfast: "https://www.payfast.co.za/eng/process",
+  salla: "https://checkout.salla.sa/",
+  stripe: "https://checkout.stripe.com/",
+  hyperpay: "https://hyperpay.com/",
+  moyasar: "https://moyasar.com/",
+  tap: "https://tap.company/",
+  bank_transfer: "#",
+  manual: "#",
 };
 
 export default function PaymentModal({ open, onClose, summary, onConfirm }) {
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
   const handlePay = async () => {
     if (!selected) return;
     setLoading(true);
-    await onConfirm(selected);
-    setLoading(false);
-    setDone(true);
-    // Redirect to gateway in new tab (placeholder until credentials are added)
-    window.open(GATEWAY_URLS[selected], '_blank');
+    try {
+      await onConfirm(selected);
+      setLoading(false);
+      setDone(true);
+      const url = GATEWAY_URLS[selected];
+      if (url && url !== "#") {
+        window.open(url, "_blank");
+      }
+    } catch {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -67,13 +56,16 @@ export default function PaymentModal({ open, onClose, summary, onConfirm }) {
         {done ? (
           <div className="text-center py-6 space-y-3">
             <CheckCircle className="w-14 h-14 text-primary mx-auto" />
-            <p className="font-heading font-bold text-lg text-foreground">Payment Initiated!</p>
-            <p className="text-sm text-muted-foreground">You've been redirected to {GATEWAYS.find(g => g.id === selected)?.name} to complete payment. Your booking is confirmed once payment clears.</p>
-            <Button onClick={handleClose} className="rounded-xl w-full mt-2">Done</Button>
+            <p className="font-heading font-bold text-lg text-foreground">Payment secured!</p>
+            <p className="text-sm text-muted-foreground">
+              Your payment is held in escrow until the hosting service is completed.
+            </p>
+            <Button onClick={handleClose} className="rounded-xl w-full mt-2">
+              Done
+            </Button>
           </div>
         ) : (
           <div className="space-y-5">
-            {/* Summary */}
             <div className="bg-secondary rounded-xl p-4 space-y-2 text-sm">
               <p className="font-semibold text-foreground text-base">{summary?.title}</p>
               {summary?.lines?.map((line, i) => (
@@ -86,28 +78,32 @@ export default function PaymentModal({ open, onClose, summary, onConfirm }) {
                 <span>Total Due Now</span>
                 <span className="text-primary text-lg">{summary?.total}</span>
               </div>
+              <p className="text-[11px] text-muted-foreground pt-1">
+                Amounts are calculated server-side. Funds release to the host after service completion.
+              </p>
             </div>
 
-            {/* Gateway selector */}
             <div>
               <p className="text-sm font-semibold text-foreground mb-3">Select Payment Method</p>
-              <div className="space-y-2">
-                {GATEWAYS.map(gw => (
+              <div className="space-y-2 max-h-56 overflow-y-auto">
+                {SUPPORTED_PAYMENT_PROVIDERS.filter((p) => p.id !== "manual").map((gw) => (
                   <button
                     key={gw.id}
+                    type="button"
                     onClick={() => setSelected(gw.id)}
                     className={`w-full flex items-center gap-4 p-3 rounded-xl border-2 transition-all text-left ${
                       selected === gw.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border bg-card hover:border-primary/40'
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-card hover:border-primary/40"
                     }`}
                   >
-                    <img src={gw.logo} alt={gw.name} className="h-7 w-20 object-contain" onError={e => e.target.style.display='none'} />
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{gw.name}</p>
-                      <p className="text-xs text-muted-foreground">{gw.desc}</p>
+                      <p className="text-xs text-muted-foreground">Provider integration coming soon</p>
                     </div>
-                    <Badge variant="outline" className="text-xs shrink-0">{gw.currencies}</Badge>
+                    <Badge variant="outline" className="text-xs shrink-0">
+                      {gw.currencies}
+                    </Badge>
                     {selected === gw.id && <CheckCircle className="w-5 h-5 text-primary shrink-0" />}
                   </button>
                 ))}
@@ -119,12 +115,16 @@ export default function PaymentModal({ open, onClose, summary, onConfirm }) {
               disabled={!selected || loading}
               className="w-full rounded-xl h-11 font-bold"
             >
-              {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ExternalLink className="w-4 h-4 mr-2" />}
-              Pay Now via {selected ? GATEWAYS.find(g => g.id === selected)?.name : '...'}
+              {loading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <ExternalLink className="w-4 h-4 mr-2" />
+              )}
+              Pay Now via {selected ? SUPPORTED_PAYMENT_PROVIDERS.find((g) => g.id === selected)?.name : "..."}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">
-              You'll be redirected to the payment gateway to complete your transaction securely.
+              Placeholder checkout — real provider webhooks will confirm payment in a later phase.
             </p>
           </div>
         )}

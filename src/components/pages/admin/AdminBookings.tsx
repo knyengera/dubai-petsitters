@@ -32,6 +32,8 @@ const FIELDS: AdminRecordField[] = [
   { key: "total_price", label: "Total Price", type: "number" },
   { key: "status", label: "Status", type: "select", options: BOOKING_STATUSES },
   { key: "payment_status", label: "Payment Status", type: "select", options: PAYMENT_STATUSES },
+  { key: "escrow_status", label: "Escrow Status", viewOnly: true },
+  { key: "release_status", label: "Release Status", viewOnly: true },
 ];
 
 export default function AdminBookings() {

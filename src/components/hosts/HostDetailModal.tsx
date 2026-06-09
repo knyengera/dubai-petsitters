@@ -9,8 +9,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Star, MapPin, CheckCircle, Clock, Loader2, ArrowLeft } from 'lucide-react';
-import { entities } from '@/lib/data/entities';
 import { useToast } from '@/components/ui/use-toast';
+import { createHostingBookingWithEscrow, captureBookingPayment } from '@/lib/monetisation/actions';
+import { quoteToSummary } from '@/lib/monetisation/pricing';
+import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
+import PaymentModal from '@/components/payment/PaymentModal';
 
 const serviceLabels = {
   boarding: 'Boarding',
@@ -26,22 +29,78 @@ export default function HostDetailModal({ host, open, onClose }) {
     owner_name: '', owner_email: '', owner_phone: '', city: host?.city || '', special_instructions: '',
   });
   const [loading, setLoading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const { quote, loading: quoteLoading, error: quoteError } = useHostingBookingQuote({
+    hostId: host?.id,
+    serviceType: form.service_type,
+    startDate: form.start_date,
+    endDate: form.end_date,
+    enabled: open && step === 'book' && !!host,
+  });
 
   const handleBook = async (e) => {
     e.preventDefault();
+    if (!quote || !host) {
+      toast({ title: 'Unable to quote', description: quoteError || 'Check booking details.', variant: 'destructive' });
+      return;
+    }
+    setShowPayment(true);
+  };
+
+  const handlePaymentConfirm = async (gateway) => {
     setLoading(true);
-    await entities.HostingBooking.create({ ...form, host_id: host.id, host_name: host.full_name });
-    toast({ title: 'Booking Requested!', description: `Your request to stay with ${host.full_name} has been sent.` });
+    const result = await createHostingBookingWithEscrow({
+      hostId: host.id,
+      serviceType: form.service_type,
+      startDate: form.start_date,
+      endDate: form.end_date || null,
+      petName: form.pet_name,
+      petType: form.pet_type,
+      ownerName: form.owner_name,
+      ownerEmail: form.owner_email,
+      ownerPhone: form.owner_phone || null,
+      city: form.city || host.city || null,
+      specialInstructions: form.special_instructions || null,
+      paymentProvider: gateway,
+      idempotencyKey: crypto.randomUUID(),
+    });
+    if (result.ok === false) {
+      setLoading(false);
+      toast({ title: 'Booking failed', description: result.error, variant: 'destructive' });
+      throw new Error(result.error);
+    }
+    const id = String(result.data.booking.id);
+    setBookingId(id);
+    const capture = await captureBookingPayment({
+      bookingId: id,
+      providerPaymentId: `placeholder-${gateway}-${Date.now()}`,
+      idempotencyKey: crypto.randomUUID(),
+    });
     setLoading(false);
+    if (capture.ok === false) {
+      toast({ title: 'Payment failed', description: capture.error, variant: 'destructive' });
+      throw new Error(capture.error);
+    }
+    toast({ title: 'Booking confirmed!', description: `Your request to stay with ${host.full_name} is confirmed.` });
     onClose();
     setStep('profile');
+    setShowPayment(false);
   };
 
   if (!host) return null;
 
   return (
-    <Dialog open={open} onOpenChange={() => { onClose(); setStep('profile'); }}>
+    <>
+    <PaymentModal
+      open={showPayment}
+      onClose={() => setShowPayment(false)}
+      summary={quote ? quoteToSummary(quote, `Booking with ${host.full_name}`) : { title: `Booking with ${host.full_name}`, lines: [], total: '—' }}
+      onConfirm={handlePaymentConfirm}
+    />
+    <Dialog open={open && !showPayment} onOpenChange={() => { onClose(); setStep('profile'); }}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         {step === 'profile' ? (
           <>
@@ -207,7 +266,18 @@ export default function HostDetailModal({ host, open, onClose }) {
                 <Label>Special Instructions</Label>
                 <Textarea value={form.special_instructions} onChange={e => setForm(f => ({ ...f, special_instructions: e.target.value }))} placeholder="Diet, medication, special needs..." className="rounded-xl mt-1" rows={3} />
               </div>
-              <Button type="submit" className="w-full rounded-xl bg-primary hover:bg-primary/90 h-12" disabled={loading || !form.service_type || !form.pet_type}>
+              {quoteLoading && form.service_type && form.start_date && (
+                <p className="text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> Calculating price...</p>
+              )}
+              {quoteError && <p className="text-xs text-destructive">{quoteError}</p>}
+              {quote && (
+                <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs space-y-1">
+                  <div className="flex justify-between"><span>Host price</span><span>{quote.currency} {quote.base_amount.toFixed(2)}</span></div>
+                  <div className="flex justify-between text-primary"><span>Platform fee ({quote.guest_service_fee_pct}%)</span><span>{quote.currency} {quote.guest_fee_amount.toFixed(2)}</span></div>
+                  <div className="flex justify-between font-bold border-t border-border pt-1"><span>Total</span><span>{quote.currency} {quote.total_amount.toFixed(2)}</span></div>
+                </div>
+              )}
+              <Button type="submit" className="w-full rounded-xl bg-primary hover:bg-primary/90 h-12" disabled={loading || quoteLoading || !quote || !form.service_type || !form.pet_type}>
                 {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Confirm Booking
               </Button>
@@ -216,5 +286,6 @@ export default function HostDetailModal({ host, open, onClose }) {
         )}
       </DialogContent>
     </Dialog>
+    </>
   );
 }

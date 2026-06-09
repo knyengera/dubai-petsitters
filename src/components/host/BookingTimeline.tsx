@@ -11,6 +11,17 @@ const STATUS_STYLES = {
   completed: 'bg-muted text-muted-foreground border-border',
 };
 
+const ESCROW_LABELS: Record<string, string> = {
+  pending_payment: 'Awaiting payment',
+  held: 'In escrow',
+  release_pending: 'Release pending',
+  released: 'Paid to you',
+  refunded: 'Refunded',
+  disputed: 'Disputed',
+  cancelled: 'Cancelled',
+  none: '',
+};
+
 export default function BookingTimeline({ bookings }) {
   const upcoming = [...bookings]
     .filter(b => b.status !== 'cancelled')
@@ -45,6 +56,11 @@ export default function BookingTimeline({ bookings }) {
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-semibold text-sm text-foreground truncate">{b.pet_name}</p>
                 <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[b.status] || STATUS_STYLES.pending}`}>{b.status}</span>
+                {b.escrow_status && b.escrow_status !== 'none' && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-warning-muted text-warning border border-warning-border font-medium">
+                    {ESCROW_LABELS[b.escrow_status] || b.escrow_status}
+                  </span>
+                )}
                 {isActive && <span className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground font-medium">Active</span>}
               </div>
               <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
