@@ -24,6 +24,8 @@ export const ADMIN_TABLES = {
   ledger_entries: "ledger_entries",
   host_balances: "host_balances",
   host_payout_requests: "host_payout_requests",
+  notification_outbox: "notification_outbox",
+  notification_preferences: "notification_preferences",
   partner_deals: "partner_deals",
   partner_inquiries: "partner_inquiries",
   vet_subscriptions: "vet_subscriptions",

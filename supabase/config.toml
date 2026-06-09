@@ -50,3 +50,14 @@ provider = "twilio"
 twilio_account_sid = "env(TWILIO_ACCOUNT_SID)"
 twilio_auth_token = "env(TWILIO_AUTH_TOKEN)"
 twilio_message_service_sid = "env(TWILIO_MESSAGE_SERVICE_SID)"
+
+# Custom branded auth via Twilio Email + SMS (requires AUTH_HOOK_SECRET in env)
+[auth.hook.send_email]
+enabled = true
+uri = "http://host.docker.internal:3000/api/auth/hooks/send-email"
+secrets = "env(AUTH_HOOK_SECRET)"
+
+[auth.hook.send_sms]
+enabled = true
+uri = "http://host.docker.internal:3000/api/auth/hooks/send-sms"
+secrets = "env(AUTH_HOOK_SECRET)"

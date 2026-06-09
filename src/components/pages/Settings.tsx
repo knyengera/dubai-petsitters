@@ -7,19 +7,41 @@ import Link from "next/link";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, LogOut, AlertTriangle, User } from 'lucide-react';
+import { Trash2, LogOut, AlertTriangle, User, Bell } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { getProfile } from "@/lib/profile/actions";
 import { maskIdNumber } from "@/lib/auth/onboarding";
 import { useAuth } from "@/lib/auth-context";
+import {
+  getNotificationPreferences,
+  saveNotificationPreferences,
+} from "@/lib/notifications/actions";
+import type { NotificationPreferences } from "@/lib/notifications/types";
 
 export default function SettingsPage() {
   const [deleting, setDeleting] = useState(false);
   const { isEmailVerified, isPhoneVerified } = useAuth();
   const [profile, setProfile] = useState<Awaited<ReturnType<typeof getProfile>>>(null);
+  const [prefs, setPrefs] = useState<NotificationPreferences | null>(null);
+  const [savingPrefs, setSavingPrefs] = useState(false);
 
   useEffect(() => {
     getProfile().then(setProfile).catch(() => setProfile(null));
+    getNotificationPreferences().then(setPrefs).catch(() => setPrefs(null));
   }, []);
+
+  const updatePref = async (
+    key: keyof Omit<NotificationPreferences, "user_id">,
+    value: boolean
+  ) => {
+    if (!prefs) return;
+    const next = { ...prefs, [key]: value };
+    setPrefs(next);
+    setSavingPrefs(true);
+    await saveNotificationPreferences({ [key]: value });
+    setSavingPrefs(false);
+  };
 
   const handleDeleteAccount = async () => {
     setDeleting(true);
@@ -61,6 +83,76 @@ export default function SettingsPage() {
             <Button variant="outline" className="rounded-xl" asChild>
               <Link href="/profile/complete">Update profile</Link>
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl">
+          <CardContent className="p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Bell className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Notifications</h3>
+                <p className="text-sm text-muted-foreground">
+                  Email and SMS alerts {savingPrefs ? "(saving…)" : ""}
+                </p>
+              </div>
+            </div>
+            {prefs && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="email_enabled">Email notifications</Label>
+                  <Switch
+                    id="email_enabled"
+                    checked={prefs.email_enabled}
+                    onCheckedChange={(v) => updatePref("email_enabled", v)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="sms_enabled">SMS notifications</Label>
+                  <Switch
+                    id="sms_enabled"
+                    checked={prefs.sms_enabled}
+                    onCheckedChange={(v) => updatePref("sms_enabled", v)}
+                  />
+                </div>
+                <div className="border-t border-border pt-3 space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Categories</p>
+                  {(
+                    [
+                      ["booking", "Bookings"],
+                      ["payment", "Payments"],
+                      ["message", "Messages"],
+                      ["appointment", "Appointments"],
+                      ["reminder", "Reminders"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <div key={key} className="grid grid-cols-2 gap-3 text-sm">
+                      <span className="text-foreground">{label}</span>
+                      <div className="flex items-center justify-end gap-4">
+                        <label className="flex items-center gap-2">
+                          <span className="text-muted-foreground text-xs">Email</span>
+                          <Switch
+                            checked={prefs[`${key}_email`]}
+                            onCheckedChange={(v) => updatePref(`${key}_email`, v)}
+                            disabled={!prefs.email_enabled}
+                          />
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <span className="text-muted-foreground text-xs">SMS</span>
+                          <Switch
+                            checked={prefs[`${key}_sms`]}
+                            onCheckedChange={(v) => updatePref(`${key}_sms`, v)}
+                            disabled={!prefs.sms_enabled}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

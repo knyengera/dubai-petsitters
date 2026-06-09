@@ -67,6 +67,103 @@ export interface Database {
       ledger_entries: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       host_balances: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       host_payout_requests: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      notification_preferences: {
+        Row: {
+          user_id: string;
+          email_enabled: boolean;
+          sms_enabled: boolean;
+          booking_email: boolean;
+          booking_sms: boolean;
+          payment_email: boolean;
+          payment_sms: boolean;
+          message_email: boolean;
+          message_sms: boolean;
+          appointment_email: boolean;
+          appointment_sms: boolean;
+          reminder_email: boolean;
+          reminder_sms: boolean;
+          marketing_email: boolean;
+          marketing_sms: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          email_enabled?: boolean;
+          sms_enabled?: boolean;
+          booking_email?: boolean;
+          booking_sms?: boolean;
+          payment_email?: boolean;
+          payment_sms?: boolean;
+          message_email?: boolean;
+          message_sms?: boolean;
+          appointment_email?: boolean;
+          appointment_sms?: boolean;
+          reminder_email?: boolean;
+          reminder_sms?: boolean;
+          marketing_email?: boolean;
+          marketing_sms?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          email_enabled?: boolean;
+          sms_enabled?: boolean;
+          booking_email?: boolean;
+          booking_sms?: boolean;
+          payment_email?: boolean;
+          payment_sms?: boolean;
+          message_email?: boolean;
+          message_sms?: boolean;
+          appointment_email?: boolean;
+          appointment_sms?: boolean;
+          reminder_email?: boolean;
+          reminder_sms?: boolean;
+          marketing_email?: boolean;
+          marketing_sms?: boolean;
+          updated_at?: string;
+        };
+      };
+      notification_outbox: {
+        Row: {
+          id: string;
+          event_type: string;
+          channel: string;
+          recipient_user_id: string | null;
+          recipient_email: string | null;
+          recipient_phone: string | null;
+          template_key: string;
+          payload: Json;
+          idempotency_key: string;
+          status: string;
+          attempts: number;
+          last_error: string | null;
+          provider_ref: string | null;
+          scheduled_for: string;
+          sent_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          event_type: string;
+          channel: string;
+          template_key: string;
+          idempotency_key: string;
+          payload?: Json;
+          recipient_user_id?: string | null;
+          recipient_email?: string | null;
+          recipient_phone?: string | null;
+          status?: string;
+          scheduled_for?: string;
+        };
+        Update: {
+          status?: string;
+          attempts?: number;
+          last_error?: string | null;
+          provider_ref?: string | null;
+          scheduled_for?: string;
+          sent_at?: string | null;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -132,6 +229,24 @@ export interface Database {
           p_provider_payout_id?: string | null;
         };
         Returns: Json;
+      };
+      enqueue_notification: {
+        Args: {
+          p_event_type: string;
+          p_channel: string;
+          p_template_key: string;
+          p_idempotency_key: string;
+          p_payload?: Json;
+          p_recipient_user_id?: string | null;
+          p_recipient_email?: string | null;
+          p_recipient_phone?: string | null;
+          p_scheduled_for?: string;
+        };
+        Returns: string | null;
+      };
+      notification_enqueue_pet_health_reminders: {
+        Args: Record<string, never>;
+        Returns: number;
       };
     };
     Enums: Record<string, never>;
