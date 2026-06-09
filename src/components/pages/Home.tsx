@@ -9,11 +9,10 @@ import { isNavPathVisible } from '@/lib/auth/navigation';
 import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
-import { Bot, Stethoscope, PawPrint, Plane, MapPin, Heart, Clock, ChevronRight, Star, ArrowRight, Users, BadgeCheck } from 'lucide-react';
+import { Bot, Stethoscope, PawPrint, Plane, MapPin, Heart, Clock, ChevronLeft, ChevronRight, Star, ArrowRight, Users, BadgeCheck } from 'lucide-react';
 import VetCard from '@/components/vets/VetCard';
 import HostCard from '@/components/hosts/HostCard';
 import PartnerDealsSection from '@/components/home/PartnerDealsSection';
-import VerifiedVetsSection from '@/components/home/VerifiedVetsSection';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -103,54 +102,95 @@ const features = [
   { icon: MapPin, gradient: 'from-warning to-destructive', labelEn: 'Lost & Found', labelAr: 'المفقودات', descEn: 'Report & find lost pets', descAr: 'أبلغ عن الحيوانات الضائعة', to: '/lost-pets', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&q=80' },
 ];
 
-const stats = [
-  { numEn: '12,000+', numAr: '+١٢٠٠٠', labelEn: 'Pet Owners', labelAr: 'مالك حيوان أليف' },
-  { numEn: '350+', numAr: '+٣٥٠', labelEn: 'Verified Vets', labelAr: 'طبيب معتمد' },
-  { numEn: '15', numAr: '١٥', labelEn: 'Saudi Cities', labelAr: 'مدينة سعودية' },
-  { numEn: '24/7', numAr: '٢٤/٧', labelEn: 'Emergency Support', labelAr: 'دعم طارئ' },
+const trustStats = [
+  { icon: Star, headlineEn: '4.9/5 Rating', headlineAr: 'تقييم ٤.٩/٥', subEn: 'From 8,000+ reviews', subAr: 'من أكثر من ٨٠٠٠ تقييم' },
+  { icon: Clock, headlineEn: '24/7 Emergency', headlineAr: 'طوارئ ٢٤/٧', subEn: 'Always here for you', subAr: 'نحن دائماً معك' },
+  { icon: Users, headlineEn: '12,000+', headlineAr: '+١٢٠٠٠', subEn: 'Pet Owners', subAr: 'مالك حيوان أليف' },
+  { icon: Stethoscope, headlineEn: '350+', headlineAr: '+٣٥٠', subEn: 'Verified Vets', subAr: 'طبيب معتمد' },
+  { icon: MapPin, headlineEn: '15', headlineAr: '١٥', subEn: 'Saudi Cities', subAr: 'مدينة سعودية' },
 ];
 
 function FeaturedVetsSection({ t }) {
+  const sliderRef = React.useRef<HTMLDivElement>(null);
+
   const { data: vets = [] } = useQuery({
     queryKey: ['featured-vets'],
     queryFn: async () => {
-      const featuredVets = await entities.VetClinic.filter({ is_featured: true }, '-rating', 5);
+      const featuredVets = await entities.VetClinic.filter({ is_featured: true }, '-rating', 8);
       return featuredVets.map(toFeaturedVetClinic);
     },
   });
 
+  const scrollSlider = (direction: 'previous' | 'next') => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const cardWidth = slider.firstElementChild?.clientWidth ?? slider.clientWidth;
+    slider.scrollBy({
+      left: direction === 'previous' ? -(cardWidth + 20) : cardWidth + 20,
+      behavior: 'smooth',
+    });
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-border">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <BadgeCheck className="w-5 h-5 text-success" />
-            <span className="text-xs font-semibold text-success uppercase tracking-wider">
-              {t('Verified & Trusted', 'موثق ومعتمد')}
-            </span>
+    <div className="bg-gradient-to-br from-success-muted to-info-muted border-y border-success-border py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="flex items-center gap-1.5 bg-success text-success-foreground text-xs font-bold px-3 py-1 rounded-full">
+                <BadgeCheck className="w-3.5 h-3.5" />
+                {t('Verified & Trusted', 'موثق ومعتمد')}
+              </span>
+            </div>
+            <h2 className="font-heading text-2xl font-bold text-foreground">
+              {t('Featured Vet Clinics', 'عيادات بيطرية مميزة')}
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              {t('Verified partners providing top-tier care for your pets', 'شركاء موثقون يقدمون أعلى مستويات الرعاية لحيوانك')}
+            </p>
           </div>
-          <h2 className="font-heading text-2xl font-bold text-foreground">
-            {t('Featured Vet Clinics', 'عيادات بيطرية مميزة')}
-          </h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            {t('Verified partners providing top-tier care for your pets', 'شركاء موثقون يقدمون أعلى مستويات الرعاية لحيوانك')}
-          </p>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => scrollSlider('previous')}
+              className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-full border border-success-border bg-card text-success shadow-sm transition-all hover:bg-success-muted"
+              aria-label={t('Previous featured vets', 'الأطباء المميزون السابقون')}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollSlider('next')}
+              className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-full border border-success-border bg-card text-success shadow-sm transition-all hover:bg-success-muted"
+              aria-label={t('Next featured vets', 'الأطباء المميزون التاليون')}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <Link href="/vets" className="text-success text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+              {t('View all', 'عرض الكل')} <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
-        <Link href="/vets" className="text-primary text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all shrink-0">
-          {t('View all', 'عرض الكل')} <ChevronRight className="w-4 h-4" />
-        </Link>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-        {vets.slice(0, 5).map((vet, i) => (
-          <VetCard key={vet.id} clinic={vet} index={i} />
-        ))}
-      </div>
-      <div className="mt-6 text-center">
-        <Link href="/vet-advertise">
-          <span className="inline-flex items-center gap-2 bg-success-muted hover:bg-success-muted/80 text-success font-medium px-5 py-2.5 rounded-xl text-sm transition-all border border-success-border">
-            <BadgeCheck className="w-4 h-4" /> {t('Get Your Clinic Featured', 'احصل على إدراج عيادتك')}
-          </span>
-        </Link>
+
+        <div
+          ref={sliderRef}
+          className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-4 pb-2 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 [&::-webkit-scrollbar]:hidden"
+        >
+          {vets.map((vet, i) => (
+            <div key={vet.id} className="w-[82%] shrink-0 snap-start sm:w-[calc(50%_-_0.625rem)] lg:w-[calc(25%_-_0.9375rem)]">
+              <VetCard clinic={vet} index={i} variant="trusted" />
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 text-center">
+          <Link href="/vet-advertise">
+            <span className="inline-flex items-center gap-2 bg-success hover:bg-success/90 text-success-foreground font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-md shadow-success/20">
+              <BadgeCheck className="w-4 h-4" /> {t('Get Your Clinic Featured', 'احصل على إدراج عيادتك')}
+            </span>
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -230,14 +270,6 @@ export default function Home() {
                   </Link>
                 )}
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {stats.map((s) => (
-                  <div key={s.labelEn} className="text-center bg-card border border-border rounded-2xl py-3 px-2">
-                    <div className="font-heading text-xl font-extrabold text-primary">{t(s.numEn, s.numAr)}</div>
-                    <div className="text-muted-foreground text-xs mt-0.5">{t(s.labelEn, s.labelAr)}</div>
-                  </div>
-                ))}
-              </div>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }} className="relative">
@@ -315,18 +347,15 @@ export default function Home() {
       </div>
 
       {/* Trust Badges */}
-       <div className="bg-muted/50 border-y border-border py-10">
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
-           {[
-             { icon: Star, en: '4.9/5 Rating', ar: 'تقييم ٤.٩/٥', desc_en: 'From 8,000+ reviews', desc_ar: 'من أكثر من ٨٠٠٠ تقييم' },
-             { icon: Clock, en: '24/7 Emergency', ar: 'طوارئ ٢٤/٧', desc_en: 'Always here for you', desc_ar: 'نحن دائماً معك' },
-           ].map((item) => (
-             <div key={item.en} className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <item.icon className="w-6 h-6 text-primary" />
+      <div className="bg-primary border-y border-primary py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 text-center">
+          {trustStats.map((item) => (
+            <div key={item.headlineEn} className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary-foreground/15 flex items-center justify-center">
+                <item.icon className="w-6 h-6 text-primary-foreground" />
               </div>
-              <div className="font-heading font-bold text-foreground">{t(item.en, item.ar)}</div>
-              <div className="text-sm text-muted-foreground">{t(item.desc_en, item.desc_ar)}</div>
+              <div className="font-heading font-bold text-primary-foreground">{t(item.headlineEn, item.headlineAr)}</div>
+              <div className="text-sm text-primary-foreground/80">{t(item.subEn, item.subAr)}</div>
             </div>
           ))}
         </div>
@@ -375,7 +404,7 @@ export default function Home() {
           <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
             {pets.slice(0, 6).map((pet) => (
               <Link key={pet.id} href="/adopt">
-                <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
+                <div className="bg-primary border border-primary rounded-xl overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="aspect-[4/3] bg-muted overflow-hidden">
                     <img
                       src={getPetImageUrl(pet)}
@@ -384,8 +413,8 @@ export default function Home() {
                     />
                   </div>
                   <div className="p-2">
-                    <p className="font-semibold text-foreground text-xs truncate">{pet.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize truncate">{pet.species}</p>
+                    <p className="font-semibold text-primary-foreground text-xs truncate">{pet.name}</p>
+                    <p className="text-xs text-primary-foreground/80 capitalize truncate">{pet.species}</p>
                   </div>
                 </div>
               </Link>
@@ -397,16 +426,13 @@ export default function Home() {
       {/* Verified Vets */}
       <FeaturedVetsSection t={t} />
 
-      {/* Verified Subscription Partners */}
-      <VerifiedVetsSection />
-
       {/* Partner Deals */}
       <div className="border-t border-border">
         <PartnerDealsSection />
       </div>
 
       {/* CTA */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2">
         <div className="bg-gradient-to-r from-primary to-success rounded-3xl p-8 lg:p-12 text-white text-center">
           <h2 className="font-heading text-3xl font-bold mb-3">
             {t("Start Your Pet's Health Journey", 'ابدأ رحلة صحة حيوانك الأليف')}
