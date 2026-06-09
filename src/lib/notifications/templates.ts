@@ -1,4 +1,11 @@
 import { getAppBaseUrl } from "@/lib/notifications/config";
+import {
+  buildBrandedEmail,
+  emailDetailTable,
+  emailParagraph,
+  emailQuote,
+  escapeHtml,
+} from "@/lib/notifications/email-layout";
 import type { NotificationChannel, RenderedNotification } from "@/lib/notifications/types";
 
 function link(path: string): string {
@@ -10,14 +17,22 @@ function str(value: unknown, fallback = ""): string {
   return String(value);
 }
 
-function wrapHtml(title: string, body: string): string {
-  return `<!DOCTYPE html><html><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#111;">
-    <div style="max-width:560px;margin:0 auto;padding:24px;">
-      <h1 style="font-size:20px;margin:0 0 16px;">${title}</h1>
-      ${body}
-      <p style="margin-top:24px;font-size:12px;color:#666;">Saudi Petsitters</p>
-    </div>
-  </body></html>`;
+function brandedHtml(
+  title: string,
+  bodyHtml: string,
+  options?: {
+    preheader?: string;
+    cta?: { label: string; href: string };
+    showLinkFallback?: boolean;
+  }
+): string {
+  return buildBrandedEmail({
+    title,
+    bodyHtml,
+    preheader: options?.preheader,
+    cta: options?.cta,
+    showLinkFallback: options?.showLinkFallback,
+  });
 }
 
 export function renderNotification(
@@ -36,30 +51,58 @@ const TEMPLATES: Record<string, TemplateFn> = {
     const owner = str(p.owner_name, "A pet owner");
     const pet = str(p.pet_name, "a pet");
     const dates = [p.start_date, p.end_date].filter(Boolean).join(" – ");
-    const text = `New booking request from ${owner} for ${pet}${dates ? ` (${dates})` : ""}. View: ${link("/host-calendar")}`;
+    const calendarUrl = link("/host-calendar");
+    const text = `New booking request from ${owner} for ${pet}${dates ? ` (${dates})` : ""}. View: ${calendarUrl}`;
     if (channel === "sms") return { text };
     return {
       subject: `New booking request for ${pet}`,
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "New booking request",
-        `<p><strong>${owner}</strong> requested hosting for <strong>${pet}</strong>${dates ? ` on ${dates}` : ""}.</p>
-         <p><a href="${link("/host-calendar")}">View your calendar</a></p>`
+        [
+          emailParagraph(
+            `<strong>${escapeHtml(owner)}</strong> requested hosting for <strong>${escapeHtml(pet)}</strong>.`
+          ),
+          emailDetailTable([
+            { label: "Pet", value: pet },
+            { label: "Owner", value: owner },
+            { label: "Dates", value: dates },
+            { label: "Service", value: str(p.service_type) },
+          ]),
+        ].join(""),
+        {
+          preheader: `${owner} wants to book hosting for ${pet}`,
+          cta: { label: "View calendar", href: calendarUrl },
+        }
       ),
     };
   },
 
   "booking.confirmed": (channel, p) => {
     const pet = str(p.pet_name, "your pet");
-    const text = `Your booking for ${pet} is confirmed. Details: ${link("/my-appointments")}`;
+    const detailsUrl = link("/my-appointments");
+    const text = `Your booking for ${pet} is confirmed. Details: ${detailsUrl}`;
     if (channel === "sms") return { text };
     return {
       subject: `Booking confirmed — ${pet}`,
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "Booking confirmed",
-        `<p>Your hosting booking for <strong>${pet}</strong> is confirmed.</p>
-         <p><a href="${link("/my-appointments")}">View booking details</a></p>`
+        [
+          emailParagraph(
+            `Great news! Your hosting booking for <strong>${escapeHtml(pet)}</strong> is confirmed.`
+          ),
+          emailDetailTable([
+            { label: "Pet", value: pet },
+            { label: "Start", value: str(p.start_date) },
+            { label: "End", value: str(p.end_date) },
+            { label: "Total", value: p.total_price ? `${p.total_price} SAR` : "" },
+          ]),
+        ].join(""),
+        {
+          preheader: `Your booking for ${pet} is confirmed`,
+          cta: { label: "View booking", href: detailsUrl },
+        }
       ),
     };
   },
@@ -67,15 +110,28 @@ const TEMPLATES: Record<string, TemplateFn> = {
   "booking.confirmed.host": (channel, p) => {
     const pet = str(p.pet_name, "a pet");
     const owner = str(p.owner_name, "the owner");
-    const text = `Booking confirmed: ${owner}'s ${pet}. ${link("/host-calendar")}`;
+    const calendarUrl = link("/host-calendar");
+    const text = `Booking confirmed: ${owner}'s ${pet}. ${calendarUrl}`;
     if (channel === "sms") return { text };
     return {
       subject: `Booking confirmed — ${pet}`,
       text,
-      html: wrapHtml(
-        "Booking confirmed",
-        `<p><strong>${owner}</strong>'s booking for <strong>${pet}</strong> is confirmed and paid.</p>
-         <p><a href="${link("/host-calendar")}">View calendar</a></p>`
+      html: brandedHtml(
+        "Booking confirmed & paid",
+        [
+          emailParagraph(
+            `<strong>${escapeHtml(owner)}</strong>&rsquo;s booking for <strong>${escapeHtml(pet)}</strong> is confirmed and payment has been received.`
+          ),
+          emailDetailTable([
+            { label: "Pet", value: pet },
+            { label: "Owner", value: owner },
+            { label: "Dates", value: [p.start_date, p.end_date].filter(Boolean).join(" – ") },
+          ]),
+        ].join(""),
+        {
+          preheader: `Paid booking confirmed for ${pet}`,
+          cta: { label: "Open host calendar", href: calendarUrl },
+        }
       ),
     };
   },
@@ -88,9 +144,16 @@ const TEMPLATES: Record<string, TemplateFn> = {
     return {
       subject: "Payment confirmed",
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "Payment confirmed",
-        `<p>We received your payment of <strong>${amount} ${currency}</strong>.</p>`
+        [
+          emailParagraph("Thank you! We&rsquo;ve received your payment."),
+          emailDetailTable([
+            { label: "Amount", value: `${amount} ${currency}` },
+            { label: "Reference", value: str(p.payment_id) },
+          ]),
+        ].join(""),
+        { preheader: `Payment of ${amount} ${currency} confirmed` }
       ),
     };
   },
@@ -99,16 +162,24 @@ const TEMPLATES: Record<string, TemplateFn> = {
     const sender = str(p.sender_name, "Someone");
     const preview = str(p.preview);
     const convId = str(p.conversation_id);
-    const text = `New message from ${sender}: "${preview}". Reply: ${link(`/messages?id=${convId}`)}`;
-    if (channel === "sms") return { text: `New message from ${sender}. ${link(`/messages?id=${convId}`)}` };
+    const messagesUrl = link(`/messages?id=${convId}`);
+    const text = `New message from ${sender}: "${preview}". Reply: ${messagesUrl}`;
+    if (channel === "sms") return { text: `New message from ${sender}. ${messagesUrl}` };
     return {
       subject: `New message from ${sender}`,
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         `Message from ${sender}`,
-        `<p><strong>${sender}</strong> sent you a message:</p>
-         <blockquote style="border-left:3px solid #ddd;padding-left:12px;color:#444;">${preview}</blockquote>
-         <p><a href="${link(`/messages?id=${convId}`)}">Reply in app</a></p>`
+        [
+          emailParagraph(
+            `<strong>${escapeHtml(sender)}</strong> sent you a message:`
+          ),
+          emailQuote(preview),
+        ].join(""),
+        {
+          preheader: `${sender}: ${preview.slice(0, 80)}`,
+          cta: { label: "Reply in app", href: messagesUrl },
+        }
       ),
     };
   },
@@ -116,15 +187,28 @@ const TEMPLATES: Record<string, TemplateFn> = {
   "appointment.request": (channel, p) => {
     const pet = str(p.pet_name, "your pet");
     const clinic = str(p.clinic_name, "the clinic");
+    const appointmentsUrl = link("/my-appointments");
     const text = `Appointment request submitted for ${pet} at ${clinic}. We'll notify you when it's reviewed.`;
     if (channel === "sms") return { text };
     return {
       subject: "Appointment request received",
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "Appointment request received",
-        `<p>Your appointment request for <strong>${pet}</strong> at <strong>${clinic}</strong> was submitted.</p>
-         <p><a href="${link("/my-appointments")}">View appointments</a></p>`
+        [
+          emailParagraph("We&rsquo;ve received your appointment request and will notify you once it&rsquo;s reviewed."),
+          emailDetailTable([
+            { label: "Pet", value: pet },
+            { label: "Clinic", value: clinic },
+            { label: "Vet", value: str(p.vet_name) },
+            { label: "Date", value: str(p.date) },
+            { label: "Time", value: str(p.time) },
+          ]),
+        ].join(""),
+        {
+          preheader: `Appointment request for ${pet}`,
+          cta: { label: "View appointments", href: appointmentsUrl },
+        }
       ),
     };
   },
@@ -132,15 +216,29 @@ const TEMPLATES: Record<string, TemplateFn> = {
   "appointment.status": (channel, p) => {
     const status = str(p.status);
     const pet = str(p.pet_name, "your pet");
-    const text = `Appointment for ${pet} is now ${status}. ${link("/my-appointments")}`;
+    const appointmentsUrl = link("/my-appointments");
+    const text = `Appointment for ${pet} is now ${status}. ${appointmentsUrl}`;
     if (channel === "sms") return { text };
     return {
       subject: `Appointment ${status}`,
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         `Appointment ${status}`,
-        `<p>Your appointment for <strong>${pet}</strong> is now <strong>${status}</strong>.</p>
-         <p><a href="${link("/my-appointments")}">View details</a></p>`
+        [
+          emailParagraph(
+            `Your appointment for <strong>${escapeHtml(pet)}</strong> is now <strong>${escapeHtml(status)}</strong>.`
+          ),
+          emailDetailTable([
+            { label: "Pet", value: pet },
+            { label: "Clinic", value: str(p.clinic_name) },
+            { label: "Date", value: str(p.date) },
+            { label: "Status", value: status },
+          ]),
+        ].join(""),
+        {
+          preheader: `${pet} appointment is ${status}`,
+          cta: { label: "View details", href: appointmentsUrl },
+        }
       ),
     };
   },
@@ -153,9 +251,15 @@ const TEMPLATES: Record<string, TemplateFn> = {
     return {
       subject: `Adoption request for ${pet}`,
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "New adoption request",
-        `<p><strong>${applicant}</strong> applied to adopt <strong>${pet}</strong>.</p>`
+        [
+          emailParagraph(
+            `<strong>${escapeHtml(applicant)}</strong> applied to adopt <strong>${escapeHtml(pet)}</strong>.`
+          ),
+          p.message ? emailQuote(str(p.message)) : "",
+        ].join(""),
+        { preheader: `${applicant} wants to adopt ${pet}` }
       ),
     };
   },
@@ -169,9 +273,16 @@ const TEMPLATES: Record<string, TemplateFn> = {
     return {
       subject: `Payout ${status}`,
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         `Payout ${status}`,
-        `<p>Your payout of <strong>${amount} ${currency}</strong> is <strong>${status}</strong>.</p>`
+        [
+          emailParagraph("Here&rsquo;s an update on your payout request:"),
+          emailDetailTable([
+            { label: "Status", value: status },
+            { label: "Net amount", value: `${amount} ${currency}` },
+          ]),
+        ].join(""),
+        { preheader: `Payout ${status}: ${amount} ${currency}` }
       ),
     };
   },
@@ -180,14 +291,27 @@ const TEMPLATES: Record<string, TemplateFn> = {
     const amount = str(p.host_earnings);
     const currency = str(p.currency, "SAR");
     const pet = str(p.pet_name, "booking");
+    const calendarUrl = link("/host-calendar");
     const text = `Earnings of ${amount} ${currency} released for ${pet}.`;
     if (channel === "sms") return { text };
     return {
       subject: "Earnings released",
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "Earnings released",
-        `<p><strong>${amount} ${currency}</strong> from the <strong>${pet}</strong> booking has been released to your balance.</p>`
+        [
+          emailParagraph(
+            `Funds from the <strong>${escapeHtml(pet)}</strong> booking have been released to your balance.`
+          ),
+          emailDetailTable([
+            { label: "Amount", value: `${amount} ${currency}` },
+            { label: "Booking", value: pet },
+          ]),
+        ].join(""),
+        {
+          preheader: `${amount} ${currency} released to your balance`,
+          cta: { label: "View host dashboard", href: calendarUrl },
+        }
       ),
     };
   },
@@ -196,31 +320,48 @@ const TEMPLATES: Record<string, TemplateFn> = {
     const pet = str(p.pet_name, "your pet");
     const vaccine = str(p.vaccine_name, "vaccination");
     const due = str(p.due_date);
+    const dashboardUrl = link("/dashboard");
     const text = `Reminder: ${pet}'s ${vaccine} is due on ${due}.`;
     if (channel === "sms") return { text };
     return {
       subject: `${pet} health reminder`,
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "Pet health reminder",
-        `<p><strong>${pet}</strong>'s <strong>${vaccine}</strong> is due on <strong>${due}</strong>.</p>
-         <p><a href="${link("/dashboard")}">View pet profile</a></p>`
+        [
+          emailParagraph(
+            `This is a friendly reminder that <strong>${escapeHtml(pet)}</strong>&rsquo;s health care is coming up.`
+          ),
+          emailDetailTable([
+            { label: "Pet", value: pet },
+            { label: "Care item", value: vaccine },
+            { label: "Due date", value: due },
+          ]),
+        ].join(""),
+        {
+          preheader: `${pet}'s ${vaccine} is due on ${due}`,
+          cta: { label: "View pet profile", href: dashboardUrl },
+        }
       ),
     };
   },
 
-  // Auth templates (used by hooks, not outbox)
   "auth.signup": (_channel, p) => {
     const url = str(p.confirmation_url);
     const text = `Welcome to Saudi Petsitters! Confirm your email: ${url}`;
     return {
       subject: "Confirm your email — Saudi Petsitters",
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "Confirm your email",
-        `<p>Welcome! Please confirm your email address to get started.</p>
-         <p><a href="${url}" style="display:inline-block;padding:12px 20px;background:#111;color:#fff;text-decoration:none;border-radius:8px;">Confirm email</a></p>
-         <p style="font-size:12px;color:#666;">Or copy this link: ${url}</p>`
+        emailParagraph(
+          "Welcome to Saudi Petsitters! Please confirm your email address to get started."
+        ),
+        {
+          preheader: "Confirm your email to get started",
+          cta: { label: "Confirm email", href: url },
+          showLinkFallback: true,
+        }
       ),
     };
   },
@@ -231,11 +372,19 @@ const TEMPLATES: Record<string, TemplateFn> = {
     return {
       subject: "Reset your password",
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "Reset your password",
-        `<p>We received a request to reset your password.</p>
-         <p><a href="${url}" style="display:inline-block;padding:12px 20px;background:#111;color:#fff;text-decoration:none;border-radius:8px;">Reset password</a></p>
-         <p style="font-size:12px;color:#666;">If you didn't request this, you can ignore this email.</p>`
+        [
+          emailParagraph("We received a request to reset your password."),
+          emailParagraph(
+            `<span style="font-size:13px;color:#7A7470;">If you didn&rsquo;t request this, you can safely ignore this email.</span>`
+          ),
+        ].join(""),
+        {
+          preheader: "Reset your Saudi Petsitters password",
+          cta: { label: "Reset password", href: url },
+          showLinkFallback: true,
+        }
       ),
     };
   },
@@ -246,9 +395,14 @@ const TEMPLATES: Record<string, TemplateFn> = {
     return {
       subject: "Your sign-in link",
       text,
-      html: wrapHtml(
-        "Sign in",
-        `<p><a href="${url}">Click here to sign in</a></p>`
+      html: brandedHtml(
+        "Sign in to Saudi Petsitters",
+        emailParagraph("Use the button below to sign in to your account. This link expires shortly."),
+        {
+          preheader: "Your one-time sign-in link",
+          cta: { label: "Sign in", href: url },
+          showLinkFallback: true,
+        }
       ),
     };
   },
@@ -259,15 +413,20 @@ const TEMPLATES: Record<string, TemplateFn> = {
     return {
       subject: "Confirm email change",
       text,
-      html: wrapHtml(
+      html: brandedHtml(
         "Confirm email change",
-        `<p><a href="${url}">Confirm your new email address</a></p>`
+        emailParagraph("Please confirm your new email address to complete the change."),
+        {
+          preheader: "Confirm your new email address",
+          cta: { label: "Confirm new email", href: url },
+          showLinkFallback: true,
+        }
       ),
     };
   },
 
   "auth.phone_otp": () => ({
-    text: "", // OTP body set dynamically in hook
+    text: "",
   }),
 
   generic: (channel, p) => {
@@ -276,7 +435,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
     return {
       subject: "Notification from Saudi Petsitters",
       text,
-      html: wrapHtml("Notification", `<p>${text}</p>`),
+      html: brandedHtml("Notification", emailParagraph(escapeHtml(text))),
     };
   },
 };
