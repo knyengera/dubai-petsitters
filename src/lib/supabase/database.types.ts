@@ -56,6 +56,10 @@ export interface Database {
           id_document_path: string | null;
           profile_completed_at: string | null;
           phone_verified_at: string | null;
+          terms_accepted_at: string | null;
+          privacy_accepted_at: string | null;
+          liability_waiver_accepted_at: string | null;
+          legal_documents_version: string | null;
           created_at: string;
           updated_at: string;
         };

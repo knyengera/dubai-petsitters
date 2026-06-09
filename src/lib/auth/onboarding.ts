@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { getSafeNextPath } from "@/lib/auth/routes";
+import { LEGAL_DOCUMENTS_VERSION } from "@/lib/legal/constants";
 
 export type ProfileRow = {
   full_name: string | null;
@@ -13,6 +14,10 @@ export type ProfileRow = {
   profile_completed_at: string | null;
   phone_verified_at: string | null;
   phone: string | null;
+  terms_accepted_at: string | null;
+  privacy_accepted_at: string | null;
+  liability_waiver_accepted_at: string | null;
+  legal_documents_version: string | null;
 };
 
 export function isEmailVerified(user: User | null): boolean {
@@ -42,12 +47,22 @@ export function isProfileComplete(profile: ProfileRow | null): boolean {
   return !!profile?.profile_completed_at;
 }
 
+export function hasLegalAcceptance(profile: ProfileRow | null): boolean {
+  return !!(
+    profile?.terms_accepted_at &&
+    profile?.privacy_accepted_at &&
+    profile?.liability_waiver_accepted_at &&
+    profile?.legal_documents_version === LEGAL_DOCUMENTS_VERSION
+  );
+}
+
 export function isOnboardingComplete(
   user: User | null,
   profile: ProfileRow | null
 ): boolean {
   if (!user) return false;
   return (
+    hasLegalAcceptance(profile) &&
     isEmailVerified(user) &&
     isPhoneVerified(user) &&
     isProfileComplete(profile)

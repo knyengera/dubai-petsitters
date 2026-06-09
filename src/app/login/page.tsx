@@ -12,6 +12,12 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import LegalAcceptanceCheckbox from "@/components/legal/LegalAcceptanceCheckbox";
+import {
+  LEGAL_DOCUMENTS_VERSION,
+  PENDING_LEGAL_ACCEPTANCE_KEY,
+} from "@/lib/legal/constants";
+import { recordLegalAcceptance } from "@/lib/legal/actions";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -20,6 +26,7 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [emailConfirmationSent, setEmailConfirmationSent] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const {
     signInWithEmail,
     signUpWithEmail,
@@ -38,8 +45,21 @@ function LoginForm() {
 
   const handleOAuth = async (provider: "google" | "apple") => {
     setError(null);
+    if (isSignUp && !legalAccepted) {
+      setError("You must accept the legal agreements to continue.");
+      return;
+    }
     setLoading(true);
     try {
+      if (isSignUp && typeof window !== "undefined") {
+        sessionStorage.setItem(
+          PENDING_LEGAL_ACCEPTANCE_KEY,
+          JSON.stringify({
+            version: LEGAL_DOCUMENTS_VERSION,
+            accepted_at: new Date().toISOString(),
+          })
+        );
+      }
       if (provider === "google") {
         await signInWithGoogle(callbackUrl);
       } else {
@@ -54,9 +74,18 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (isSignUp && !legalAccepted) {
+      setError("You must accept the legal agreements to continue.");
+      return;
+    }
     setLoading(true);
     try {
       if (isSignUp) {
+        const acceptedAt = new Date().toISOString();
+        const legalMetadata = {
+          legal_documents_version: LEGAL_DOCUMENTS_VERSION,
+          legal_accepted_at: acceptedAt,
+        };
         const emailRedirectTo =
           typeof window !== "undefined"
             ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
@@ -64,10 +93,16 @@ function LoginForm() {
         const { needsEmailConfirmation } = await signUpWithEmail(
           email,
           password,
-          emailRedirectTo
+          emailRedirectTo,
+          legalMetadata
         );
         if (needsEmailConfirmation) {
           setEmailConfirmationSent(true);
+          return;
+        }
+        const acceptanceResult = await recordLegalAcceptance();
+        if (acceptanceResult.success === false) {
+          setError(acceptanceResult.error);
           return;
         }
       } else {
@@ -119,12 +154,19 @@ function LoginForm() {
         </p>
       </div>
 
+      {isSignUp && (
+        <LegalAcceptanceCheckbox
+          checked={legalAccepted}
+          onCheckedChange={setLegalAccepted}
+        />
+      )}
+
       <div className="space-y-3">
         <Button
           type="button"
           variant="outline"
           className="w-full rounded-xl"
-          disabled={loading}
+          disabled={loading || (isSignUp && !legalAccepted)}
           onClick={() => handleOAuth("google")}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden>
@@ -151,7 +193,7 @@ function LoginForm() {
           type="button"
           variant="outline"
           className="w-full rounded-xl"
-          disabled={loading}
+          disabled={loading || (isSignUp && !legalAccepted)}
           onClick={() => handleOAuth("apple")}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -209,7 +251,11 @@ function LoginForm() {
         {(error || urlError) && (
           <p className="text-sm text-destructive">{error ?? urlError}</p>
         )}
-        <Button type="submit" className="w-full rounded-xl" disabled={loading}>
+        <Button
+          type="submit"
+          className="w-full rounded-xl"
+          disabled={loading || (isSignUp && !legalAccepted)}
+        >
           {loading ? "Please wait…" : isSignUp ? "Sign up" : "Sign in"}
         </Button>
       </form>
@@ -218,7 +264,11 @@ function LoginForm() {
         <button
           type="button"
           className="text-primary hover:underline"
-          onClick={() => setIsSignUp(!isSignUp)}
+          onClick={() => {
+            setIsSignUp(!isSignUp);
+            setLegalAccepted(false);
+            setError(null);
+          }}
         >
           {isSignUp
             ? "Already have an account? Sign in"

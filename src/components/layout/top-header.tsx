@@ -24,6 +24,7 @@ const EXACT_TITLES: Record<string, string> = {
   "/about": "About Us",
   "/privacy": "Privacy Policy",
   "/terms": "Terms & Conditions",
+  "/liability-waiver": "Liability Waiver",
   "/disclaimer": "Disclaimer",
 };
 

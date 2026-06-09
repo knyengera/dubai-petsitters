@@ -25,7 +25,11 @@ type AuthContextValue = {
   signUpWithEmail: (
     email: string,
     password: string,
-    redirectTo?: string
+    redirectTo?: string,
+    legalMetadata?: {
+      legal_documents_version: string;
+      legal_accepted_at: string;
+    }
   ) => Promise<{ needsEmailConfirmation: boolean }>;
   signInWithOAuth: (provider: OAuthProvider, redirectTo: string) => Promise<void>;
   signInWithGoogle: (redirectTo: string) => Promise<void>;
@@ -75,13 +79,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signUpWithEmail = useCallback(
-    async (email: string, password: string, redirectTo?: string) => {
+    async (
+      email: string,
+      password: string,
+      redirectTo?: string,
+      legalMetadata?: {
+        legal_documents_version: string;
+        legal_accepted_at: string;
+      }
+    ) => {
+      const options: {
+        emailRedirectTo?: string;
+        data?: Record<string, string>;
+      } = {};
+      if (redirectTo) options.emailRedirectTo = redirectTo;
+      if (legalMetadata) options.data = legalMetadata;
+
       const { data, error } = await createClient().auth.signUp({
         email,
         password,
-        options: redirectTo
-          ? { emailRedirectTo: redirectTo }
-          : undefined,
+        options: Object.keys(options).length > 0 ? options : undefined,
       });
       if (error) throw error;
       const needsEmailConfirmation = !data.session;

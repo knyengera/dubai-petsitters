@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   CheckCircle,
+  FileText,
   Loader2,
   Mail,
   Phone,
@@ -18,10 +19,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth-context";
 import { getSafeNextPath } from "@/lib/auth/routes";
 import {
+  hasLegalAcceptance,
   hasProfileDetails,
   isOnboardingComplete,
   resolvePostAuthRedirect,
 } from "@/lib/auth/onboarding";
+import LegalAcceptanceCheckbox from "@/components/legal/LegalAcceptanceCheckbox";
+import { PENDING_LEGAL_ACCEPTANCE_KEY } from "@/lib/legal/constants";
+import { recordLegalAcceptance } from "@/lib/legal/actions";
 import {
   getProfile,
   saveProfileDetails,
@@ -31,9 +36,10 @@ import {
 import { uploadUserFile } from "@/lib/storage/upload";
 import { createClient } from "@/lib/supabase/client";
 
-type Step = "profile" | "email" | "phone";
+type Step = "legal" | "profile" | "email" | "phone";
 
 const STEPS: { id: Step; label: string; icon: typeof User }[] = [
+  { id: "legal", label: "Legal agreements", icon: FileText },
   { id: "profile", label: "Profile & KYC", icon: User },
   { id: "email", label: "Verify Email", icon: Mail },
   { id: "phone", label: "Verify Phone", icon: Phone },
@@ -54,8 +60,9 @@ export default function ProfileCompletionWizard() {
     verifyPhoneOtp,
   } = useAuth();
 
-  const [step, setStep] = useState<Step>("profile");
+  const [step, setStep] = useState<Step>("legal");
   const [loading, setLoading] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [verifiedPhone, setVerifiedPhone] = useState("");
@@ -110,19 +117,72 @@ export default function ProfileCompletionWizard() {
   useEffect(() => {
     if (!user || isLoadingAuth) return;
 
+    const syncPendingLegalAcceptance = async () => {
+      if (typeof window === "undefined") return;
+      const pending = sessionStorage.getItem(PENDING_LEGAL_ACCEPTANCE_KEY);
+      if (!pending) return;
+
+      const profile = await getProfile();
+      if (hasLegalAcceptance(profile)) {
+        sessionStorage.removeItem(PENDING_LEGAL_ACCEPTANCE_KEY);
+        return;
+      }
+
+      const result = await recordLegalAcceptance();
+      if (result.success) {
+        sessionStorage.removeItem(PENDING_LEGAL_ACCEPTANCE_KEY);
+      }
+    };
+
     const checkComplete = async () => {
+      await syncPendingLegalAcceptance();
       const profile = await getProfile();
       if (isOnboardingComplete(user, profile)) {
         router.replace(resolvePostAuthRedirect(user, profile, nextPath));
         return;
       }
+      if (!hasLegalAcceptance(profile)) {
+        setStep("legal");
+        return;
+      }
       if (hasProfileDetails(profile)) {
         if (!isEmailVerified) setStep("email");
         else if (!isPhoneVerified) setStep("phone");
+        else setStep("profile");
+      } else {
+        setStep("profile");
       }
     };
     checkComplete();
   }, [user, isLoadingAuth, isEmailVerified, isPhoneVerified, router, nextPath]);
+
+  const handleLegalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!legalAccepted) {
+      toast({
+        title: "You must accept the legal agreements to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await recordLegalAcceptance();
+      if (result.success === false) {
+        toast({ title: result.error, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Legal agreements accepted" });
+      setStep("profile");
+    } catch (err) {
+      toast({
+        title: err instanceof Error ? err.message : "Failed to record acceptance",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -168,7 +228,7 @@ export default function ProfileCompletionWizard() {
         id_document_path: idDocumentPath,
       });
 
-      if (!result.success) {
+      if (result.success === false) {
         toast({ title: result.error, variant: "destructive" });
         return;
       }
@@ -230,7 +290,7 @@ export default function ProfileCompletionWizard() {
     try {
       await verifyPhoneOtp(verifiedPhone || phone, otp);
       const syncResult = await syncPhoneVerified(verifiedPhone || phone);
-      if (!syncResult.success) {
+      if (syncResult.success === false) {
         toast({ title: syncResult.error, variant: "destructive" });
         return;
       }
@@ -294,6 +354,35 @@ export default function ProfileCompletionWizard() {
           );
         })}
       </div>
+
+      {step === "legal" && (
+        <form onSubmit={handleLegalSubmit} className="space-y-6">
+          <div className="rounded-2xl border border-border bg-muted/40 p-5 text-sm text-muted-foreground">
+            Before continuing, please review and accept our legal documents. These
+            agreements help protect you and Saudi Petsitters when using the
+            platform.
+          </div>
+          <LegalAcceptanceCheckbox
+            checked={legalAccepted}
+            onCheckedChange={setLegalAccepted}
+            id="legal-acceptance-wizard"
+          />
+          <Button
+            type="submit"
+            className="w-full rounded-xl"
+            disabled={loading || !legalAccepted}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving…
+              </>
+            ) : (
+              "Continue"
+            )}
+          </Button>
+        </form>
+      )}
 
       {step === "profile" && (
         <form onSubmit={handleProfileSubmit} className="space-y-4">

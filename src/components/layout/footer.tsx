@@ -28,6 +28,7 @@ const footerLinkClass =
 const legalLinks: NavLinkItem[] = [
   { labelEn: "Privacy", labelAr: "الخصوصية", path: "/privacy" },
   { labelEn: "Terms", labelAr: "الشروط", path: "/terms" },
+  { labelEn: "Liability Waiver", labelAr: "إخلاء المسؤولية القانوني", path: "/liability-waiver" },
   { labelEn: "Disclaimer", labelAr: "إخلاء المسؤولية", path: "/disclaimer" },
 ];
 

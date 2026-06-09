@@ -101,6 +101,11 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
     subtitle: "Last updated: May 2026",
     imageAlt: DEFAULT_ALT,
   },
+  "/liability-waiver": {
+    title: "Liability Waiver",
+    subtitle: "Last updated: June 2026",
+    imageAlt: DEFAULT_ALT,
+  },
   "/dashboard": {
     title: "Dashboard",
     subtitle: "Your pet care hub at a glance",

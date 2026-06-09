@@ -3,7 +3,7 @@
 import React from 'react';
 
 const sections = [
-  { title: '1. Acceptance of Terms', body: 'By accessing or using Saudi Petsitters, you agree to be bound by these Terms and Conditions and all applicable laws and regulations. If you do not agree, please discontinue use of the platform immediately.' },
+  { title: '1. Acceptance of Terms', body: 'By creating an account, signing up, or using Saudi Petsitters, you agree to be bound by these Terms and Conditions, our Privacy Policy, and our Liability Waiver. Your acceptance is recorded at registration. If you do not agree, please discontinue use of the platform immediately.' },
   { title: '2. Use of the Platform', body: 'You may use Saudi Petsitters solely for lawful purposes. You agree not to misuse the platform, post false information, harass other users, or attempt to gain unauthorised access to any part of the service.' },
   { title: '3. User Accounts', body: 'You are responsible for maintaining the confidentiality of your account credentials. You agree to notify us immediately of any unauthorised use of your account. Saudi Petsitters is not liable for losses resulting from unauthorised account use.' },
   { title: '4. Pet Hosting Services', body: 'Saudi Petsitters acts as an intermediary connecting pet owners with independent hosts. We do not directly provide pet care services. Hosts are independent contractors and not employees of Saudi Petsitters. We are not liable for the actions or omissions of hosts.' },

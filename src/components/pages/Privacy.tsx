@@ -3,7 +3,7 @@
 import React from 'react';
 
 const sections = [
-  { title: '1. Information We Collect', body: 'We collect information you provide directly, such as your name, email address, phone number, and pet details when you register, book a service, or contact us. We also collect usage data automatically, including IP addresses, browser type, and pages visited.' },
+  { title: '1. Information We Collect', body: 'We collect information you provide directly, such as your name, email address, phone number, and pet details when you register, book a service, or contact us. When you sign up, we also record your acceptance of our legal documents, including the timestamp and document version. We also collect usage data automatically, including IP addresses, browser type, and pages visited.' },
   { title: '2. How We Use Your Information', body: 'Your information is used to provide, maintain, and improve our services; process bookings and payments; send service-related communications; and comply with legal obligations. We do not sell your personal data to third parties.' },
   { title: '3. Data Sharing', body: 'We may share your information with service providers (hosts, vet clinics) necessary to fulfil a booking, payment processors for secure transactions, and authorities when required by law. All partners are bound by confidentiality agreements.' },
   { title: '4. Cookies', body: 'We use cookies and similar technologies to improve user experience, analyse site traffic, and personalise content. You may disable cookies in your browser settings, though this may affect functionality.' },
