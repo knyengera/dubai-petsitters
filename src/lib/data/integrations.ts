@@ -32,9 +32,15 @@ export const integrations = {
       );
       return { file_url: URL.createObjectURL(file) };
     },
-    async InvokeLLM({ prompt }: { prompt: string }) {
-      console.warn("[integrations.Core.InvokeLLM] Not configured.");
-      return `AI response placeholder for: ${prompt.slice(0, 80)}...`;
+    async InvokeLLM(_payload: { prompt: string }) {
+      if (typeof window !== "undefined") {
+        throw new Error(
+          "InvokeLLM is server-only. Use POST /api/ai/chat from the client."
+        );
+      }
+      throw new Error(
+        "InvokeLLM is deprecated. Use the /api/ai/chat route handler instead."
+      );
     },
   },
 };

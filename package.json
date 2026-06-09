@@ -13,6 +13,7 @@
     "db:seed-forum": "node scripts/seed-forum.mjs"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.69",
     "@base-ui/react": "^1.5.0",
     "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -38,6 +39,7 @@
     "@tiptap/pm": "^3.26.0",
     "@tiptap/react": "^3.26.0",
     "@tiptap/starter-kit": "^3.26.0",
+    "ai": "^6.0.199",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",

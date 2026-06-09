@@ -14,7 +14,7 @@ import PetRemindersSection from '@/components/home/PetRemindersSection';
 import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
 
 const quickActions = [
-  { icon: Bot, color: 'bg-primary', en: 'AI Health Check', ar: 'فحص ذكي', openAssistant: true as const },
+  { icon: Bot, color: 'bg-primary', en: 'AI Pet Care', ar: 'رعاية ذكية', openAssistant: true as const },
   { icon: PawPrint, color: 'bg-accent', en: 'My Pets', ar: 'حيواناتي', to: '/pets' },
   { icon: Calendar, color: 'bg-info', en: 'Book Appointment', ar: 'احجز موعداً', to: '/appointments' },
   { icon: Stethoscope, color: 'bg-success', en: 'Find a Vet', ar: 'ابحث عن طبيب', to: '/vets' },

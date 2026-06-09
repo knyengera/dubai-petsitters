@@ -94,7 +94,7 @@ function getPetImageUrl(pet: FeaturedPet) {
 }
 
 const features = [
-  { icon: Bot, gradient: 'from-primary to-primary/80', labelEn: 'AI Health Assistant', labelAr: 'مساعد الصحة الذكي', descEn: 'Symptom checker & emergency alerts', descAr: 'فحص الأعراض وتنبيهات الطوارئ', openAssistant: true as const, img: 'https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&q=80' },
+  { icon: Bot, gradient: 'from-primary to-primary/80', labelEn: 'AI Pet Care Assistant', labelAr: 'مساعد رعاية الحيوانات الذكي', descEn: 'Feeding, travel, heat safety & health guidance', descAr: 'إرشادات التغذية والسفر والحرارة والصحة', openAssistant: true as const, img: 'https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&q=80' },
   { icon: PawPrint, gradient: 'from-accent to-warning', labelEn: 'Pet Profiles', labelAr: 'ملفات الحيوانات', descEn: 'Vaccination records & health passports', descAr: 'سجلات التطعيم وجوازات الصحة', to: '/pets', img: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80' },
   { icon: Stethoscope, gradient: 'from-success to-success/80', labelEn: 'Find a Vet', labelAr: 'ابحث عن طبيب', descEn: 'Nearby clinics & emergency care', descAr: 'عيادات قريبة ورعاية طارئة', to: '/vets', img: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=80' },
   { icon: Plane, gradient: 'from-info to-primary', labelEn: 'Travel Compliance', labelAr: 'امتثال السفر', descEn: 'Import/export Saudi pet regulations', descAr: 'لوائح استيراد وتصدير الحيوانات', to: '/travel', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&q=80' },
@@ -231,7 +231,7 @@ export default function Home() {
               </h1>
               <p className="text-base text-muted-foreground mb-8 max-w-md leading-relaxed">
                 {t(
-                  'Professional pet sitters, verified vets, AI health guidance, and travel compliance — all in one place for Saudi pet owners.',
+                  'Professional pet sitters, verified vets, AI pet care guidance, and travel compliance — all in one place for Saudi pet owners.',
                   'مربيو حيوانات محترفون، أطباء معتمدون، إرشادات صحية بالذكاء الاصطناعي، وامتثال السفر — كل ذلك في مكان واحد.'
                 )}
               </p>
@@ -255,7 +255,7 @@ export default function Home() {
                     className="rounded-2xl px-8 border-border hover:border-primary hover:text-primary"
                   >
                     <Bot className="w-4 h-4 me-2" />
-                    {t('AI Health Check', 'فحص صحي ذكي')}
+                    {t('AI Pet Care', 'رعاية ذكية')}
                   </Button>
                 ) : (
                   <Link

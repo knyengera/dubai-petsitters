@@ -1,48 +1,99 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, User, AlertTriangle } from "lucide-react";
-import { base44 } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
 import { useLanguage } from "@/lib/language-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  TOPIC_LABELS,
+  TOPIC_QUICK_PROMPTS,
+} from "@/lib/ai/prompts";
+import type { AssistantTopic, ChatMessage } from "@/lib/ai/types";
 
-const SYSTEM_PROMPT = `You are Saudi Petsitters AI — a bilingual (Arabic/English) pet health assistant for Saudi Arabia.
-Your role: provide helpful pet health guidance, symptom assessment, and emergency detection for cats, dogs, and birds.
-Guidelines:
-- Detect language of the user's message and respond in the SAME language
-- For urgent symptoms (bleeding, seizures, difficulty breathing, extreme lethargy, not eating 24h+), add 🚨 EMERGENCY alert and advise immediate vet visit
-- For moderate symptoms, provide home care tips and recommend vet visit within 24-48h
-- Always suggest nearby vet search via the app for serious cases
-- Be empathetic, clear, and concise
-- Never diagnose definitively — recommend professional vet consultation
-- If in Arabic, use formal Arabic (فصحى)
-- Mention Saudi-specific context when relevant (e.g. heat stress, desert climate)`;
-
-const QUICK_PROMPTS_EN = [
-  "My cat is vomiting, what should I do?",
-  "Dog not eating for 2 days",
-  "Bird feathers falling out",
-  "Vaccination schedule for a puppy",
-];
-const QUICK_PROMPTS_AR = [
-  "قطتي تتقيأ، ماذا أفعل؟",
-  "كلبي لا يأكل منذ يومين",
-  "ريش طائري يتساقط",
-  "جدول تطعيم الجرو",
+const SELECTABLE_TOPICS: AssistantTopic[] = [
+  "feeding",
+  "travel",
+  "heat_safety",
+  "basic_care",
+  "health",
 ];
 
-type ChatMessage = { role: "user" | "assistant"; content: string };
+type PetHealthAssistantChatProps = {
+  skipHistoryLoad?: boolean;
+};
 
-export default function PetHealthAssistantChat() {
+export default function PetHealthAssistantChat({
+  skipHistoryLoad = false,
+}: PetHealthAssistantChatProps) {
   const { t, isRTL } = useLanguage();
   const { user, isLoadingAuth } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [topic, setTopic] = useState<AssistantTopic>("general");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const loadRecentConversation = useCallback(async () => {
+    setLoadingHistory(true);
+    setError(null);
+    try {
+      const listRes = await fetch("/api/ai/conversations");
+      if (!listRes.ok) {
+        if (listRes.status === 401) return;
+        throw new Error("Failed to load conversations");
+      }
+      const { conversations } = await listRes.json();
+      if (!conversations?.length) {
+        setMessages([]);
+        setConversationId(null);
+        return;
+      }
+
+      const latest = conversations[0];
+      const detailRes = await fetch(`/api/ai/conversations/${latest.id}`);
+      if (!detailRes.ok) throw new Error("Failed to load conversation");
+
+      const { conversation, messages: loadedMessages } = await detailRes.json();
+      setConversationId(conversation.id);
+      if (conversation.topic) setTopic(conversation.topic);
+      setMessages(
+        (loadedMessages ?? []).map(
+          (m: { role: string; content: string; isEmergency?: boolean }) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+            isEmergency: m.isEmergency,
+          })
+        )
+      );
+    } catch {
+      setError(
+        t(
+          "Could not load your chat history. You can still start a new conversation.",
+          "تعذر تحميل سجل المحادثة. يمكنك بدء محادثة جديدة."
+        )
+      );
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    if (!user) {
+      setLoadingHistory(false);
+      return;
+    }
+    if (skipHistoryLoad) {
+      setLoadingHistory(false);
+      return;
+    }
+    loadRecentConversation();
+  }, [user, skipHistoryLoad, loadRecentConversation]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,37 +103,75 @@ export default function PetHealthAssistantChat() {
     if (!user) return;
 
     const userMsg = text || input.trim();
-    if (!userMsg) return;
+    if (!userMsg || loading) return;
     setInput("");
-    const newMessages: ChatMessage[] = [
-      ...messages,
+    setError(null);
+
+    const previousMessages = messages;
+    const optimistic: ChatMessage[] = [
+      ...previousMessages,
       { role: "user", content: userMsg },
     ];
-    setMessages(newMessages);
+    setMessages(optimistic);
     setLoading(true);
 
-    const history = newMessages
-      .map(
-        (m) =>
-          `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`
-      )
-      .join("\n");
-    const prompt = `${SYSTEM_PROMPT}\n\nConversation:\n${history}\n\nAssistant:`;
-
     try {
-      const res = await base44.integrations.Core.InvokeLLM({ prompt });
-      setMessages((prev) => [...prev, { role: "assistant", content: res }]);
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationId: conversationId ?? undefined,
+          message: userMsg,
+          topic,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setMessages(previousMessages);
+        setError(
+          data.error ??
+            t(
+              "Something went wrong. Please try again.",
+              "حدث خطأ. يرجى المحاولة مرة أخرى."
+            )
+        );
+        return;
+      }
+
+      setConversationId(data.conversationId);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: data.message.content,
+          isEmergency: data.message.isEmergency,
+        },
+      ]);
+    } catch {
+      setMessages(previousMessages);
+      setError(
+        t(
+          "Network error. Please check your connection and try again.",
+          "خطأ في الشبكة. يرجى التحقق من الاتصال والمحاولة مرة أخرى."
+        )
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const isEmergency = (text: string) => text?.includes("🚨");
+  const isEmergency = (msg: ChatMessage) =>
+    msg.isEmergency ?? msg.content?.includes("🚨");
 
-  if (isLoadingAuth) {
+  const quickPrompts =
+    TOPIC_QUICK_PROMPTS[topic][isRTL ? "ar" : "en"];
+
+  if (isLoadingAuth || loadingHistory) {
     return (
       <div className="flex h-full min-h-0 items-center justify-center bg-background px-4 text-sm text-muted-foreground">
-        {t("Checking your account...", "جار التحقق من حسابك...")}
+        {t("Loading assistant...", "جار تحميل المساعد...")}
       </div>
     );
   }
@@ -96,8 +185,8 @@ export default function PetHealthAssistantChat() {
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           {t(
-            "Pet health guidance is available for authenticated users only.",
-            "إرشادات صحة الحيوانات متاحة للمستخدمين المسجلين فقط."
+            "Pet care guidance is available for authenticated users only.",
+            "إرشادات رعاية الحيوانات متاحة للمستخدمين المسجلين فقط."
           )}
         </p>
       </div>
@@ -106,9 +195,32 @@ export default function PetHealthAssistantChat() {
 
   return (
     <div className="flex flex-col h-full min-h-0 bg-background">
+      <div className="px-4 py-2 border-b border-border shrink-0 overflow-x-auto">
+        <div className="flex gap-1.5 min-w-max">
+          {SELECTABLE_TOPICS.map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTopic(key)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                topic === key
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              {t(TOPIC_LABELS[key].en, TOPIC_LABELS[key].ar)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
+        {error && (
+          <p className="text-xs text-destructive text-center px-2">{error}</p>
+        )}
+
         {messages.length === 0 && (
-          <div className="flex flex-col items-center text-center pt-4 pb-4">
+          <div className="flex flex-col items-center text-center pt-2 pb-4">
             <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mb-3">
               <Bot className="w-8 h-8 text-primary" />
             </div>
@@ -120,12 +232,12 @@ export default function PetHealthAssistantChat() {
             </h2>
             <p className="text-muted-foreground text-sm max-w-xs mb-4">
               {t(
-                "Ask about symptoms, vaccinations, nutrition, or emergency care — in Arabic or English.",
-                "اسأل عن الأعراض أو التطعيمات أو التغذية أو الرعاية الطارئة — بالعربية أو الإنجليزية."
+                "Ask about feeding, travel, heat safety, daily care, or health — in Arabic or English.",
+                "اسأل عن التغذية أو السفر أو الحرارة أو الرعاية اليومية أو الصحة — بالعربية أو الإنجليزية."
               )}
             </p>
             <div className="grid grid-cols-1 gap-2 w-full">
-              {(isRTL ? QUICK_PROMPTS_AR : QUICK_PROMPTS_EN).map((p) => (
+              {quickPrompts.map((p) => (
                 <button
                   key={p}
                   type="button"
@@ -152,10 +264,10 @@ export default function PetHealthAssistantChat() {
               {msg.role === "assistant" && (
                 <div
                   className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-1 ${
-                    isEmergency(msg.content) ? "bg-destructive" : "bg-primary"
+                    isEmergency(msg) ? "bg-destructive" : "bg-primary"
                   }`}
                 >
-                  {isEmergency(msg.content) ? (
+                  {isEmergency(msg) ? (
                     <AlertTriangle className="w-4 h-4 text-white" />
                   ) : (
                     <Bot className="w-4 h-4 text-white" />
@@ -166,7 +278,7 @@ export default function PetHealthAssistantChat() {
                 className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-ee-sm"
-                    : isEmergency(msg.content)
+                    : isEmergency(msg)
                       ? "bg-destructive/10 border border-destructive/20 text-foreground rounded-es-sm"
                       : "bg-card border border-border text-foreground rounded-es-sm"
                 }`}
@@ -216,8 +328,8 @@ export default function PetHealthAssistantChat() {
               e.key === "Enter" && !e.shiftKey && sendMessage()
             }
             placeholder={t(
-              "Describe your pet's symptoms...",
-              "صف أعراض حيوانك الأليف..."
+              "Ask about feeding, travel, heat safety, or care...",
+              "اسأل عن التغذية أو السفر أو الحرارة أو الرعاية..."
             )}
             className="rounded-2xl flex-1"
             disabled={loading}
