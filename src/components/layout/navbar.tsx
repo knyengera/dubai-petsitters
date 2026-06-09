@@ -95,7 +95,7 @@ export default function Navbar() {
                 href="/login"
                 className="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
               >
-                {t("Sign in", "تسجيل الدخول")}
+                {t("Get Started", "ابدأ الآن")}
               </Link>
             )}
             {user && (
@@ -125,7 +125,7 @@ export default function Navbar() {
                 href="/login"
                 className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground min-h-[44px] flex items-center justify-center"
               >
-                {t("Sign in", "دخول")}
+                {t("Get Started", "ابدأ")}
               </Link>
             )}
             {user && (
