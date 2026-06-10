@@ -35,7 +35,7 @@ enable_confirmations = true
 enabled = true
 client_id = "env(GOOGLE_CLIENT_ID)"
 secret = "env(GOOGLE_CLIENT_SECRET)"
-redirect_uri = ""
+redirect_uri = "https://plmzzcsamtrieywnaeus.supabase.co/auth/v1/callback"
 
 [auth.external.apple]
 enabled = true

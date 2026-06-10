@@ -8,7 +8,7 @@ export const ASSISTANT_TOPICS = [
 ] as const;
 
 export const MAX_CONTEXT_MESSAGES = 20;
-export const DEFAULT_OPENROUTER_MODEL = "google/gemma-2-9b-it:free";
+export const DEFAULT_OPENROUTER_MODEL = "openrouter/free";
 export const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 

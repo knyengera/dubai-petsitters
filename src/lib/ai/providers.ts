@@ -20,12 +20,41 @@ export type GenerateAssistantResult = {
   provider: AiProviderName;
 };
 
+function isOpenRouterKey(key: string | undefined): key is string {
+  return Boolean(key?.startsWith("sk-or-"));
+}
+
+/** Prefer OPENROUTER_API_KEY; accept a misplaced sk-or-v1 key in OPENAI_API_KEY. */
+export function resolveOpenRouterApiKey(): string | undefined {
+  const openrouterKey = process.env.OPENROUTER_API_KEY?.trim();
+  const openaiKey = process.env.OPENAI_API_KEY?.trim();
+
+  if (isOpenRouterKey(openrouterKey)) {
+    return openrouterKey;
+  }
+
+  if (isOpenRouterKey(openaiKey)) {
+    return openaiKey;
+  }
+
+  return openrouterKey || undefined;
+}
+
+function resolveOpenAiApiKey(): string | undefined {
+  const openaiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!openaiKey || isOpenRouterKey(openaiKey)) {
+    return undefined;
+  }
+
+  return openaiKey;
+}
+
 export function isAiConfigured(): boolean {
-  return Boolean(process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY);
+  return Boolean(resolveOpenRouterApiKey() || resolveOpenAiApiKey());
 }
 
 function getOpenRouterClient() {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = resolveOpenRouterApiKey();
   if (!apiKey) return null;
 
   return createOpenAI({
@@ -39,7 +68,7 @@ function getOpenRouterClient() {
 }
 
 function getOpenAIClient() {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = resolveOpenAiApiKey();
   if (!apiKey) return null;
 
   return createOpenAI({ apiKey });
@@ -54,7 +83,7 @@ export async function generateAssistantResponse(
   if (openrouter) {
     try {
       const result = await generateText({
-        model: openrouter(process.env.OPENROUTER_MODEL ?? DEFAULT_OPENROUTER_MODEL),
+        model: openrouter.chat(process.env.OPENROUTER_MODEL ?? DEFAULT_OPENROUTER_MODEL),
         system: input.system,
         messages: input.messages,
       });
@@ -75,7 +104,7 @@ export async function generateAssistantResponse(
   if (openai) {
     try {
       const result = await generateText({
-        model: openai(process.env.OPENAI_MODEL ?? DEFAULT_OPENAI_MODEL),
+        model: openai.chat(process.env.OPENAI_MODEL ?? DEFAULT_OPENAI_MODEL),
         system: input.system,
         messages: input.messages,
       });
@@ -89,8 +118,18 @@ export async function generateAssistantResponse(
   }
 
   if (failures.length) {
-    throw new Error(`All AI providers failed: ${failures.join("; ")}`);
+    const hint = isOpenRouterKey(process.env.OPENROUTER_API_KEY?.trim())
+      ? ""
+      : isOpenRouterKey(process.env.OPENAI_API_KEY?.trim())
+        ? " (OpenRouter key detected in OPENAI_API_KEY — move it to OPENROUTER_API_KEY)"
+        : process.env.OPENROUTER_API_KEY
+          ? " (check OPENROUTER_API_KEY is a valid sk-or-v1 key from https://openrouter.ai/settings/keys)"
+          : "";
+
+    throw new Error(`All AI providers failed: ${failures.join("; ")}${hint}`);
   }
 
-  throw new Error("AI assistant is not configured");
+  throw new Error(
+    "AI assistant is not configured. Set OPENROUTER_API_KEY in .env.local (https://openrouter.ai/settings/keys)."
+  );
 }
