@@ -1,13 +1,56 @@
+import { Webhook } from "standardwebhooks";
+
 import { getAppBaseUrl } from "@/lib/notifications/config";
 import { renderNotification } from "@/lib/notifications/templates";
 import { sendTwilioEmail } from "@/lib/notifications/twilio-email";
 import { sendTwilioSms } from "@/lib/notifications/twilio-sms";
 
-export function verifyAuthHookSecret(request: Request): boolean {
-  const secret = process.env.AUTH_HOOK_SECRET;
+function getAuthHookSecret(): string | undefined {
+  return process.env.AUTH_HOOK_SECRET?.trim() || undefined;
+}
+
+function verifyStandardWebhook(
+  request: Request,
+  rawBody: string
+): boolean {
+  const secret = getAuthHookSecret();
+  if (!secret) return false;
+
+  const webhookId = request.headers.get("webhook-id");
+  const webhookTimestamp = request.headers.get("webhook-timestamp");
+  const webhookSignature = request.headers.get("webhook-signature");
+  if (!webhookId || !webhookTimestamp || !webhookSignature) {
+    return false;
+  }
+
+  const signingSecret = secret.replace(/^v1,whsec_/, "");
+  try {
+    const wh = new Webhook(signingSecret);
+    wh.verify(rawBody, {
+      "webhook-id": webhookId,
+      "webhook-timestamp": webhookTimestamp,
+      "webhook-signature": webhookSignature,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function verifyBearerAuthHookSecret(request: Request): boolean {
+  const secret = getAuthHookSecret();
   if (!secret) return false;
   const auth = request.headers.get("authorization") ?? "";
   return auth === `Bearer ${secret}` || auth === secret;
+}
+
+/** Verify Supabase Auth Hook requests (Standard Webhooks or legacy Bearer). */
+export function verifyAuthHookSecret(
+  request: Request,
+  rawBody: string
+): boolean {
+  if (verifyStandardWebhook(request, rawBody)) return true;
+  return verifyBearerAuthHookSecret(request);
 }
 
 interface SendEmailHookPayload {

@@ -29,7 +29,7 @@ Branded auth messages are sent via your Next.js app using Twilio instead of defa
 | Send Email | `https://your-domain.com/api/auth/hooks/send-email` |
 | Send SMS | `https://your-domain.com/api/auth/hooks/send-sms` |
 
-Set the hook secret to match `AUTH_HOOK_SECRET` in your environment.
+Set the hook secret to match `AUTH_HOOK_SECRET` in your environment (format: `v1,whsec_<base64>`). Supabase signs hook requests with Standard Webhooks headers (`webhook-id`, `webhook-timestamp`, `webhook-signature`); the app verifies those signatures in `src/lib/notifications/auth-hook.ts`.
 
 Local dev: `supabase/config.toml` points hooks to `http://host.docker.internal:3000/api/auth/hooks/...` when running `supabase start` alongside `next dev`.
 

@@ -5,13 +5,14 @@ import {
 } from "@/lib/notifications/auth-hook";
 
 export async function POST(request: Request) {
-  if (!verifyAuthHookSecret(request)) {
+  const rawBody = await request.text();
+  if (!verifyAuthHookSecret(request, rawBody)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   let payload: Parameters<typeof handleSendEmailHook>[0];
   try {
-    payload = await request.json();
+    payload = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
