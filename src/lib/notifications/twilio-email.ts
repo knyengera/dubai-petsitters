@@ -1,18 +1,7 @@
 import { getTwilioConfig } from "@/lib/notifications/config";
+import type { SendEmailInput, SendEmailResult } from "@/lib/notifications/email-types";
 
-export interface SendEmailInput {
-  to: string;
-  toName?: string;
-  subject: string;
-  text: string;
-  html?: string;
-}
-
-export interface SendEmailResult {
-  ok: boolean;
-  operationId?: string;
-  error?: string;
-}
+export type { SendEmailInput, SendEmailResult } from "@/lib/notifications/email-types";
 
 export async function sendTwilioEmail(input: SendEmailInput): Promise<SendEmailResult> {
   const { accountSid, authToken, emailFrom, emailFromName, isEmailConfigured } =
@@ -75,7 +64,11 @@ export async function sendTwilioEmail(input: SendEmailInput): Promise<SendEmailR
       };
     }
 
-    return { ok: true, operationId: data.operationId };
+    return {
+      ok: true,
+      provider: "twilio",
+      providerRef: data.operationId,
+    };
   } catch (e) {
     return {
       ok: false,

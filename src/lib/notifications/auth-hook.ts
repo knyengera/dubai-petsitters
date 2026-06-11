@@ -2,7 +2,7 @@ import { Webhook } from "standardwebhooks";
 
 import { getAppBaseUrl } from "@/lib/notifications/config";
 import { renderNotification } from "@/lib/notifications/templates";
-import { sendTwilioEmail } from "@/lib/notifications/twilio-email";
+import { sendEmail } from "@/lib/notifications/send-email";
 import { sendTwilioSms } from "@/lib/notifications/twilio-sms";
 
 function getAuthHookSecret(): string | undefined {
@@ -116,7 +116,7 @@ export async function handleSendEmailHook(
     site_url,
   });
 
-  const result = await sendTwilioEmail({
+  const result = await sendEmail({
     to: email,
     subject: rendered.subject || "Saudi Petsitters",
     text: rendered.text,

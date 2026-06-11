@@ -23,3 +23,22 @@ export function getTwilioConfig() {
     isEmailConfigured: Boolean(accountSid && authToken && emailFrom),
   };
 }
+
+export function getSmtpConfig() {
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || 587);
+  const user = process.env.SMTP_USER;
+  const password = process.env.SMTP_PASSWORD;
+  const from = process.env.SMTP_FROM;
+  const fromName = process.env.SMTP_FROM_NAME || "Saudi Petsitters";
+
+  return {
+    host,
+    port,
+    user,
+    password,
+    from,
+    fromName,
+    isConfigured: Boolean(host && port && user && password && from),
+  };
+}

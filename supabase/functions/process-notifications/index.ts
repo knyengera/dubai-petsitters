@@ -1,41 +1,17 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import { sendEmail } from "../_shared/send-email.ts";
+
 const MAX_ATTEMPTS = 5;
 const BATCH_SIZE = 50;
 
-function basicAuth(): string {
-  const sid = Deno.env.get("TWILIO_ACCOUNT_SID") ?? "";
-  const token = Deno.env.get("TWILIO_AUTH_TOKEN") ?? "";
-  return btoa(`${sid}:${token}`);
-}
-
-async function sendEmail(to: string, subject: string, text: string, html?: string) {
-  const from = Deno.env.get("TWILIO_EMAIL_FROM");
-  const fromName = Deno.env.get("TWILIO_EMAIL_FROM_NAME") ?? "Saudi Petsitters";
-  if (!from) return { ok: false, error: "TWILIO_EMAIL_FROM not set" };
-
-  const res = await fetch("https://comms.twilio.com/v1/Emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${basicAuth()}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: { address: from, name: fromName },
-      to: [{ address: to }],
-      content: { subject, text, ...(html ? { html } : {}) },
-    }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) return { ok: false, error: data.message || res.statusText };
-  return { ok: true, ref: data.operationId as string | undefined };
-}
-
 async function sendSms(to: string, body: string) {
   const sid = Deno.env.get("TWILIO_ACCOUNT_SID");
+  const token = Deno.env.get("TWILIO_AUTH_TOKEN") ?? "";
   const msid = Deno.env.get("TWILIO_MESSAGE_SERVICE_SID");
   if (!sid || !msid) return { ok: false, error: "Twilio SMS not configured" };
 
+  const auth = btoa(`${sid}:${token}`);
   const params = new URLSearchParams({
     To: to,
     MessagingServiceSid: msid,
@@ -46,7 +22,7 @@ async function sendSms(to: string, body: string) {
     {
       method: "POST",
       headers: {
-        Authorization: `Basic ${basicAuth()}`,
+        Authorization: `Basic ${auth}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: params.toString(),

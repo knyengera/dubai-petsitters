@@ -1,7 +1,7 @@
 import { createServiceClient, hasServiceRole } from "@/lib/admin/service-client";
 import { shouldSendNotification } from "@/lib/notifications/preferences";
 import { renderNotification } from "@/lib/notifications/templates";
-import { sendTwilioEmail } from "@/lib/notifications/twilio-email";
+import { sendEmail } from "@/lib/notifications/send-email";
 import { sendTwilioSms } from "@/lib/notifications/twilio-sms";
 import type {
   NotificationOutboxRow,
@@ -69,14 +69,14 @@ async function processRow(row: NotificationOutboxRow): Promise<{
     if (!row.recipient_email) {
       return { status: "skipped", error: "No recipient email" };
     }
-    const result = await sendTwilioEmail({
+    const result = await sendEmail({
       to: row.recipient_email,
       subject: rendered.subject || "Saudi Petsitters",
       text: rendered.text,
       html: rendered.html,
     });
     if (!result.ok) return { status: "failed", error: result.error };
-    return { status: "sent", providerRef: result.operationId };
+    return { status: "sent", providerRef: result.providerRef };
   }
 
   if (!row.recipient_phone) {
