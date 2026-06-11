@@ -247,11 +247,6 @@ export default function HeroSlider() {
               exit={{ opacity: prefersReducedMotion ? 1 : 0, y: prefersReducedMotion ? 0 : -12 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.45, ease: "easeOut" }}
             >
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
-                <SlideIcon className="h-4 w-4 text-primary" aria-hidden="true" />
-                {t(slide.titleEn, slide.titleAr)}
-              </div>
-
               <h1 className="font-heading mb-5 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
                 {t(slide.titleEn, slide.titleAr)}
               </h1>
