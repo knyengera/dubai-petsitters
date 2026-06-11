@@ -18,6 +18,26 @@ Configure these in the [Supabase Dashboard](https://supabase.com/dashboard) befo
 - Enable **Confirm email**
 - Users must verify email before full access (enforced by app middleware)
 
+## Dashboard email templates (branded HTML)
+
+Branded Supabase auth email HTML lives in [`docs/supabase-email-templates/`](supabase-email-templates/). Copy each file into **Authentication → Email Templates** in the [Supabase Dashboard](https://supabase.com/dashboard).
+
+| File | Dashboard slot | Recommended subject |
+|------|----------------|---------------------|
+| `confirmation.html` | Confirm signup | `Confirm your email — Saudi Petsitters` |
+| `email_change.html` | Change email address | `Confirm your new email address` |
+| `recovery.html` | Reset password | `Reset your password` |
+| `magic_link.html` | Magic Link | `Your sign-in link` |
+| `magic_link_otp.html` | Magic Link (OTP variant) | `Your verification code` |
+| `invite.html` | Invite user | `You've been invited to Saudi Petsitters` |
+| `reauthentication.html` | Reauthentication | `{{ .Token }} is your verification code` |
+
+**Paste steps:** open the template type in the Dashboard → paste the full HTML from the matching file into **Message body** → set **Subject** from the table → Save.
+
+**Magic Link slot:** Supabase has only one Magic Link template. Use `magic_link.html` (sign-in URL) **or** `magic_link_otp.html` (6-digit code), not both.
+
+**Auth hook override:** When the Send Email hook is enabled (below), Supabase does **not** use these Dashboard templates in production — mail is sent via Twilio from your Next.js app instead. Use Dashboard templates for local dev, staging without hooks, or as a fallback.
+
 ## Custom Auth Hooks (Twilio Email + SMS)
 
 Branded auth messages are sent via your Next.js app using Twilio instead of default Supabase templates.
