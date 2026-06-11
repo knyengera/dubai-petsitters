@@ -69,6 +69,9 @@ export async function handleSendEmailHook(
 ): Promise<{ ok: boolean; error?: string }> {
   const email = payload.user?.email;
   if (!email) return { ok: false, error: "Missing user email" };
+  if (!payload.email_data) {
+    return { ok: false, error: "Missing email_data in hook payload" };
+  }
 
   const { token_hash, redirect_to, email_action_type, site_url } =
     payload.email_data;

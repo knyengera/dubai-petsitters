@@ -96,6 +96,22 @@ Set `CRON_SECRET` in env. On Vercel, add a cron job hitting this route every 1�
 
 Alternatively deploy `supabase/functions/process-notifications` and schedule it in Supabase.
 
+## Troubleshooting auth hooks
+
+| Supabase error | Likely cause | Fix |
+|----------------|--------------|-----|
+| `Hook requires authorization token` | Hook secret mismatch or old Bearer-only verification | Match `AUTH_HOOK_SECRET` in Vercel to Dashboard → Hooks; deploy Standard Webhooks verification |
+| `over_email_send_rate_limit` | Too many signup/recovery attempts | Wait 30–60 min; raise **Authentication → Rate Limits → Emails sent** |
+| `Unexpected status code returned from hook: 500` | Your `/api/auth/hooks/send-email` handler failed | Check Vercel function logs for `[auth/hooks/send-email]` |
+
+Common causes of hook **500**:
+
+1. **Twilio env vars missing in Vercel Production** — set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_EMAIL_FROM` (not just in `.env.local`)
+2. **Sender domain not verified** — Twilio Console → Email → Domain Authentication; `TWILIO_EMAIL_FROM` must use that domain
+3. **Twilio Email not enabled** on the account — enable Email in Twilio Console before using `comms.twilio.com/v1/Emails`
+
+After changing Vercel env vars, redeploy the app.
+
 ## Local Development
 
 `supabase/config.toml` includes auth settings for the local Supabase stack. Run `supabase start` and apply migrations with `supabase db reset` or `supabase migration up`.

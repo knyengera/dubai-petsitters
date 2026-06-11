@@ -17,8 +17,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const result = await handleSendEmailHook(payload);
+  let result: Awaited<ReturnType<typeof handleSendEmailHook>>;
+  try {
+    result = await handleSendEmailHook(payload);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Unhandled send-email hook error";
+    console.error("[auth/hooks/send-email]", message, err);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+
   if (!result.ok) {
+    console.error("[auth/hooks/send-email]", result.error, {
+      email: payload.user?.email,
+      email_action_type: payload.email_data?.email_action_type,
+    });
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
 

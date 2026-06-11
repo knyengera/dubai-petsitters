@@ -55,12 +55,23 @@ export async function sendTwilioEmail(input: SendEmailInput): Promise<SendEmailR
     const data = (await res.json().catch(() => ({}))) as {
       operationId?: string;
       message?: string;
+      detail?: string;
+      title?: string;
+      errors?: Array<{ message?: string; detail?: string }>;
     };
 
     if (!res.ok) {
+      const parts = [
+        data.message,
+        data.detail,
+        data.title,
+        ...(data.errors?.map((e) => e.message || e.detail) ?? []),
+      ].filter(Boolean);
       return {
         ok: false,
-        error: data.message || `Twilio Email failed (${res.status})`,
+        error:
+          parts.join(" — ") ||
+          `Twilio Email failed (${res.status})`,
       };
     }
 
