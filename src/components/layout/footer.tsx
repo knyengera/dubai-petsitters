@@ -84,9 +84,6 @@ export default function Footer() {
               )}
             </p>
             <div>
-              <h3 className="mb-4 font-semibold text-background">
-                {t("Contact", "تواصل معنا")}
-              </h3>
               <ul className="space-y-3 text-sm text-background/65">
                 <li>
                   <a
