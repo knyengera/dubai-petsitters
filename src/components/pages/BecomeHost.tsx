@@ -82,6 +82,7 @@ export default function BecomeHost() {
         accepted_pet_types: form.accepted_pet_types ? form.accepted_pet_types.split(',').map(p => p.trim()) : [],
         is_available: true,
         created_by: user.email,
+        user_id: user.id,
       });
       toast({ title: 'Application submitted!' });
       setSubmitted(true);

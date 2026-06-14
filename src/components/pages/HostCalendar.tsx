@@ -17,6 +17,8 @@ import HostEarningsPanel from '@/components/host/HostEarningsPanel';
 import { getHostBalance } from '@/lib/monetisation/actions';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 import { useAuth } from '@/lib/auth-context';
+import { hostsQueries } from '@/features/hosts/queries';
+import Link from 'next/link';
 
 const today = startOfToday();
 
@@ -38,9 +40,9 @@ export default function HostCalendar() {
     }
     let cancelled = false;
     setLoadingHost(true);
-    entities.PetHost.filter({ created_by: user.email }).then((hosts) => {
+    hostsQueries.forUser(user).then((host) => {
       if (cancelled) return;
-      if (hosts.length > 0) setHostProfile(hosts[0]);
+      if (host) setHostProfile(host);
       setLoadingHost(false);
     });
     return () => { cancelled = true; };
@@ -138,7 +140,15 @@ export default function HostCalendar() {
         <div>
           <CalendarX className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h2 className="font-heading text-xl font-bold text-foreground mb-2">No Host Profile Found</h2>
-          <p className="text-muted-foreground text-sm">You need a host profile to manage your calendar.</p>
+          <p className="text-muted-foreground text-sm mb-6">
+            A host account role is not enough — you need a host listing before you can manage availability.
+          </p>
+          <Link href="/become-host">
+            <Button className="rounded-xl bg-primary gap-2">
+              <CalendarDays className="w-4 h-4" />
+              Create Host Profile
+            </Button>
+          </Link>
         </div>
       </div>
     );
