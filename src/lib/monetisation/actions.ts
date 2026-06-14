@@ -470,7 +470,32 @@ export async function adminListEscrowAccounts(): Promise<MonetisationActionResul
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) return { ok: false, error: error.message };
-    return { ok: true, data: (data ?? []) as Record<string, unknown>[] };
+
+    const accounts = (data ?? []) as Record<string, unknown>[];
+    const hostIds = [...new Set(accounts.map((row) => String(row.host_id)).filter(Boolean))];
+    if (hostIds.length === 0) {
+      return { ok: true, data: accounts };
+    }
+
+    const { data: hostRows, error: hostError } = await supabase
+      .from("pet_hosts")
+      .select("id, full_name")
+      .in("id", hostIds);
+    if (hostError) return { ok: false, error: hostError.message };
+
+    const hostNameById = new Map(
+      (hostRows ?? []).map((row) => [
+        String((row as Record<string, unknown>).id),
+        String((row as Record<string, unknown>).full_name ?? ""),
+      ])
+    );
+
+    const enriched = accounts.map((row) => ({
+      ...row,
+      host_name: hostNameById.get(String(row.host_id)) || "Unknown host",
+    }));
+
+    return { ok: true, data: enriched };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }

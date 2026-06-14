@@ -69,8 +69,20 @@ export default function AdminEscrow() {
           layout="table"
           getRowKey={(row) => String(row.booking_id ?? row.id)}
           columns={[
-            { key: "booking_id", label: "Booking" },
-            { key: "host_id", label: "Host" },
+            {
+              key: "booking_id",
+              label: "Booking",
+              render: (row) => {
+                const id = String(row.booking_id ?? "");
+                if (!id) return "—";
+                return (
+                  <span title={id} className="font-mono text-xs">
+                    {id.slice(0, 8)}
+                  </span>
+                );
+              },
+            },
+            { key: "host_name", label: "Host" },
             {
               key: "gross_amount",
               label: "Gross",
