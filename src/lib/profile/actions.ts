@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import type { SignupAccountType } from "@/lib/auth/constants";
 import {
   hasProfileDetails,
   type ProfileRow,
@@ -57,7 +58,7 @@ export async function getProfile(): Promise<ProfileRow | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version"
+      "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version, signup_account_type"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -99,6 +100,7 @@ export async function saveProfileDetails(
     privacy_accepted_at: null,
     liability_waiver_accepted_at: null,
     legal_documents_version: null,
+    signup_account_type: null,
   };
 
   if (!hasProfileDetails(draftProfile)) {
@@ -146,4 +148,64 @@ export async function syncPhoneVerified(
 
   revalidatePath("/profile/complete");
   return { success: true };
+}
+
+export async function saveSignupAccountType(
+  type: SignupAccountType
+): Promise<{ success: true } | { success: false; error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated." };
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("profiles")
+    .select("signup_account_type")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (fetchError) return { success: false, error: fetchError.message };
+  if (existing?.signup_account_type) return { success: true };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      signup_account_type: type,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/profile/complete");
+  return { success: true };
+}
+
+export async function userHasHostProfile(): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: byUserId } = await supabase
+    .from("pet_hosts")
+    .select("id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (byUserId) return true;
+
+  if (!user.email) return false;
+
+  const { data: byEmail } = await supabase
+    .from("pet_hosts")
+    .select("id")
+    .eq("created_by", user.email)
+    .limit(1)
+    .maybeSingle();
+
+  return !!byEmail;
 }

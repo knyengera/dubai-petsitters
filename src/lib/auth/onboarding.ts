@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { getSafeNextPath } from "@/lib/auth/routes";
+import type { SignupAccountType } from "@/lib/auth/constants";
 import { LEGAL_DOCUMENTS_VERSION } from "@/lib/legal/constants";
 
 export type ProfileRow = {
@@ -18,7 +19,18 @@ export type ProfileRow = {
   privacy_accepted_at: string | null;
   liability_waiver_accepted_at: string | null;
   legal_documents_version: string | null;
+  signup_account_type: SignupAccountType | null;
 };
+
+export function getSignupAccountType(
+  profile: ProfileRow | null
+): SignupAccountType {
+  return profile?.signup_account_type ?? "client";
+}
+
+export function isHostSignup(profile: ProfileRow | null): boolean {
+  return getSignupAccountType(profile) === "host";
+}
 
 export function isEmailVerified(user: User | null): boolean {
   return !!user?.email_confirmed_at;
@@ -56,7 +68,7 @@ export function hasLegalAcceptance(profile: ProfileRow | null): boolean {
   );
 }
 
-export function isOnboardingComplete(
+export function isBaseOnboardingComplete(
   user: User | null,
   profile: ProfileRow | null
 ): boolean {
@@ -69,21 +81,35 @@ export function isOnboardingComplete(
   );
 }
 
+export function isOnboardingComplete(
+  user: User | null,
+  profile: ProfileRow | null,
+  options?: { hasHostProfile?: boolean }
+): boolean {
+  if (!isBaseOnboardingComplete(user, profile)) return false;
+  if (isHostSignup(profile)) {
+    return options?.hasHostProfile === true;
+  }
+  return true;
+}
+
 export function getOnboardingRedirect(
   user: User | null,
-  profile: ProfileRow | null
+  profile: ProfileRow | null,
+  options?: { hasHostProfile?: boolean }
 ): "/profile/complete" | null {
   if (!user) return null;
-  if (isOnboardingComplete(user, profile)) return null;
+  if (isOnboardingComplete(user, profile, options)) return null;
   return "/profile/complete";
 }
 
 export function resolvePostAuthRedirect(
   user: User | null,
   profile: ProfileRow | null,
-  next: string | null | undefined
+  next: string | null | undefined,
+  options?: { hasHostProfile?: boolean }
 ): string {
-  const onboardingRedirect = getOnboardingRedirect(user, profile);
+  const onboardingRedirect = getOnboardingRedirect(user, profile, options);
   if (onboardingRedirect) {
     const safeNext = getSafeNextPath(next);
     if (safeNext !== "/dashboard") {

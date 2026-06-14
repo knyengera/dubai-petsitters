@@ -3,7 +3,7 @@ import {
   resolvePostAuthRedirect,
   type ProfileRow,
 } from "@/lib/auth/onboarding";
-import { getProfile } from "@/lib/profile/actions";
+import { getProfile, userHasHostProfile } from "@/lib/profile/actions";
 
 export async function getPostAuthRedirectPath(
   next: string | null | undefined
@@ -13,5 +13,8 @@ export async function getPostAuthRedirectPath(
     data: { user },
   } = await supabase.auth.getUser();
   const profile = await getProfile();
-  return resolvePostAuthRedirect(user, profile as ProfileRow | null, next);
+  const hasHostProfile = profile ? await userHasHostProfile() : false;
+  return resolvePostAuthRedirect(user, profile as ProfileRow | null, next, {
+    hasHostProfile,
+  });
 }

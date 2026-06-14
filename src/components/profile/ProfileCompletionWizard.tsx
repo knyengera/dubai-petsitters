@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   CheckCircle,
   FileText,
+  Home,
   Loader2,
   Mail,
   Phone,
@@ -19,8 +20,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth-context";
 import { getSafeNextPath } from "@/lib/auth/routes";
 import {
+  PENDING_SIGNUP_ACCOUNT_TYPE_KEY,
+  normalizeSignupAccountType,
+  type SignupAccountType,
+} from "@/lib/auth/constants";
+import {
+  getSignupAccountType,
   hasLegalAcceptance,
   hasProfileDetails,
+  isHostSignup,
   isOnboardingComplete,
   isValidE164Phone,
   resolvePostAuthRedirect,
@@ -39,15 +47,23 @@ import type { AuthVerificationSettings } from "@/lib/auth/verification-settings"
 import {
   getProfile,
   saveProfileDetails,
+  saveSignupAccountType,
   syncPhoneVerified,
+  userHasHostProfile,
   type ProfileDetailsInput,
 } from "@/lib/profile/actions";
 import { uploadAppFile } from "@/lib/storage/upload";
 import { createClient } from "@/lib/supabase/client";
+import HostProfileFormFields from "@/components/host/HostProfileFormFields";
+import {
+  emptyHostProfileForm,
+  hostFormToPayload,
+} from "@/lib/hosting/host-profile-form";
+import { entities } from "@/lib/data/entities";
 
-type Step = "legal" | "profile" | "email" | "phone";
+type Step = "legal" | "profile" | "email" | "phone" | "host";
 
-const STEPS: { id: Step; label: string; icon: typeof User }[] = [
+const BASE_STEPS: { id: Step; label: string; icon: typeof User }[] = [
   { id: "legal", label: "Legal agreements", icon: FileText },
   { id: "profile", label: "Profile & KYC", icon: User },
   { id: "email", label: "Verify Email", icon: Mail },
@@ -98,6 +114,34 @@ export default function ProfileCompletionWizard() {
       phoneVerificationEnabled: true,
     });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [signupAccountType, setSignupAccountType] =
+    useState<SignupAccountType>("client");
+  const [hostForm, setHostForm] = useState(emptyHostProfileForm());
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [hostPhotoFile, setHostPhotoFile] = useState<File | null>(null);
+  const [hostPhotoPreview, setHostPhotoPreview] = useState<string | null>(null);
+
+  const steps = useMemo(() => {
+    if (signupAccountType === "host") {
+      return [
+        ...BASE_STEPS,
+        { id: "host" as const, label: "Host profile", icon: Home },
+      ];
+    }
+    return BASE_STEPS;
+  }, [signupAccountType]);
+
+  const finishOrAdvanceAfterPhone = useCallback(async () => {
+    const profile = await getProfile();
+    const hasHostProfile = await userHasHostProfile();
+    if (isHostSignup(profile) && !hasHostProfile) {
+      setStep("host");
+      return;
+    }
+    router.replace(
+      resolvePostAuthRedirect(user, profile, nextPath, { hasHostProfile })
+    );
+  }, [user, router, nextPath]);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -116,6 +160,7 @@ export default function ProfileCompletionWizard() {
         });
         if (profile.avatar_url) setAvatarPreview(profile.avatar_url);
         if (profile.phone) setPhone(profile.phone);
+        setSignupAccountType(getSignupAccountType(profile));
       }
     } catch {
       // Profile may not exist yet for new users
@@ -174,8 +219,40 @@ export default function ProfileCompletionWizard() {
       }
     };
 
+    const syncPendingSignupAccountType = async () => {
+      const profile = await getProfile();
+      if (profile?.signup_account_type) {
+        setSignupAccountType(profile.signup_account_type);
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem(PENDING_SIGNUP_ACCOUNT_TYPE_KEY);
+        }
+        return;
+      }
+
+      let type: SignupAccountType = "client";
+      if (typeof window !== "undefined") {
+        const pending = sessionStorage.getItem(PENDING_SIGNUP_ACCOUNT_TYPE_KEY);
+        if (pending === "host" || pending === "client") {
+          type = pending;
+        }
+      }
+      const metadataType = normalizeSignupAccountType(
+        user.user_metadata?.signup_account_type
+      );
+      if (metadataType) type = metadataType;
+
+      const result = await saveSignupAccountType(type);
+      if (result.success) {
+        setSignupAccountType(type);
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem(PENDING_SIGNUP_ACCOUNT_TYPE_KEY);
+        }
+      }
+    };
+
     const checkComplete = async () => {
       await syncPendingLegalAcceptance();
+      await syncPendingSignupAccountType();
 
       if (
         !verificationSettings.emailVerificationEnabled &&
@@ -195,8 +272,13 @@ export default function ProfileCompletionWizard() {
       const activeUser = freshUser ?? user;
 
       const profile = await getProfile();
-      if (isOnboardingComplete(activeUser, profile)) {
-        router.replace(resolvePostAuthRedirect(activeUser, profile, nextPath));
+      const hasHostProfile = await userHasHostProfile();
+      if (isOnboardingComplete(activeUser, profile, { hasHostProfile })) {
+        router.replace(
+          resolvePostAuthRedirect(activeUser, profile, nextPath, {
+            hasHostProfile,
+          })
+        );
         return;
       }
       if (!hasLegalAcceptance(profile)) {
@@ -207,8 +289,12 @@ export default function ProfileCompletionWizard() {
         const emailVerified =
           !!activeUser.email_confirmed_at ||
           !verificationSettings.emailVerificationEnabled;
+        const phoneVerified =
+          !!activeUser.phone_confirmed_at ||
+          !verificationSettings.phoneVerificationEnabled;
         if (!emailVerified) setStep("email");
-        else if (!activeUser.phone_confirmed_at) setStep("phone");
+        else if (!phoneVerified) setStep("phone");
+        else if (isHostSignup(profile) && !hasHostProfile) setStep("host");
         else setStep("profile");
       } else {
         setStep("profile");
@@ -402,8 +488,7 @@ export default function ProfileCompletionWizard() {
       const supabase = createClient();
       await supabase.auth.refreshSession();
       toast({ title: "Phone saved — welcome!" });
-      const profile = await getProfile();
-      router.replace(resolvePostAuthRedirect(user, profile, nextPath));
+      await finishOrAdvanceAfterPhone();
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Failed to save phone",
@@ -435,11 +520,79 @@ export default function ProfileCompletionWizard() {
         return;
       }
       toast({ title: "Phone verified — welcome!" });
-      const profile = await getProfile();
-      router.replace(resolvePostAuthRedirect(user, profile, nextPath));
+      await finishOrAdvanceAfterPhone();
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Invalid verification code",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleService = (id: string) => {
+    setSelectedServices((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
+
+  const handleHostPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setHostPhotoFile(file);
+    setHostPhotoPreview(URL.createObjectURL(file));
+  };
+
+  useEffect(() => {
+    if (step !== "host") return;
+    setHostForm((f) => ({
+      ...f,
+      full_name: f.full_name || form.full_name,
+      city: f.city || form.city,
+    }));
+    setHostPhotoPreview((prev) => prev ?? form.avatar_url ?? avatarPreview);
+  }, [step, form.full_name, form.city, form.avatar_url, avatarPreview]);
+
+  const handleHostSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (selectedServices.length === 0) {
+      toast({
+        title: "Please select at least one service",
+        variant: "destructive",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      let photo_url: string | null = hostPhotoPreview;
+      if (hostPhotoFile) {
+        photo_url = await uploadAppFile(
+          "public-uploads",
+          hostPhotoFile,
+          user.id,
+          "hosts",
+          "profile"
+        );
+      }
+      const payload = hostFormToPayload(hostForm, selectedServices, photo_url);
+      await entities.PetHost.create({
+        ...payload,
+        is_available: true,
+        created_by: user.email,
+        user_id: user.id,
+      });
+      toast({ title: "Host profile created!" });
+      const profile = await getProfile();
+      router.replace(
+        resolvePostAuthRedirect(user, profile, nextPath, { hasHostProfile: true })
+      );
+    } catch (err) {
+      toast({
+        title: "Submission failed",
+        description:
+          err instanceof Error ? err.message : "Could not create host profile",
         variant: "destructive",
       });
     } finally {
@@ -468,10 +621,10 @@ export default function ProfileCompletionWizard() {
       </div>
 
       <div className="flex w-full flex-wrap justify-center gap-2">
-        {STEPS.map((s, i) => {
+        {steps.map((s, i) => {
           const Icon = s.icon;
           const isActive = s.id === step;
-          const stepIndex = STEPS.findIndex((x) => x.id === step);
+          const stepIndex = steps.findIndex((x) => x.id === step);
           const isDone = i < stepIndex;
           return (
             <div
@@ -743,12 +896,9 @@ export default function ProfileCompletionWizard() {
               <p className="text-muted-foreground">Your phone is verified.</p>
               <Button
                 className="w-full rounded-xl"
-                onClick={async () => {
-                  const profile = await getProfile();
-                  router.replace(resolvePostAuthRedirect(user, profile, nextPath));
-                }}
+                onClick={finishOrAdvanceAfterPhone}
               >
-                Go to dashboard
+                {signupAccountType === "host" ? "Continue to host profile" : "Go to dashboard"}
               </Button>
             </div>
           ) : (
@@ -858,6 +1008,37 @@ export default function ProfileCompletionWizard() {
             </>
           )}
         </div>
+      )}
+
+      {step === "host" && (
+        <form onSubmit={handleHostSubmit} className="space-y-6">
+          <div className="rounded-2xl border border-border bg-muted/40 p-5 text-sm text-muted-foreground">
+            Tell pet owners about your home and the services you offer. You can
+            update this anytime from your host dashboard.
+          </div>
+          <HostProfileFormFields
+            form={hostForm}
+            setForm={setHostForm}
+            selectedServices={selectedServices}
+            toggleService={toggleService}
+            photoPreview={hostPhotoPreview}
+            onPhotoChange={handleHostPhotoChange}
+          />
+          <Button
+            type="submit"
+            className="w-full rounded-xl"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating host profile…
+              </>
+            ) : (
+              "Complete host setup"
+            )}
+          </Button>
+        </form>
       )}
     </div>
   );

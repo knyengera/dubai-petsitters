@@ -15,7 +15,6 @@ const serviceLinks: NavLinkItem[] = [
 
 const companyLinks: NavLinkItem[] = [
   { labelEn: "About Us", labelAr: "من نحن", path: "/about" },
-  { labelEn: "Become a Host", labelAr: "كن مضيفا", path: "/become-host" },
   { labelEn: "Partners", labelAr: "الشركاء", path: "/partners" },
   { labelEn: "Blog", labelAr: "المدونة", path: "/blog" },
   { labelEn: "Forum", labelAr: "المنتدى", path: "/forum" },

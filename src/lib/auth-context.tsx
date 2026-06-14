@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import type { SignupAccountType } from "@/lib/auth/constants";
 import { toE164Phone } from "@/lib/auth/onboarding";
 
 type OAuthProvider = "google" | "apple";
@@ -26,9 +27,10 @@ type AuthContextValue = {
     email: string,
     password: string,
     redirectTo?: string,
-    legalMetadata?: {
+    metadata?: {
       legal_documents_version: string;
       legal_accepted_at: string;
+      signup_account_type?: SignupAccountType;
     }
   ) => Promise<{ needsEmailConfirmation: boolean; userId?: string }>;
   signInWithOAuth: (provider: OAuthProvider, redirectTo: string) => Promise<void>;
@@ -84,9 +86,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: string,
       password: string,
       redirectTo?: string,
-      legalMetadata?: {
+      metadata?: {
         legal_documents_version: string;
         legal_accepted_at: string;
+        signup_account_type?: SignupAccountType;
       }
     ) => {
       const options: {
@@ -94,7 +97,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data?: Record<string, string>;
       } = {};
       if (redirectTo) options.emailRedirectTo = redirectTo;
-      if (legalMetadata) options.data = legalMetadata;
+      if (metadata) {
+        options.data = {
+          legal_documents_version: metadata.legal_documents_version,
+          legal_accepted_at: metadata.legal_accepted_at,
+        };
+        if (metadata.signup_account_type) {
+          options.data.signup_account_type = metadata.signup_account_type;
+        }
+      }
 
       const { data, error } = await createClient().auth.signUp({
         email,

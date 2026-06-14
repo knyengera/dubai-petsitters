@@ -8,11 +8,52 @@ import {
   isProtectedPath,
 } from "@/lib/auth/routes";
 import {
+  isBaseOnboardingComplete,
+  isHostSignup,
   isOnboardingComplete,
   resolvePostAuthRedirect,
   type ProfileRow,
 } from "@/lib/auth/onboarding";
 import { getSupabasePublicKey, getSupabaseUrl } from "@/lib/supabase/env";
+
+const PROFILE_SELECT =
+  "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version, signup_account_type";
+
+async function userHasHostProfile(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  user: { id: string; email?: string | null }
+): Promise<boolean> {
+  const { data: byUserId } = await supabase
+    .from("pet_hosts")
+    .select("id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (byUserId) return true;
+  if (!user.email) return false;
+
+  const { data: byEmail } = await supabase
+    .from("pet_hosts")
+    .select("id")
+    .eq("created_by", user.email)
+    .limit(1)
+    .maybeSingle();
+
+  return !!byEmail;
+}
+
+async function getOnboardingOptions(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  user: { id: string; email?: string | null },
+  profile: ProfileRow | null
+): Promise<{ hasHostProfile?: boolean }> {
+  if (!isBaseOnboardingComplete(user, profile) || !isHostSignup(profile)) {
+    return {};
+  }
+  const hasHostProfile = await userHasHostProfile(supabase, user);
+  return { hasHostProfile };
+}
 
 function copyCookies(from: NextResponse, to: NextResponse) {
   from.cookies.getAll().forEach((cookie) => {
@@ -56,16 +97,20 @@ export async function updateSession(request: NextRequest) {
     const next = request.nextUrl.searchParams.get("next");
     const { data: profile } = await supabase
       .from("profiles")
-      .select(
-        "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version"
-      )
+      .select(PROFILE_SELECT)
       .eq("id", user.id)
       .maybeSingle();
 
+    const onboardingOptions = await getOnboardingOptions(
+      supabase,
+      user,
+      profile as ProfileRow | null
+    );
     const redirectPath = resolvePostAuthRedirect(
       user,
       profile as ProfileRow | null,
-      next
+      next,
+      onboardingOptions
     );
     const redirectResponse = NextResponse.redirect(
       new URL(redirectPath, request.url)
@@ -99,13 +144,19 @@ export async function updateSession(request: NextRequest) {
   ) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select(
-        "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version"
-      )
+      .select(PROFILE_SELECT)
       .eq("id", user.id)
       .maybeSingle();
 
-    if (!isOnboardingComplete(user, profile as ProfileRow | null)) {
+    const onboardingOptions = await getOnboardingOptions(
+      supabase,
+      user,
+      profile as ProfileRow | null
+    );
+
+    if (
+      !isOnboardingComplete(user, profile as ProfileRow | null, onboardingOptions)
+    ) {
       const completeUrl = request.nextUrl.clone();
       completeUrl.pathname = "/profile/complete";
       completeUrl.search = "";

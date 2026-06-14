@@ -1,11 +1,15 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSafeNextPath } from "@/lib/auth/routes";
 import { getPostAuthRedirectPath } from "@/lib/auth/post-auth";
-import { PawPrint } from "lucide-react";
+import {
+  PENDING_SIGNUP_ACCOUNT_TYPE_KEY,
+  type SignupAccountType,
+} from "@/lib/auth/constants";
+import { PawPrint, Home, Dog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +28,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [accountType, setAccountType] = useState<SignupAccountType>("client");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [emailConfirmationSent, setEmailConfirmationSent] = useState(false);
@@ -38,6 +43,14 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const nextPath = getSafeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
+
+  useEffect(() => {
+    const typeParam = searchParams.get("type");
+    if (typeParam === "host") {
+      setAccountType("host");
+      setIsSignUp(true);
+    }
+  }, [searchParams]);
 
   const callbackUrl =
     typeof window !== "undefined"
@@ -60,6 +73,7 @@ function LoginForm() {
             accepted_at: new Date().toISOString(),
           })
         );
+        sessionStorage.setItem(PENDING_SIGNUP_ACCOUNT_TYPE_KEY, accountType);
       }
       if (provider === "google") {
         await signInWithGoogle(callbackUrl);
@@ -86,6 +100,7 @@ function LoginForm() {
         const legalMetadata = {
           legal_documents_version: LEGAL_DOCUMENTS_VERSION,
           legal_accepted_at: acceptedAt,
+          signup_account_type: accountType,
         };
         const emailRedirectTo =
           typeof window !== "undefined"
@@ -169,6 +184,43 @@ function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {isSignUp && (
+          <div className="space-y-2">
+            <Label>I want to join as</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setAccountType("client")}
+                className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-left transition-colors ${
+                  accountType === "client"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/50"
+                }`}
+              >
+                <Dog className="h-6 w-6" />
+                <span className="text-sm font-semibold">Pet Owner</span>
+                <span className="text-xs text-center opacity-80">
+                  I need pet care
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAccountType("host")}
+                className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-left transition-colors ${
+                  accountType === "host"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/50"
+                }`}
+              >
+                <Home className="h-6 w-6" />
+                <span className="text-sm font-semibold">Pet Host</span>
+                <span className="text-xs text-center opacity-80">
+                  I want to host pets
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -280,6 +332,7 @@ function LoginForm() {
           onClick={() => {
             setIsSignUp(!isSignUp);
             setLegalAccepted(false);
+            setAccountType("client");
             setError(null);
           }}
         >
