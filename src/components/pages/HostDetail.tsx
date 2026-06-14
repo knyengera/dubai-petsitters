@@ -17,6 +17,9 @@ import PhotoGallery from '@/components/common/PhotoGallery';
 import StartChatButton from '@/components/messaging/StartChatButton';
 import ReviewsList from '@/components/reviews/ReviewsList';
 import BookingPetField, { isBookingPetValid, type BookingPetValue } from '@/components/hosting/BookingPetField';
+import BookingDatePicker from '@/components/hosting/BookingDatePicker';
+import { isRangeBookable } from '@/lib/hosting/availability';
+import { useHostBookingCalendar } from '@/lib/hosting/use-host-booking-calendar';
 import { createHostingBookingWithEscrow } from '@/lib/monetisation/actions';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 import { quoteToSummary } from '@/lib/monetisation/pricing';
@@ -88,6 +91,8 @@ export default function HostDetail() {
     clearHostBookingDraft(hostId);
   }, [isLoadingAuth, hostId]);
 
+  const { data: bookingCalendar } = useHostBookingCalendar(host?.id, !!host?.id);
+
   const { quote, loading: quoteLoading, error: quoteError } = useHostingBookingQuote({
     hostId: host?.id,
     serviceType: form.service_type,
@@ -118,6 +123,10 @@ export default function HostDetail() {
 
     if (!quote) {
       toast({ title: 'Unable to quote', description: quoteError || 'Check booking details.', variant: 'destructive' });
+      return;
+    }
+    if (!isRangeBookable(bookingCalendar, form.start_date, form.end_date)) {
+      toast({ title: 'Dates unavailable', description: 'Please select dates that are open on the calendar.', variant: 'destructive' });
       return;
     }
     setShowPayment(true);
@@ -193,9 +202,12 @@ export default function HostDetail() {
   };
 
   const petValid = isBookingPetValid(form.pet);
+
+  const datesBookable = isRangeBookable(bookingCalendar, form.start_date, form.end_date);
   const canSubmit =
     !!form.service_type &&
     !!form.start_date &&
+    datesBookable &&
     petValid &&
     (user ? !!quote && !quoteLoading : true);
 
@@ -364,10 +376,13 @@ export default function HostDetail() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div><Label className="text-xs">Start Date *</Label><Input required type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
-                    <div><Label className="text-xs">End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
-                  </div>
+                  <BookingDatePicker
+                    hostId={host.id}
+                    startDate={form.start_date}
+                    endDate={form.end_date}
+                    onRangeChange={(start_date, end_date) => setForm(f => ({ ...f, start_date, end_date }))}
+                    compact
+                  />
 
                   <BookingPetField
                     acceptedPetTypes={acceptedPetTypes}

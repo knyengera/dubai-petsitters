@@ -88,6 +88,13 @@ export type CreateBookingInput = {
   idempotencyKey?: string;
 };
 
+export type HostBookingCalendar = {
+  host_available: boolean;
+  blocked_dates: string[];
+  booked_dates: string[];
+  custom_prices: { date: string; price: number }[];
+};
+
 export type MonetisationActionResult<T = unknown> =
   | { ok: true; data: T }
   | { ok: false; error: string };

@@ -18,7 +18,7 @@ const quickActions = [
   { icon: PawPrint, color: 'bg-accent', en: 'My Pets', ar: 'حيواناتي', to: '/pets' },
   { icon: Calendar, color: 'bg-info', en: 'Book Appointment', ar: 'احجز موعداً', to: '/appointments' },
   { icon: Stethoscope, color: 'bg-success', en: 'Find a Vet', ar: 'ابحث عن طبيب', to: '/vets' },
-  { icon: CalendarDays, color: 'bg-secondary', en: 'My Calendar', ar: 'تقويمي', to: '/host-calendar' },
+  { icon: CalendarDays, color: 'bg-secondary', en: 'Manage Calendar', ar: 'إدارة التقويم', to: '/host-calendar' },
   { icon: MapPin, color: 'bg-warning', en: 'Lost Pets', ar: 'الحيوانات الضائعة', to: '/lost-pets' },
 ];
 

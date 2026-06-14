@@ -1,7 +1,5 @@
 "use client";
 
-import { base44 } from "@/lib/data";
-
 import { useState, useEffect, useMemo } from 'react';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
@@ -10,37 +8,43 @@ import 'react-day-picker/dist/style.css';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { format, isSameDay, parseISO, isBefore, startOfToday } from 'date-fns';
+import { enumerateServiceNights } from '@/lib/hosting/availability';
 import { CalendarX, DollarSign, Loader2, Trash2, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import BookingTimeline from '@/components/host/BookingTimeline';
 import HostEarningsPanel from '@/components/host/HostEarningsPanel';
 import { getHostBalance } from '@/lib/monetisation/actions';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
+import { useAuth } from '@/lib/auth-context';
 
 const today = startOfToday();
 
 export default function HostCalendar() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user, isLoadingAuth, navigateToLogin } = useAuth();
   const [hostProfile, setHostProfile] = useState(null);
-  const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingHost, setLoadingHost] = useState(true);
   const [selectedDates, setSelectedDates] = useState([]);
   const [mode, setMode] = useState('unavailable'); // 'unavailable' | 'custom_price'
   const [customPrice, setCustomPrice] = useState('');
-  const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [showTimeline, setShowTimeline] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(async (user) => {
-      if (!user) { base44.auth.redirectToLogin(); return; }
-      setCurrentUser(user);
-      const hosts = await entities.PetHost.filter({ created_by: user.email });
+    if (isLoadingAuth) return;
+    if (!user) {
+      navigateToLogin();
+      return;
+    }
+    let cancelled = false;
+    setLoadingHost(true);
+    entities.PetHost.filter({ created_by: user.email }).then((hosts) => {
+      if (cancelled) return;
       if (hosts.length > 0) setHostProfile(hosts[0]);
-      setLoadingUser(false);
+      setLoadingHost(false);
     });
-  }, []);
+    return () => { cancelled = true; };
+  }, [user, isLoadingAuth, navigateToLogin]);
 
   const { data: availability = [], refetch: refetchAvail } = useQuery({
     queryKey: ['host-availability', hostProfile?.id],
@@ -65,19 +69,19 @@ export default function HostCalendar() {
 
   // Build sets for calendar modifiers
   const unavailableDates = useMemo(() =>
-    availability.filter(a => a.type === 'unavailable').map(a => parseISO(a.date)), [availability]);
+    availability.filter(a => a.is_available === false).map(a => parseISO(a.date)), [availability]);
 
   const customPriceDates = useMemo(() =>
-    availability.filter(a => a.type === 'custom_price').map(a => parseISO(a.date)), [availability]);
+    availability.filter(a => a.is_available !== false && a.price_override != null && a.price_override > 0)
+      .map(a => parseISO(a.date)), [availability]);
 
   const bookedDates = useMemo(() => {
     const dates = [];
     bookings.filter(b => b.status !== 'cancelled').forEach(b => {
       if (!b.start_date) return;
-      const start = parseISO(b.start_date);
-      const end = b.end_date ? parseISO(b.end_date) : start;
-      let cur = new Date(start);
-      while (cur <= end) { dates.push(new Date(cur)); cur.setDate(cur.getDate() + 1); }
+      enumerateServiceNights(b.start_date, b.end_date).forEach((dateStr) => {
+        dates.push(parseISO(dateStr));
+      });
     });
     return dates;
   }, [bookings]);
@@ -93,14 +97,12 @@ export default function HostCalendar() {
       await entities.HostAvailability.create({
         host_id: hostProfile.id,
         date: dateStr,
-        type: mode,
-        custom_price: mode === 'custom_price' ? parseFloat(customPrice) || undefined : undefined,
-        note: note || undefined,
+        is_available: mode !== 'unavailable',
+        price_override: mode === 'custom_price' ? parseFloat(customPrice) || null : null,
       });
     }
     setSelectedDates([]);
     setCustomPrice('');
-    setNote('');
     setSaving(false);
     refetchAvail();
   };
@@ -126,7 +128,7 @@ export default function HostCalendar() {
     });
   };
 
-  if (loadingUser) {
+  if (isLoadingAuth || loadingHost) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
 
@@ -236,11 +238,6 @@ export default function HostCalendar() {
                   </div>
                 )}
 
-                <div>
-                  <Label className="text-xs">Note (optional)</Label>
-                  <Textarea value={note} onChange={e => setNote(e.target.value)} rows={2} placeholder="e.g. National Day holiday pricing" className="rounded-xl mt-1 text-sm" />
-                </div>
-
                 <div className="flex gap-2">
                   <Button onClick={handleSave} disabled={saving || (mode === 'custom_price' && !customPrice)} className="flex-1 rounded-xl font-bold">
                     {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -261,11 +258,12 @@ export default function HostCalendar() {
                   {[...availability].sort((a, b) => a.date.localeCompare(b.date)).map(a => (
                     <div key={a.id} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={a.type === 'unavailable' ? 'border-destructive/30 text-destructive bg-destructive/10' : 'border-warning-border text-warning bg-warning-muted'}>
+                        <Badge variant="outline" className={a.is_available === false ? 'border-destructive/30 text-destructive bg-destructive/10' : 'border-warning-border text-warning bg-warning-muted'}>
                           {format(parseISO(a.date), 'MMM d, yyyy')}
                         </Badge>
-                        <span className="text-muted-foreground capitalize text-xs">{a.type === 'custom_price' ? `${DEFAULT_CURRENCY} ${a.custom_price}` : 'Blocked'}</span>
-                        {a.note && <span className="text-xs text-muted-foreground italic truncate max-w-32">{a.note}</span>}
+                        <span className="text-muted-foreground capitalize text-xs">
+                          {a.is_available === false ? 'Blocked' : `${DEFAULT_CURRENCY} ${a.price_override}`}
+                        </span>
                       </div>
                       <button
                         onClick={async () => { await entities.HostAvailability.delete(a.id); refetchAvail(); }}

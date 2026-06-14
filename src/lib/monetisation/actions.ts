@@ -9,6 +9,7 @@ import type {
   BookingQuote,
   CreateBookingInput,
   HostBalance,
+  HostBookingCalendar,
   HostPayoutRequest,
   MonetisationActionResult,
   PaymentProviderSettings,
@@ -34,6 +35,50 @@ async function callRpc(
 
 function parseRow<T>(value: unknown): T {
   return value as T;
+}
+
+function parseHostBookingCalendar(value: unknown): HostBookingCalendar | null {
+  if (!value || typeof value !== "object") return null;
+  const row = value as Record<string, unknown>;
+  return {
+    host_available: row.host_available !== false,
+    blocked_dates: Array.isArray(row.blocked_dates)
+      ? row.blocked_dates.map((d) => String(d).replace(/^"|"$/g, ""))
+      : [],
+    booked_dates: Array.isArray(row.booked_dates)
+      ? row.booked_dates.map((d) => String(d).replace(/^"|"$/g, ""))
+      : [],
+    custom_prices: Array.isArray(row.custom_prices)
+      ? row.custom_prices.map((item) => {
+          const entry = item as Record<string, unknown>;
+          return {
+            date: String(entry.date ?? "").replace(/^"|"$/g, ""),
+            price: Number(entry.price ?? 0),
+          };
+        })
+      : [],
+  };
+}
+
+export async function getHostBookingCalendar(input: {
+  hostId: string;
+  from?: string;
+  to?: string;
+}): Promise<MonetisationActionResult<HostBookingCalendar>> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await callRpc(supabase, "get_host_booking_calendar", {
+      p_host_id: input.hostId,
+      p_from: input.from || null,
+      p_to: input.to || null,
+    });
+    if (error) return { ok: false, error: error.message };
+    const calendar = parseHostBookingCalendar(data);
+    if (!calendar) return { ok: false, error: "Invalid calendar response" };
+    return { ok: true, data: calendar };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
 }
 
 export async function getBookingQuote(input: {

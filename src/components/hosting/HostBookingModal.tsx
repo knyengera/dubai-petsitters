@@ -10,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2, Star, MapPin } from "lucide-react";
 import PaymentModal from "@/components/payment/PaymentModal";
+import BookingDatePicker from "@/components/hosting/BookingDatePicker";
+import { isRangeBookable } from "@/lib/hosting/availability";
+import { useHostBookingCalendar } from "@/lib/hosting/use-host-booking-calendar";
 import { createHostingBookingWithEscrow } from "@/lib/monetisation/actions";
 import { quoteToSummary } from "@/lib/monetisation/pricing";
 import { useHostingBookingQuote } from "@/lib/monetisation/use-booking-quote";
@@ -41,6 +44,8 @@ export default function HostBookingModal({ host, open, onClose }) {
   const [showPayment, setShowPayment] = useState(false);
   const { toast } = useToast();
 
+  const { data: bookingCalendar } = useHostBookingCalendar(host?.id, open && !!host);
+
   const { quote, loading: quoteLoading, error: quoteError } = useHostingBookingQuote({
     hostId: host?.id,
     serviceType: selectedService,
@@ -55,6 +60,10 @@ export default function HostBookingModal({ host, open, onClose }) {
     e.preventDefault();
     if (!quote) {
       toast({ title: "Unable to quote", description: quoteError || "Please check your booking details.", variant: "destructive" });
+      return;
+    }
+    if (!isRangeBookable(bookingCalendar, form.start_date, form.end_date)) {
+      toast({ title: "Dates unavailable", description: "Please select dates that are open on the calendar.", variant: "destructive" });
       return;
     }
     setShowPayment(true);
@@ -232,27 +241,13 @@ export default function HostBookingModal({ host, open, onClose }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="mb-1.5 block">Start Date *</Label>
-                  <Input
-                    required
-                    type="date"
-                    value={form.start_date}
-                    onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
-                    className="rounded-xl"
-                  />
-                </div>
-                <div>
-                  <Label className="mb-1.5 block">End Date</Label>
-                  <Input
-                    type="date"
-                    value={form.end_date}
-                    onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}
-                    className="rounded-xl"
-                  />
-                </div>
-              </div>
+              <BookingDatePicker
+                hostId={host.id}
+                startDate={form.start_date}
+                endDate={form.end_date}
+                onRangeChange={(start_date, end_date) => setForm((f) => ({ ...f, start_date, end_date }))}
+                compact
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -319,7 +314,8 @@ export default function HostBookingModal({ host, open, onClose }) {
                     !selectedService ||
                     !form.pet_name ||
                     !form.owner_email ||
-                    !form.start_date
+                    !form.start_date ||
+                    !isRangeBookable(bookingCalendar, form.start_date, form.end_date)
                   }
                   className="flex-1 rounded-xl"
                 >

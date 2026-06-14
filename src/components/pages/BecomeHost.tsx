@@ -10,7 +10,8 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { uploadAppFile } from '@/lib/storage/upload';
-import { CheckCircle, Upload, Home, Sun, Dog, Footprints, Star, Users, DollarSign, Shield, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { CheckCircle, Upload, Home, Sun, Dog, Footprints, Star, Users, DollarSign, Shield, Loader2, CalendarDays } from 'lucide-react';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
 const perks = [
@@ -80,6 +81,7 @@ export default function BecomeHost() {
         languages: form.languages ? form.languages.split(',').map(l => l.trim()) : [],
         accepted_pet_types: form.accepted_pet_types ? form.accepted_pet_types.split(',').map(p => p.trim()) : [],
         is_available: true,
+        created_by: user.email,
       });
       toast({ title: 'Application submitted!' });
       setSubmitted(true);
@@ -102,8 +104,15 @@ export default function BecomeHost() {
             <CheckCircle className="w-10 h-10 text-primary" />
           </div>
           <h2 className="font-heading text-3xl font-bold text-foreground mb-3">You are on your way!</h2>
-          <p className="text-muted-foreground mb-6">Your host profile has been submitted. Our team will review and activate it within 24 hours. Welcome to the Saudi Petsitters family!</p>
-          <Button onClick={() => setSubmitted(false)} className="rounded-xl bg-primary">Submit Another Profile</Button>
+          <p className="text-muted-foreground mb-6">Your host profile has been submitted. Block any dates you are unavailable so guests only see open days when booking.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/host-calendar">
+              <Button className="rounded-xl bg-primary gap-2 w-full sm:w-auto">
+                <CalendarDays className="w-4 h-4" />Set Your Availability
+              </Button>
+            </Link>
+            <Button onClick={() => setSubmitted(false)} variant="outline" className="rounded-xl">Submit Another Profile</Button>
+          </div>
         </motion.div>
       </div>
     );

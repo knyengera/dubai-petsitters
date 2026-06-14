@@ -15,6 +15,9 @@ import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 import { quoteToSummary } from '@/lib/monetisation/pricing';
 import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
 import PaymentModal from '@/components/payment/PaymentModal';
+import BookingDatePicker from '@/components/hosting/BookingDatePicker';
+import { isRangeBookable } from '@/lib/hosting/availability';
+import { useHostBookingCalendar } from '@/lib/hosting/use-host-booking-calendar';
 
 const serviceLabels = {
   boarding: 'Boarding',
@@ -34,6 +37,8 @@ export default function HostDetailModal({ host, open, onClose }) {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const { data: bookingCalendar } = useHostBookingCalendar(host?.id, open && !!host);
+
   const { quote, loading: quoteLoading, error: quoteError } = useHostingBookingQuote({
     hostId: host?.id,
     serviceType: form.service_type,
@@ -46,6 +51,10 @@ export default function HostDetailModal({ host, open, onClose }) {
     e.preventDefault();
     if (!quote || !host) {
       toast({ title: 'Unable to quote', description: quoteError || 'Check booking details.', variant: 'destructive' });
+      return;
+    }
+    if (!isRangeBookable(bookingCalendar, form.start_date, form.end_date)) {
+      toast({ title: 'Dates unavailable', description: 'Please select dates that are open on the calendar.', variant: 'destructive' });
       return;
     }
     setShowPayment(true);
@@ -232,16 +241,13 @@ export default function HostDetailModal({ host, open, onClose }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Start Date *</Label>
-                  <Input required type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="rounded-xl mt-1" />
-                </div>
-                <div>
-                  <Label>End Date</Label>
-                  <Input type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} className="rounded-xl mt-1" />
-                </div>
-              </div>
+              <BookingDatePicker
+                hostId={host.id}
+                startDate={form.start_date}
+                endDate={form.end_date}
+                onRangeChange={(start_date, end_date) => setForm(f => ({ ...f, start_date, end_date }))}
+                compact
+              />
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Your Name *</Label>
@@ -271,7 +277,7 @@ export default function HostDetailModal({ host, open, onClose }) {
                   <div className="flex justify-between font-bold border-t border-border pt-1"><span>Total</span><span>{quote.currency} {quote.total_amount.toFixed(2)}</span></div>
                 </div>
               )}
-              <Button type="submit" className="w-full rounded-xl bg-primary hover:bg-primary/90 h-12" disabled={loading || quoteLoading || !quote || !form.service_type || !form.pet_type}>
+              <Button type="submit" className="w-full rounded-xl bg-primary hover:bg-primary/90 h-12" disabled={loading || quoteLoading || !quote || !form.service_type || !form.pet_type || !isRangeBookable(bookingCalendar, form.start_date, form.end_date)}>
                 {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Confirm Booking
               </Button>
