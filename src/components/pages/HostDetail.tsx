@@ -1,26 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PaymentModal from '@/components/payment/PaymentModal';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { entities } from '@/lib/data/entities';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Star, MapPin, Clock, CheckCircle, ArrowLeft, Home, Sun, Dog, Footprints, Loader2, ExternalLink } from 'lucide-react';
 import PhotoGallery from '@/components/common/PhotoGallery';
 import StartChatButton from '@/components/messaging/StartChatButton';
 import ReviewsList from '@/components/reviews/ReviewsList';
+import BookingPetField, { isBookingPetValid, type BookingPetValue } from '@/components/hosting/BookingPetField';
 import { createHostingBookingWithEscrow } from '@/lib/monetisation/actions';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 import { quoteToSummary } from '@/lib/monetisation/pricing';
 import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
+import { useAuth } from '@/lib/auth-context';
+import {
+  saveHostBookingDraft,
+  loadHostBookingDraft,
+  clearHostBookingDraft,
+} from '@/lib/hosting/booking-draft';
 
 const serviceLabels = {
   boarding: 'Boarding', daycare: 'Daycare',
@@ -29,16 +35,27 @@ const serviceLabels = {
 
 const serviceIcons = { boarding: Home, daycare: Sun, home_sitting: Dog, dog_walking: Footprints };
 
+const emptyPet: BookingPetValue = {
+  mode: 'new',
+  petName: '',
+  petType: '',
+};
+
 export default function HostDetail() {
   const { id } = useParams();
+  const hostId = String(id || '');
   const { toast } = useToast();
+  const { user, navigateToLogin, isLoadingAuth } = useAuth();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [booked, setBooked] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [form, setForm] = useState({
-    pet_name: '', pet_type: '', service_type: '', start_date: '', end_date: '',
-    owner_name: '', owner_email: '', owner_phone: '', special_instructions: '',
+    service_type: '',
+    start_date: '',
+    end_date: '',
+    pet: emptyPet,
   });
 
   const { data: host, isLoading } = useQuery({
@@ -58,6 +75,19 @@ export default function HostDetail() {
     }
   }, [host]);
 
+  useEffect(() => {
+    if (isLoadingAuth || !hostId) return;
+    const draft = loadHostBookingDraft(hostId);
+    if (!draft) return;
+    setForm({
+      service_type: draft.service_type,
+      start_date: draft.start_date,
+      end_date: draft.end_date,
+      pet: draft.pet,
+    });
+    clearHostBookingDraft(hostId);
+  }, [isLoadingAuth, hostId]);
+
   const { quote, loading: quoteLoading, error: quoteError } = useHostingBookingQuote({
     hostId: host?.id,
     serviceType: form.service_type,
@@ -66,9 +96,27 @@ export default function HostDetail() {
     enabled: !!host?.id,
   });
 
-  const handleBook = async (e) => {
+  const handlePetChange = useCallback((pet: BookingPetValue) => {
+    setForm((f) => ({ ...f, pet }));
+  }, []);
+
+  const handleBook = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!quote || !host) {
+    if (!host) return;
+
+    if (!user) {
+      saveHostBookingDraft({
+        hostId: host.id,
+        service_type: form.service_type,
+        start_date: form.start_date,
+        end_date: form.end_date,
+        pet: form.pet,
+      });
+      navigateToLogin();
+      return;
+    }
+
+    if (!quote) {
       toast({ title: 'Unable to quote', description: quoteError || 'Check booking details.', variant: 'destructive' });
       return;
     }
@@ -76,25 +124,52 @@ export default function HostDetail() {
   };
 
   const handlePayConfirm = async (gateway: string) => {
+    if (!host || !user?.email) return { paymentId: '' };
+
     setLoading(true);
+
+    const petName = form.pet.petName.trim();
+    const petType = form.pet.petType;
+
+    if (form.pet.mode === 'new') {
+      try {
+        const existingPets = await entities.UserPet.list('-created_date', 50);
+        const duplicate = existingPets.some(
+          (p) =>
+            String(p.name || '').toLowerCase() === petName.toLowerCase() &&
+            String(p.species || '').toLowerCase() === petType.toLowerCase()
+        );
+        if (!duplicate) {
+          await entities.UserPet.create({
+            name: petName,
+            species: petType,
+            created_by: user.email,
+          });
+          queryClient.invalidateQueries({ queryKey: ['my-pets'] });
+        }
+      } catch {
+        // Non-blocking: booking can proceed even if pet save fails
+      }
+    }
+
     const result = await createHostingBookingWithEscrow({
       hostId: host.id,
       serviceType: form.service_type,
       startDate: form.start_date,
       endDate: form.end_date || null,
-      petName: form.pet_name,
-      petType: form.pet_type,
-      ownerName: form.owner_name,
-      ownerEmail: form.owner_email,
-      ownerPhone: form.owner_phone || null,
+      petName,
+      petType,
       city: host.city,
-      specialInstructions: form.special_instructions || null,
       paymentProvider: gateway,
       idempotencyKey: crypto.randomUUID(),
     });
     if (result.ok === false) {
       setLoading(false);
-      toast({ title: 'Booking failed', description: result.error, variant: 'destructive' });
+      const description =
+        result.error === 'Complete your profile before booking.'
+          ? 'Please complete your profile before requesting a booking.'
+          : result.error;
+      toast({ title: 'Booking failed', description, variant: 'destructive' });
       throw new Error(result.error);
     }
     const id = String(result.data.booking.id);
@@ -117,6 +192,13 @@ export default function HostDetail() {
     setBooked(true);
   };
 
+  const petValid = isBookingPetValid(form.pet);
+  const canSubmit =
+    !!form.service_type &&
+    !!form.start_date &&
+    petValid &&
+    (user ? !!quote && !quoteLoading : true);
+
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
@@ -129,6 +211,9 @@ export default function HostDetail() {
   const paymentSummary = quote
     ? quoteToSummary(quote, `Booking with ${host.full_name}`)
     : { title: `Booking with ${host.full_name}`, lines: [], total: '—' };
+  const acceptedPetTypes = Array.isArray(host.accepted_pet_types)
+    ? (host.accepted_pet_types as string[])
+    : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -205,18 +290,16 @@ export default function HostDetail() {
             </section>
 
             {/* Accepted pets */}
-            {host.accepted_pet_types?.length > 0 && (
+            {acceptedPetTypes.length > 0 && (
               <section>
                 <h2 className="font-heading text-xl font-bold text-foreground mb-3">Accepted Pet Types</h2>
                 <div className="flex flex-wrap gap-2">
-                  {host.accepted_pet_types.map(t => (
+                  {acceptedPetTypes.map(t => (
                     <Badge key={t} variant="secondary" className="capitalize px-3 py-1 text-sm">{t}</Badge>
                   ))}
                 </div>
               </section>
             )}
-
-
 
             {/* Reviews */}
             <section>
@@ -248,7 +331,7 @@ export default function HostDetail() {
             </section>
             </div>
 
-            {/* RIGHT — Booking + Map */}
+            {/* RIGHT — Booking */}
           <div className="lg:w-96 space-y-5">
             {/* Booking card */}
             <div className="bg-card border border-border rounded-2xl p-6 shadow-lg lg:sticky lg:top-24">
@@ -285,31 +368,24 @@ export default function HostDetail() {
                     <div><Label className="text-xs">Start Date *</Label><Input required type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
                     <div><Label className="text-xs">End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div><Label className="text-xs">Pet Name *</Label><Input required value={form.pet_name} onChange={e => setForm(f => ({ ...f, pet_name: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
-                    <div>
-                      <Label className="text-xs">Pet Type *</Label>
-                      <Select value={form.pet_type} onValueChange={v => setForm(f => ({ ...f, pet_type: v }))}>
-                        <SelectTrigger className="rounded-xl mt-1 h-10 text-sm"><SelectValue placeholder="Type" /></SelectTrigger>
-                        <SelectContent>{['dog','cat','bird','rabbit','fish','reptile','other'].map(t => <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div><Label className="text-xs">Your Name *</Label><Input required value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
-                  <div><Label className="text-xs">Email *</Label><Input required type="email" value={form.owner_email} onChange={e => setForm(f => ({ ...f, owner_email: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
-                  <div><Label className="text-xs">Phone</Label><Input value={form.owner_phone} onChange={e => setForm(f => ({ ...f, owner_phone: e.target.value }))} className="rounded-xl mt-1 h-10 text-sm" /></div>
-                  <div><Label className="text-xs">Notes</Label><Textarea value={form.special_instructions} onChange={e => setForm(f => ({ ...f, special_instructions: e.target.value }))} className="rounded-xl mt-1 text-sm" rows={2} /></div>
 
-                  {/* Fee preview — server-authoritative */}
-                  {quoteLoading && form.service_type && form.start_date && (
+                  <BookingPetField
+                    acceptedPetTypes={acceptedPetTypes}
+                    value={form.pet}
+                    onChange={handlePetChange}
+                    disabled={loading}
+                  />
+
+                  {/* Fee preview — server-authoritative (logged-in only) */}
+                  {user && quoteLoading && form.service_type && form.start_date && (
                     <div className="text-xs text-muted-foreground flex items-center gap-2">
                       <Loader2 className="w-3 h-3 animate-spin" /> Calculating price...
                     </div>
                   )}
-                  {quoteError && (
+                  {user && quoteError && (
                     <div className="text-xs text-destructive bg-destructive/10 rounded-xl p-2">{quoteError}</div>
                   )}
-                  {quote && (
+                  {user && quote && (
                     <div className="bg-secondary rounded-xl p-3 text-xs space-y-1">
                       <div className="flex justify-between text-muted-foreground">
                         <span>Service ({quote.units} unit{quote.units !== 1 ? 's' : ''})</span>
@@ -333,9 +409,9 @@ export default function HostDetail() {
                     subject={`Question about hosting with ${host.full_name}`}
                     className="w-full h-10"
                   />
-                   <Button type="submit" className="w-full rounded-xl bg-primary h-11 font-bold" disabled={loading || quoteLoading || !quote || !form.service_type || !form.pet_type || !form.start_date}>
+                   <Button type="submit" className="w-full rounded-xl bg-primary h-11 font-bold" disabled={loading || !canSubmit}>
                      {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                     Request & Pay
+                     {user ? 'Request & Pay' : 'Login & Request'}
                    </Button>
                 </form>
               )}

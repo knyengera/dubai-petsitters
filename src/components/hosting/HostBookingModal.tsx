@@ -69,11 +69,7 @@ export default function HostBookingModal({ host, open, onClose }) {
       endDate: form.end_date || null,
       petName: form.pet_name,
       petType: form.pet_type,
-      ownerName: form.owner_name,
-      ownerEmail: form.owner_email,
-      ownerPhone: form.owner_phone || null,
       city: form.city || host.city || null,
-      specialInstructions: form.special_instructions || null,
       paymentProvider: gateway,
       idempotencyKey: crypto.randomUUID(),
     });

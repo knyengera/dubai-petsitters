@@ -83,11 +83,7 @@ export type CreateBookingInput = {
   endDate?: string | null;
   petName: string;
   petType: string;
-  ownerName: string;
-  ownerEmail: string;
-  ownerPhone?: string | null;
   city?: string | null;
-  specialInstructions?: string | null;
   paymentProvider: string;
   idempotencyKey?: string;
 };

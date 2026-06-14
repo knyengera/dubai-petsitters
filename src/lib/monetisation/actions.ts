@@ -79,11 +79,41 @@ export async function createHostingBookingWithEscrow(
       return { ok: false, error: "Unsupported payment provider" };
     }
 
-    if (input.ownerEmail.toLowerCase().trim() !== user.email.toLowerCase().trim()) {
-      return { ok: false, error: "Owner email must match your account email" };
+    const supabase = await createClient();
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("full_name, phone")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileError) return { ok: false, error: profileError.message };
+
+    const profileRow = profile as { full_name: string | null; phone: string | null } | null;
+    const ownerName = profileRow?.full_name?.trim();
+    if (!ownerName) {
+      return { ok: false, error: "Complete your profile before booking." };
     }
 
-    const supabase = await createClient();
+    const ownerEmail = user.email;
+    const ownerPhone = profileRow?.phone?.trim() || null;
+
+    const { data: host, error: hostError } = await supabase
+      .from("pet_hosts")
+      .select("accepted_pet_types")
+      .eq("id", input.hostId)
+      .maybeSingle();
+
+    if (hostError) return { ok: false, error: hostError.message };
+    if (!host) return { ok: false, error: "Host not found" };
+
+    const hostRow = host as { accepted_pet_types: string[] | null };
+    const acceptedTypes = hostRow.accepted_pet_types ?? [];
+    const petType = input.petType.toLowerCase().trim();
+    if (acceptedTypes.length > 0 && !acceptedTypes.map((t) => t.toLowerCase()).includes(petType)) {
+      return { ok: false, error: "This host does not accept that pet type." };
+    }
+
     const { data, error } = await callRpc(supabase, "monetisation_create_hosting_booking", {
       p_host_id: input.hostId,
       p_service_type: input.serviceType,
@@ -91,11 +121,11 @@ export async function createHostingBookingWithEscrow(
       p_end_date: input.endDate || null,
       p_pet_name: input.petName,
       p_pet_type: input.petType,
-      p_owner_name: input.ownerName,
-      p_owner_email: input.ownerEmail,
-      p_owner_phone: input.ownerPhone || null,
+      p_owner_name: ownerName,
+      p_owner_email: ownerEmail,
+      p_owner_phone: ownerPhone,
       p_city: input.city || null,
-      p_special_instructions: input.specialInstructions || null,
+      p_special_instructions: null,
       p_payment_provider: input.paymentProvider,
       p_idempotency_key: input.idempotencyKey || null,
     });
