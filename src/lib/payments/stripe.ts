@@ -1,5 +1,11 @@
 import Stripe from "stripe";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
+import {
+  getPaymentBaseUrl,
+  getStripeSecretKey,
+  getStripeWebhookSecret,
+  isStripeConfigured,
+} from "@/lib/payments/config";
 import type { PaymentRecord } from "@/lib/payments/types";
 
 function getStripeClient(): Stripe {
