@@ -60,8 +60,8 @@ export default function HostEarnings() {
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-0">
-            <div className="border-b border-border px-4 sm:px-6 pt-4 pb-0">
+          <Tabs defaultValue="earnings" value={activeTab} onValueChange={setActiveTab} className="gap-0">
+            <div dir="ltr" className="border-b border-border px-4 sm:px-6 pt-4 pb-0">
               <TabsList className="w-full sm:w-auto rounded-xl h-auto p-1">
                 <TabsTrigger value="earnings" className="rounded-lg flex-1 sm:flex-none gap-2 px-4 py-2">
                   <Wallet className="w-4 h-4" />
