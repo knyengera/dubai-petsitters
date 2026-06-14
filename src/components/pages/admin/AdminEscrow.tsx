@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
 import { adminListEscrowAccounts, releaseEscrow, markBookingCompleted } from "@/lib/monetisation/actions";
@@ -71,12 +72,12 @@ export default function AdminEscrow() {
             {
               key: "gross_amount",
               label: "Gross",
-              render: (row) => `${row.currency ?? "SAR"} ${row.gross_amount}`,
+              render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.gross_amount}`,
             },
             {
               key: "host_earnings",
               label: "Host earns",
-              render: (row) => `${row.currency ?? "SAR"} ${row.host_earnings}`,
+              render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.host_earnings}`,
             },
             {
               key: "status",

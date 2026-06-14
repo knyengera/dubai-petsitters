@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/admin/auth";
 import { isLivePaymentProvider } from "@/lib/payments/config";
 import { createGatewayCheckout, isPendingPaymentStatus } from "@/lib/payments/checkout";
 import { isProviderEnabled } from "@/lib/payments/providers";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import type { PaymentRecord } from "@/lib/payments/types";
 
 function parsePayment(row: Record<string, unknown>): PaymentRecord {
@@ -13,7 +14,7 @@ function parsePayment(row: Record<string, unknown>): PaymentRecord {
     gateway: String(row.gateway),
     payment_provider: row.payment_provider ? String(row.payment_provider) : null,
     amount: Number(row.amount),
-    currency: String(row.currency ?? "SAR"),
+    currency: String(row.currency ?? DEFAULT_CURRENCY),
     status: String(row.status),
     reference_id: row.reference_id ? String(row.reference_id) : null,
     booking_id: row.booking_id ? String(row.booking_id) : null,

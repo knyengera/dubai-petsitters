@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { adminListFeeSettings, adminUpsertFeeSettings } from "@/lib/monetisation/actions";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import type { PlatformFeeSettings } from "@/lib/monetisation/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -22,7 +23,7 @@ export default function AdminFeeSettings() {
     guest_fee_max: "",
     host_payout_fee_min: "0",
     host_payout_fee_max: "",
-    currency: "SAR",
+    currency: DEFAULT_CURRENCY,
   });
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function AdminFeeSettings() {
             guest_fee_max: active.guest_fee_max != null ? String(active.guest_fee_max) : "",
             host_payout_fee_min: String(active.host_payout_fee_min ?? 0),
             host_payout_fee_max: active.host_payout_fee_max != null ? String(active.host_payout_fee_max) : "",
-            currency: active.currency || "SAR",
+            currency: active.currency || DEFAULT_CURRENCY,
           });
         }
       }
@@ -97,7 +98,7 @@ export default function AdminFeeSettings() {
               onChange={(e) => setForm((f) => ({ ...f, guest_service_fee_pct: e.target.value }))}
               className="rounded-xl"
             />
-            <p className="text-[11px] text-muted-foreground mt-1">Added on top of host price (e.g. 10% → SAR 100 becomes SAR 110)</p>
+            <p className="text-[11px] text-muted-foreground mt-1">Added on top of host price (e.g. 10% → USD 100 becomes USD 110)</p>
           </div>
           <div>
             <Label className="mb-1.5 block">Host payout fee (%)</Label>
@@ -110,13 +111,13 @@ export default function AdminFeeSettings() {
               onChange={(e) => setForm((f) => ({ ...f, host_payout_fee_pct: e.target.value }))}
               className="rounded-xl"
             />
-            <p className="text-[11px] text-muted-foreground mt-1">Deducted when host withdraws (e.g. 2% on SAR 100 → SAR 98 net)</p>
+            <p className="text-[11px] text-muted-foreground mt-1">Deducted when host withdraws (e.g. 2% on USD 100 → USD 98 net)</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label className="mb-1.5 block">Guest fee min (SAR)</Label>
+            <Label className="mb-1.5 block">Guest fee min ({DEFAULT_CURRENCY})</Label>
             <Input type="number" min="0" step="0.01" value={form.guest_fee_min} onChange={(e) => setForm((f) => ({ ...f, guest_fee_min: e.target.value }))} className="rounded-xl" />
           </div>
           <div>

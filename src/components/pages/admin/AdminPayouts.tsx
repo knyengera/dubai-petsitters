@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
 import { adminListPayoutRequests, adminUpdatePayoutStatus } from "@/lib/monetisation/actions";
@@ -58,17 +59,17 @@ export default function AdminPayouts() {
             {
               key: "gross_amount",
               label: "Gross",
-              render: (row) => `${row.currency ?? "SAR"} ${row.gross_amount}`,
+              render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.gross_amount}`,
             },
             {
               key: "payout_fee_amount",
               label: "Fee",
-              render: (row) => `${row.currency ?? "SAR"} ${row.payout_fee_amount}`,
+              render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.payout_fee_amount}`,
             },
             {
               key: "net_amount",
               label: "Net",
-              render: (row) => `${row.currency ?? "SAR"} ${row.net_amount}`,
+              render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.net_amount}`,
             },
             {
               key: "status",

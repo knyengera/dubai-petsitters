@@ -1,10 +1,5 @@
 import Stripe from "stripe";
-import {
-  getPaymentBaseUrl,
-  getStripeSecretKey,
-  getStripeWebhookSecret,
-  isStripeConfigured,
-} from "@/lib/payments/config";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import type { PaymentRecord } from "@/lib/payments/types";
 
 function getStripeClient(): Stripe {
@@ -48,7 +43,7 @@ export async function createStripeCheckoutSession(
 
   const stripe = getStripeClient();
   const baseUrl = getPaymentBaseUrl();
-  const currency = (payment.currency || "SAR").toLowerCase();
+  const currency = (payment.currency || DEFAULT_CURRENCY).toLowerCase();
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",

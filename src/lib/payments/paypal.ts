@@ -1,3 +1,4 @@
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import {
   getPayPalApiBase,
   getPayPalClientId,
@@ -68,7 +69,7 @@ export async function createPayPalOrder(
 
   const token = await getPayPalAccessToken();
   const baseUrl = getPaymentBaseUrl();
-  const currency = payment.currency || "SAR";
+  const currency = payment.currency || DEFAULT_CURRENCY;
 
   const res = await fetch(`${getPayPalApiBase()}/v2/checkout/orders`, {
     method: "POST",

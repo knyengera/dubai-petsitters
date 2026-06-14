@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Star, MapPin, CheckCircle, Clock, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { createHostingBookingWithEscrow } from '@/lib/monetisation/actions';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 import { quoteToSummary } from '@/lib/monetisation/pricing';
 import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
 import PaymentModal from '@/components/payment/PaymentModal';
@@ -186,10 +187,10 @@ export default function HostDetailModal({ host, open, onClose }) {
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <div>
                   {host.price_per_night && (
-                    <span className="text-2xl font-bold text-foreground">SAR {host.price_per_night}<span className="text-sm font-normal text-muted-foreground"> / night</span></span>
+                    <span className="text-2xl font-bold text-foreground">{DEFAULT_CURRENCY} {host.price_per_night}<span className="text-sm font-normal text-muted-foreground"> / night</span></span>
                   )}
                   {!host.price_per_night && host.price_per_day && (
-                    <span className="text-2xl font-bold text-foreground">SAR {host.price_per_day}<span className="text-sm font-normal text-muted-foreground"> / day</span></span>
+                    <span className="text-2xl font-bold text-foreground">{DEFAULT_CURRENCY} {host.price_per_day}<span className="text-sm font-normal text-muted-foreground"> / day</span></span>
                   )}
                 </div>
                 <Button onClick={() => setStep('book')} className="bg-primary hover:bg-primary/90 rounded-xl px-8">

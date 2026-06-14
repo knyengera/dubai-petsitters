@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin, getSessionUser } from "@/lib/admin/auth";
-import { isSupportedPaymentProvider } from "@/lib/monetisation/constants";
+import { isSupportedPaymentProvider, DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { parseBookingQuote } from "@/lib/monetisation/pricing";
 import type {
   BookingQuote,
@@ -50,7 +50,7 @@ export async function getBookingQuote(input: {
       p_service_type: input.serviceType,
       p_start_date: input.startDate,
       p_end_date: input.endDate || null,
-      p_currency: input.currency || "SAR",
+      p_currency: input.currency || DEFAULT_CURRENCY,
     });
     if (error) return { ok: false, error: error.message };
     const quote = parseBookingQuote(data);
@@ -195,7 +195,7 @@ export async function getHostBalance(hostId: string): Promise<MonetisationAction
       ok: true,
       data: {
         host_id: String(row.host_id),
-        currency: String(row.currency ?? "SAR"),
+        currency: String(row.currency ?? DEFAULT_CURRENCY),
         available_balance: Number(row.available_balance ?? 0),
         pending_balance: Number(row.pending_balance ?? 0),
         lifetime_earned: Number(row.lifetime_earned ?? 0),
@@ -247,7 +247,7 @@ export async function requestHostPayout(input: {
         payout: {
           id: String(payout.id),
           host_id: String(payout.host_id),
-          currency: String(payout.currency ?? "SAR"),
+          currency: String(payout.currency ?? DEFAULT_CURRENCY),
           gross_amount: Number(payout.gross_amount),
           payout_fee_pct: Number(payout.payout_fee_pct),
           payout_fee_amount: Number(payout.payout_fee_amount),
@@ -265,7 +265,7 @@ export async function requestHostPayout(input: {
         },
         balance: {
           host_id: String(balance.host_id),
-          currency: String(balance.currency ?? "SAR"),
+          currency: String(balance.currency ?? DEFAULT_CURRENCY),
           available_balance: Number(balance.available_balance ?? 0),
           pending_balance: Number(balance.pending_balance ?? 0),
           lifetime_earned: Number(balance.lifetime_earned ?? 0),
@@ -328,7 +328,7 @@ export async function adminUpsertFeeSettings(
       await supabase
         .from("platform_fee_settings")
         .update({ is_active: false, updated_at: new Date().toISOString() } as never)
-        .eq("currency", payload.currency || "SAR")
+        .eq("currency", payload.currency || DEFAULT_CURRENCY)
         .eq("is_active", true);
     }
 
@@ -340,7 +340,7 @@ export async function adminUpsertFeeSettings(
       guest_fee_max: payload.guest_fee_max ?? null,
       host_payout_fee_min: payload.host_payout_fee_min ?? 0,
       host_payout_fee_max: payload.host_payout_fee_max ?? null,
-      currency: payload.currency || "SAR",
+      currency: payload.currency || DEFAULT_CURRENCY,
       is_active: payload.is_active ?? true,
       effective_from: payload.effective_from || new Date().toISOString(),
       effective_until: payload.effective_until ?? null,
@@ -501,7 +501,7 @@ export async function createVetSubscriptionPayment(input: {
         gateway: input.gateway,
         payment_provider: input.gateway,
         amount: input.amount,
-        currency: input.currency || "SAR",
+        currency: input.currency || DEFAULT_CURRENCY,
         status: "pending",
         reference_id: input.subscriptionId,
         payer_name: input.payerName,
@@ -550,7 +550,7 @@ export async function createPartnerAdvertisingPayment(input: {
         gateway: input.gateway,
         payment_provider: input.gateway,
         amount: input.amount,
-        currency: input.currency || "SAR",
+        currency: input.currency || DEFAULT_CURRENCY,
         status: "pending",
         reference_id: input.inquiryId,
         payer_name: input.payerName,

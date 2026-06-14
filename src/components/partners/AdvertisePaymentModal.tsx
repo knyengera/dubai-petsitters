@@ -10,12 +10,19 @@ import { useToast } from '@/components/ui/use-toast';
 import { BadgeCheck, ArrowRight } from 'lucide-react';
 import PaymentModal from '@/components/payment/PaymentModal';
 import { createPartnerAdvertisingPayment } from '@/lib/monetisation/actions';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
+import {
+  formatAdvertisingPlanPrice,
+  type AdvertisingPlan,
+} from '@/lib/partners/advertising-plans';
 
-function parsePriceNumber(priceStr: string) {
-  return parseFloat(priceStr.replace(/[^0-9.]/g, '')) || 0;
-}
+type AdvertisePaymentModalProps = {
+  plan: AdvertisingPlan | null;
+  open: boolean;
+  onClose: () => void;
+};
 
-export default function AdvertisePaymentModal({ plan, open, onClose }) {
+export default function AdvertisePaymentModal({ plan, open, onClose }: AdvertisePaymentModalProps) {
   const [contact, setContact] = useState({ business_name: '', contact_name: '', email: '', phone: '' });
   const [inquiryId, setInquiryId] = useState<string | null>(null);
   const [showPayment, setShowPayment] = useState(false);
@@ -23,7 +30,8 @@ export default function AdvertisePaymentModal({ plan, open, onClose }) {
 
   if (!plan) return null;
 
-  const amount = parsePriceNumber(plan.price);
+  const amount = Number(plan.amount);
+  const priceLabel = formatAdvertisingPlanPrice(plan);
 
   const handleProceedToPayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +65,7 @@ export default function AdvertisePaymentModal({ plan, open, onClose }) {
       payerName: contact.contact_name,
       payerEmail: contact.email,
       notes: `Advertising plan: ${plan.name} | Business: ${contact.business_name}`,
-      currency: 'SAR',
+      currency: plan.currency || DEFAULT_CURRENCY,
     });
     if (result.ok === false) {
       toast({ title: 'Payment setup failed', description: result.error, variant: 'destructive' });
@@ -87,7 +95,7 @@ export default function AdvertisePaymentModal({ plan, open, onClose }) {
       { label: 'Plan', value: plan.name },
       { label: 'Business', value: contact.business_name || '—' },
     ],
-    total: plan.price,
+    total: priceLabel,
   };
 
   return (
@@ -111,8 +119,8 @@ export default function AdvertisePaymentModal({ plan, open, onClose }) {
             <div className="flex justify-between items-center mb-2">
               <span className="font-semibold text-foreground">{plan.name} Plan</span>
               <span className="font-heading text-xl font-bold text-primary">
-                {plan.price}
-                <span className="text-sm font-normal text-muted-foreground">{plan.period}</span>
+                {priceLabel}
+                <span className="text-sm font-normal text-muted-foreground">{plan.period_label}</span>
               </span>
             </div>
             <ul className="space-y-1">

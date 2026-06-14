@@ -13,6 +13,7 @@ import {
 } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { adminCaptureManualPayment } from "@/lib/monetisation/actions";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle } from "lucide-react";
@@ -83,7 +84,7 @@ export default function AdminPayments() {
             key: "amount",
             label: "Amount",
             render: (row) =>
-              row.amount ? `${row.currency ?? "SAR"} ${row.amount}` : "—",
+              row.amount ? `${row.currency ?? DEFAULT_CURRENCY} ${row.amount}` : "—",
           },
           {
             key: "status",

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/admin/auth";
-import { isCapturedPaymentStatus } from "@/lib/payments/checkout";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 export async function GET(
   _request: Request,
@@ -39,7 +39,7 @@ export async function GET(
     captured: isCapturedPaymentStatus(status),
     payment_type: String(row.payment_type),
     amount: Number(row.amount),
-    currency: String(row.currency ?? "SAR"),
+    currency: String(row.currency ?? DEFAULT_CURRENCY),
     provider_payment_id: row.provider_payment_id ? String(row.provider_payment_id) : null,
   });
 }

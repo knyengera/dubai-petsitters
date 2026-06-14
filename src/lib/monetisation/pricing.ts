@@ -1,3 +1,4 @@
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import type { BookingQuote } from "@/lib/monetisation/types";
 
 /** Parse server-authoritative quote JSON from RPC. */
@@ -11,7 +12,7 @@ export function parseBookingQuote(raw: unknown): BookingQuote | null {
   const str = (k: string) => String(q[k] ?? "");
   if (!str("fee_settings_id")) return null;
   return {
-    currency: str("currency") || "SAR",
+    currency: str("currency") || DEFAULT_CURRENCY,
     unit_price: num("unit_price"),
     units: num("units") || 1,
     base_amount: num("base_amount"),

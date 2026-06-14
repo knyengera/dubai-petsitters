@@ -28,6 +28,7 @@ export const ADMIN_TABLES = {
   notification_preferences: "notification_preferences",
   partner_deals: "partner_deals",
   partner_inquiries: "partner_inquiries",
+  advertising_plans: "advertising_plans",
   vet_subscriptions: "vet_subscriptions",
   reviews: "reviews",
 } as const satisfies Record<string, AdminTable>;

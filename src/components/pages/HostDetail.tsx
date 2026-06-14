@@ -18,6 +18,7 @@ import PhotoGallery from '@/components/common/PhotoGallery';
 import StartChatButton from '@/components/messaging/StartChatButton';
 import ReviewsList from '@/components/reviews/ReviewsList';
 import { createHostingBookingWithEscrow } from '@/lib/monetisation/actions';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 import { quoteToSummary } from '@/lib/monetisation/pricing';
 import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
 
@@ -253,8 +254,8 @@ export default function HostDetail() {
             <div className="bg-card border border-border rounded-2xl p-6 shadow-lg lg:sticky lg:top-24">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  {host.price_per_night && <p className="font-heading text-2xl font-bold text-foreground">SAR {host.price_per_night}<span className="text-sm font-normal text-muted-foreground"> / night</span></p>}
-                  {!host.price_per_night && host.price_per_day && <p className="font-heading text-2xl font-bold text-foreground">SAR {host.price_per_day}<span className="text-sm font-normal text-muted-foreground"> / day</span></p>}
+                  {host.price_per_night && <p className="font-heading text-2xl font-bold text-foreground">{DEFAULT_CURRENCY} {host.price_per_night}<span className="text-sm font-normal text-muted-foreground"> / night</span></p>}
+                  {!host.price_per_night && host.price_per_day && <p className="font-heading text-2xl font-bold text-foreground">{DEFAULT_CURRENCY} {host.price_per_day}<span className="text-sm font-normal text-muted-foreground"> / day</span></p>}
                 </div>
                 {host.rating && (
                   <div className="flex items-center gap-1 text-sm font-semibold">

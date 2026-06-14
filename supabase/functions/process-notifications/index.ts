@@ -42,7 +42,7 @@ function renderText(templateKey: string, payload: Record<string, unknown>): stri
     case "booking.confirmed.host":
       return `Booking confirmed for ${pet}.`;
     case "payment.confirmed":
-      return `Payment of ${payload.amount} ${payload.currency ?? "SAR"} received.`;
+      return `Payment of ${payload.amount} ${payload.currency ?? "USD"} received.`;
     case "message.new":
       return `New message from ${payload.sender_name ?? "someone"}.`;
     default:

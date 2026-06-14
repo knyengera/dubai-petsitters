@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
 import { adminListLedgerEntries } from "@/lib/monetisation/actions";
@@ -46,7 +47,7 @@ export default function AdminLedger() {
             {
               key: "amount",
               label: "Amount",
-              render: (row) => `${row.currency ?? "SAR"} ${row.amount}`,
+              render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.amount}`,
             },
             { key: "direction", label: "Direction" },
             { key: "actor_email", label: "Actor" },

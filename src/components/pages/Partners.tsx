@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { entities } from '@/lib/data/entities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,37 +10,18 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { CheckCircle, Stethoscope, Store, TrendingUp, Megaphone, Globe, BadgeCheck, Loader2, ChevronRight } from 'lucide-react';
 import AdvertisePaymentModal from '@/components/partners/AdvertisePaymentModal';
+import { getActiveAdvertisingPlans } from '@/lib/partners/actions';
+import {
+  ADVERTISING_PLAN_HIGHLIGHT_STYLES,
+  formatAdvertisingPlanPrice,
+  type AdvertisingPlan,
+} from '@/lib/partners/advertising-plans';
 
 const partnerTypes = [
   { icon: Stethoscope, label: 'Vet Clinics', desc: 'Reach thousands of pet owners looking for trusted care.' },
   { icon: Store, label: 'Pet Shops & Stores', desc: 'Promote your products to an engaged Saudi audience.' },
   { icon: TrendingUp, label: 'Pet Insurance', desc: 'Connect with owners seeking protection for their pets.' },
   { icon: Globe, label: 'Other Pet Businesses', desc: 'Groomers, trainers, breeders & more.' },
-];
-
-const adPlans = [
-  {
-    name: 'Starter',
-    price: 'SAR 299',
-    period: '/month',
-    color: 'border-border',
-    features: ['Directory listing', 'Business profile page', 'Contact button', '500 impressions/month'],
-  },
-  {
-    name: 'Professional',
-    price: 'SAR 799',
-    period: '/month',
-    color: 'border-primary',
-    badge: 'Most Popular',
-    features: ['Everything in Starter', 'Featured placement', 'Banner ad on relevant pages', '5,000 impressions/month', 'Monthly analytics report'],
-  },
-  {
-    name: 'Premium',
-    price: 'SAR 1,999',
-    period: '/month',
-    color: 'border-warning',
-    features: ['Everything in Professional', 'Homepage spotlight', 'Priority search ranking', 'Unlimited impressions', 'Dedicated account manager', 'Custom landing page'],
-  },
 ];
 
 const stats = [
@@ -52,7 +33,9 @@ const stats = [
 
 export default function Partners() {
   const { toast } = useToast();
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [adPlans, setAdPlans] = useState<AdvertisingPlan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState<AdvertisingPlan | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -60,7 +43,13 @@ export default function Partners() {
     business_type: '', city: '', website: '', message: '', plan: '',
   });
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    getActiveAdvertisingPlans()
+      .then(setAdPlans)
+      .finally(() => setPlansLoading(false));
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -106,7 +95,6 @@ export default function Partners() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Stats bar */}
       <div className="bg-primary text-primary-foreground py-6">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
           {stats.map(s => (
@@ -119,8 +107,6 @@ export default function Partners() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-
-        {/* Who we serve */}
         <div className="text-center mb-10">
           <h2 className="font-heading text-3xl font-bold text-foreground mb-2">Who Can Partner With Us?</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">We welcome all pet-related businesses looking to grow their customer base in Saudi Arabia.</p>
@@ -139,51 +125,60 @@ export default function Partners() {
           ))}
         </div>
 
-        {/* Pricing */}
         <div className="text-center mb-10">
           <h2 className="font-heading text-3xl font-bold text-foreground mb-2">Advertising Plans</h2>
           <p className="text-muted-foreground">Flexible options to fit every business size and budget.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          {adPlans.map((plan, i) => (
-            <motion.div key={plan.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-              <div className={`relative bg-card border-2 ${plan.color} rounded-2xl p-6 h-full flex flex-col ${plan.badge ? 'shadow-xl' : ''}`}>
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full shadow">{plan.badge}</span>
-                  </div>
-                )}
-                <div className="mb-4">
-                  <h3 className="font-heading text-xl font-bold text-foreground">{plan.name}</h3>
-                  <div className="flex items-end gap-1 mt-1">
-                    <span className="font-heading text-3xl font-extrabold text-primary">{plan.price}</span>
-                    <span className="text-sm text-muted-foreground mb-1">{plan.period}</span>
-                  </div>
-                </div>
-                <ul className="space-y-2 flex-1 mb-6">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-foreground">
-                      <BadgeCheck className="w-4 h-4 text-primary shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  onClick={() => {
-                    setSelectedPlan(plan);
-                    setForm((f) => ({ ...f, plan: plan.name }));
-                  }}
-                  className={`w-full rounded-xl ${plan.badge ? 'bg-primary text-primary-foreground' : 'variant-outline'}`}
-                  variant={plan.badge ? 'default' : 'outline'}
-                >
-                  Get Started <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
 
-        {/* Contact Form */}
+        {plansLoading ? (
+          <div className="flex justify-center py-16 mb-16">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : adPlans.length === 0 ? (
+          <div className="text-center py-16 mb-16 text-muted-foreground">
+            Advertising plans are not available right now. Please use the contact form below.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            {adPlans.map((plan, i) => (
+              <motion.div key={plan.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+                <div className={`relative bg-card border-2 ${ADVERTISING_PLAN_HIGHLIGHT_STYLES[plan.highlight]} rounded-2xl p-6 h-full flex flex-col ${plan.badge ? 'shadow-xl' : ''}`}>
+                  {plan.badge && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full shadow">{plan.badge}</span>
+                    </div>
+                  )}
+                  <div className="mb-4">
+                    <h3 className="font-heading text-xl font-bold text-foreground">{plan.name}</h3>
+                    <div className="flex items-end gap-1 mt-1">
+                      <span className="font-heading text-3xl font-extrabold text-primary">{formatAdvertisingPlanPrice(plan)}</span>
+                      <span className="text-sm text-muted-foreground mb-1">{plan.period_label}</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-2 flex-1 mb-6">
+                    {plan.features.map(f => (
+                      <li key={f} className="flex items-center gap-2 text-sm text-foreground">
+                        <BadgeCheck className="w-4 h-4 text-primary shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    onClick={() => {
+                      setSelectedPlan(plan);
+                      setForm((f) => ({ ...f, plan: plan.name }));
+                    }}
+                    className={`w-full rounded-xl ${plan.badge ? 'bg-primary text-primary-foreground' : ''}`}
+                    variant={plan.badge ? 'default' : 'outline'}
+                  >
+                    Get Started <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
         <div id="partner-form" className="max-w-2xl mx-auto">
           <h2 className="font-heading text-2xl font-bold text-foreground mb-2 text-center">Get In Touch</h2>
           <p className="text-muted-foreground text-center mb-8">Tell us about your business and we'll find the best advertising solution for you.</p>

@@ -2,6 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import {
+  buildDatabaseUrl,
+  formatConnectionHelp,
+  getProjectRef,
+  warnIfIpv6Only,
+} from "./lib/database-url.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -23,22 +29,12 @@ function loadEnvFile(filePath) {
 loadEnvFile(path.join(root, ".env.local"));
 loadEnvFile(path.join(root, ".env"));
 
-const projectRef =
-  process.env.SUPABASE_PROJECT_REF ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL?.match(
-    /https:\/\/([^.]+)\.supabase\.co/
-  )?.[1];
-
-const password = process.env.SUPABASE_DB_PASSWORD;
-const databaseUrl =
-  process.env.DATABASE_URL ||
-  (projectRef && password
-    ? `postgresql://postgres:${encodeURIComponent(password)}@db.${projectRef}.supabase.co:5432/postgres`
-    : null);
+const projectRef = getProjectRef();
+const databaseUrl = buildDatabaseUrl();
 
 if (!databaseUrl) {
   console.error(
-    "Missing database connection. Set DATABASE_URL or SUPABASE_DB_PASSWORD in .env.local"
+    "Missing database connection. Set DATABASE_URL, SUPABASE_DB_POOLER_URL, or SUPABASE_DB_PASSWORD in .env.local"
   );
   process.exit(1);
 }
@@ -52,17 +48,6 @@ const client = new pg.Client({
   connectionString: databaseUrl,
   ssl: { rejectUnauthorized: false },
 });
-
-async function ensureMigrationTable() {
-  await client.query(`
-    CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations (
-      version text PRIMARY KEY,
-      name text,
-      statements text[]
-    );
-  `);
-  await client.query(`CREATE SCHEMA IF NOT EXISTS supabase_migrations;`);
-}
 
 async function getApplied() {
   const { rows } = await client.query(
@@ -81,8 +66,22 @@ async function getApplied() {
 }
 
 async function main() {
-  console.log(`Connecting to project: ${projectRef ?? "custom DATABASE_URL"}`);
-  await client.connect();
+  const usingPooler = Boolean(
+    process.env.DATABASE_URL || process.env.SUPABASE_DB_POOLER_URL
+  );
+  console.log(
+    `Connecting to project: ${projectRef ?? "custom DATABASE_URL"}${usingPooler ? " (pooler/custom URL)" : " (direct)"}`
+  );
+  await warnIfIpv6Only(databaseUrl);
+
+  try {
+    await client.connect();
+  } catch (error) {
+    if (error.code === "ENETUNREACH" || error.message?.includes("ENETUNREACH")) {
+      console.error(formatConnectionHelp(projectRef));
+    }
+    throw error;
+  }
 
   const applied = await getApplied();
 

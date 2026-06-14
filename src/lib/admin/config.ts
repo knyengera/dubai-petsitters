@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Handshake,
   Mail,
+  Megaphone,
   CreditCard,
   Star,
   Receipt,
@@ -120,6 +121,13 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     href: "/admin/partner-inquiries",
     icon: Mail,
     description: "Partnership form submissions",
+    group: "commerce",
+  },
+  {
+    label: "Advertising Plans",
+    href: "/admin/advertising-plans",
+    icon: Megaphone,
+    description: "Partner advertising pricing tiers",
     group: "commerce",
   },
   {

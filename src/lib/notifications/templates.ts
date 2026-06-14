@@ -96,7 +96,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
             { label: "Pet", value: pet },
             { label: "Start", value: str(p.start_date) },
             { label: "End", value: str(p.end_date) },
-            { label: "Total", value: p.total_price ? `${p.total_price} SAR` : "" },
+            { label: "Total", value: p.total_price ? `${p.total_price} USD` : "" },
           ]),
         ].join(""),
         {
@@ -138,7 +138,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
 
   "payment.confirmed": (channel, p) => {
     const amount = str(p.amount);
-    const currency = str(p.currency, "SAR");
+    const currency = str(p.currency, "USD");
     const text = `Payment of ${amount} ${currency} received. Thank you!`;
     if (channel === "sms") return { text };
     return {
@@ -267,7 +267,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
   "payout.status": (channel, p) => {
     const status = str(p.status);
     const amount = str(p.net_amount);
-    const currency = str(p.currency, "SAR");
+    const currency = str(p.currency, "USD");
     const text = `Payout ${status}: ${amount} ${currency}.`;
     if (channel === "sms") return { text };
     return {
@@ -289,7 +289,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
 
   "escrow.released": (channel, p) => {
     const amount = str(p.host_earnings);
-    const currency = str(p.currency, "SAR");
+    const currency = str(p.currency, "USD");
     const pet = str(p.pet_name, "booking");
     const calendarUrl = link("/host-calendar");
     const text = `Earnings of ${amount} ${currency} released for ${pet}.`;

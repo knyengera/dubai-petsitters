@@ -1,4 +1,5 @@
 import { createServiceClient, hasServiceRole } from "@/lib/admin/service-client";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { capturePayPalOrder } from "@/lib/payments/paypal";
 import type { PaymentRecord } from "@/lib/payments/types";
 
@@ -73,7 +74,7 @@ export async function loadPaymentRecord(paymentId: string): Promise<PaymentRecor
     gateway: String(row.gateway),
     payment_provider: row.payment_provider ? String(row.payment_provider) : null,
     amount: Number(row.amount),
-    currency: String(row.currency ?? "SAR"),
+    currency: String(row.currency ?? DEFAULT_CURRENCY),
     status: String(row.status),
     reference_id: row.reference_id ? String(row.reference_id) : null,
     booking_id: row.booking_id ? String(row.booking_id) : null,

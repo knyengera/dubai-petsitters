@@ -12,8 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Stethoscope, CheckCircle, Star, Megaphone, Calendar } from 'lucide-react';
 import PaymentModal from '@/components/payment/PaymentModal';
 import { createVetSubscriptionPayment } from '@/lib/monetisation/actions';
+import { DEFAULT_CURRENCY, formatMoney } from '@/lib/monetisation/constants';
 
-const ANNUAL_FEE = 999; // SAR
+const ANNUAL_FEE = 999; // USD
 const SAUDI_CITIES = ['Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar', 'Tabuk', 'Abha', 'Other'];
 
 const PERKS = [
@@ -81,7 +82,7 @@ export default function VetAdvertise() {
       amount: ANNUAL_FEE * 1.15,
       payerName: form.contact_name,
       payerEmail: user?.email ?? form.contact_email,
-      currency: 'SAR',
+      currency: DEFAULT_CURRENCY,
     });
     if (result.ok === false) {
       toast({
@@ -105,11 +106,11 @@ export default function VetAdvertise() {
   const paymentSummary = {
     title: `Vet Clinic Annual Subscription — ${form.clinic_name || 'Your Clinic'}`,
     lines: [
-      { label: 'Annual listing fee', value: `SAR ${ANNUAL_FEE}` },
+      { label: 'Annual listing fee', value: formatMoney(ANNUAL_FEE) },
       { label: 'Duration', value: '12 months' },
-      { label: 'VAT (15%)', value: `SAR ${(ANNUAL_FEE * 0.15).toFixed(2)}` },
+      { label: 'VAT (15%)', value: formatMoney(ANNUAL_FEE * 0.15) },
     ],
-    total: `SAR ${(ANNUAL_FEE * 1.15).toFixed(2)}`,
+    total: formatMoney(ANNUAL_FEE * 1.15),
   };
 
   return (
@@ -145,7 +146,7 @@ export default function VetAdvertise() {
 
             <div className="bg-primary rounded-2xl p-5 text-primary-foreground text-center">
               <p className="text-sm font-medium opacity-80 mb-1">Annual Plan</p>
-              <p className="font-heading text-4xl font-extrabold">SAR {ANNUAL_FEE}</p>
+              <p className="font-heading text-4xl font-extrabold">{formatMoney(ANNUAL_FEE)}</p>
               <p className="text-sm opacity-80 mt-1">+ 15% VAT / year</p>
             </div>
           </div>
@@ -192,7 +193,7 @@ export default function VetAdvertise() {
               <div><Label className="text-xs">Promo Details</Label><Textarea value={form.promo_description} onChange={f('promo_description')} rows={3} placeholder="Describe your offer, terms & conditions..." className="rounded-xl mt-1 text-sm" /></div>
 
               <Button type="submit" disabled={submitting || isLoadingAuth} className="w-full rounded-xl h-11 font-bold bg-primary">
-                {submitting ? 'Saving...' : `Proceed to Payment — SAR ${(ANNUAL_FEE * 1.15).toFixed(2)}`}
+                {submitting ? 'Saving...' : `Proceed to Payment — ${formatMoney(ANNUAL_FEE * 1.15)}`}
               </Button>
             </form>
             )}
