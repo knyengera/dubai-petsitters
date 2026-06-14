@@ -108,7 +108,7 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
   },
   "/dashboard": {
     title: "Dashboard",
-    subtitle: "Your pet care hub at a glance",
+    subtitle: "Your pet care and hosting hub at a glance",
     imageAlt: DEFAULT_ALT,
   },
   "/pets": {

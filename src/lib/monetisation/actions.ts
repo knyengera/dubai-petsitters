@@ -183,6 +183,7 @@ export async function createHostingBookingWithEscrow(
 
     revalidatePath("/admin/bookings");
     revalidatePath("/host-calendar");
+    revalidatePath("/dashboard");
 
     return {
       ok: true,
@@ -213,6 +214,7 @@ export async function captureBookingPayment(input: {
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin/bookings");
     revalidatePath("/host-calendar");
+    revalidatePath("/dashboard");
     return { ok: true, data: parseRow(data) };
   } catch (e) {
     return { ok: false, error: toError(e) };
@@ -230,6 +232,7 @@ export async function markBookingCompleted(
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin/bookings");
     revalidatePath("/host-calendar");
+    revalidatePath("/dashboard");
     return { ok: true, data: parseRow(data) };
   } catch (e) {
     return { ok: false, error: toError(e) };
@@ -249,6 +252,7 @@ export async function releaseEscrow(
     revalidatePath("/admin/bookings");
     revalidatePath("/admin/escrow");
     revalidatePath("/host-calendar");
+    revalidatePath("/dashboard");
     return { ok: true, data: parseRow(data) };
   } catch (e) {
     return { ok: false, error: toError(e) };
@@ -314,6 +318,7 @@ export async function requestHostPayout(input: {
     const balance = payload.balance as Record<string, unknown>;
 
     revalidatePath("/host-calendar");
+    revalidatePath("/dashboard");
     revalidatePath("/admin/payouts");
 
     return {

@@ -68,7 +68,7 @@ const IN_APP_TEMPLATES: Record<string, InAppTemplateFn> = {
     return {
       title: `New booking request for ${pet}`,
       body: `${owner} requested hosting for ${pet}${dates ? ` (${dates})` : ""}.`,
-      actionUrl: "/host-calendar",
+      actionUrl: "/dashboard",
     };
   },
   "booking.confirmed": (p) => {
@@ -76,7 +76,7 @@ const IN_APP_TEMPLATES: Record<string, InAppTemplateFn> = {
     return {
       title: `Booking confirmed — ${pet}`,
       body: `Your hosting booking for ${pet} is confirmed.`,
-      actionUrl: "/my-appointments",
+      actionUrl: "/dashboard",
     };
   },
   "booking.confirmed.host": (p) => {
@@ -85,7 +85,7 @@ const IN_APP_TEMPLATES: Record<string, InAppTemplateFn> = {
     return {
       title: `Booking confirmed — ${pet}`,
       body: `${owner}'s booking for ${pet} is confirmed and payment has been received.`,
-      actionUrl: "/host-calendar",
+      actionUrl: "/dashboard",
     };
   },
   "payment.confirmed": (p) => {
@@ -151,7 +151,7 @@ const IN_APP_TEMPLATES: Record<string, InAppTemplateFn> = {
     return {
       title: "Earnings released",
       body: `Earnings of ${amount} ${currency} released for ${pet}.`,
-      actionUrl: "/host-calendar",
+      actionUrl: "/dashboard",
     };
   },
   "reminder.pet_health": (p) => {
@@ -178,7 +178,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
     const owner = str(p.owner_name, "A pet owner");
     const pet = str(p.pet_name, "a pet");
     const dates = [p.start_date, p.end_date].filter(Boolean).join(" – ");
-    const calendarUrl = link("/host-calendar");
+    const calendarUrl = link("/dashboard");
     const text = `New booking request from ${owner} for ${pet}${dates ? ` (${dates})` : ""}. View: ${calendarUrl}`;
     if (channel === "sms") return { text };
     return {
@@ -207,7 +207,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
 
   "booking.confirmed": (channel, p) => {
     const pet = str(p.pet_name, "your pet");
-    const detailsUrl = link("/my-appointments");
+    const detailsUrl = link("/dashboard");
     const text = `Your booking for ${pet} is confirmed. Details: ${detailsUrl}`;
     if (channel === "sms") return { text };
     return {
@@ -237,7 +237,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
   "booking.confirmed.host": (channel, p) => {
     const pet = str(p.pet_name, "a pet");
     const owner = str(p.owner_name, "the owner");
-    const calendarUrl = link("/host-calendar");
+    const calendarUrl = link("/dashboard");
     const text = `Booking confirmed: ${owner}'s ${pet}. ${calendarUrl}`;
     if (channel === "sms") return { text };
     return {
@@ -418,7 +418,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
     const amount = str(p.host_earnings);
     const currency = str(p.currency, "USD");
     const pet = str(p.pet_name, "booking");
-    const calendarUrl = link("/host-calendar");
+    const calendarUrl = link("/dashboard");
     const text = `Earnings of ${amount} ${currency} released for ${pet}.`;
     if (channel === "sms") return { text };
     return {
