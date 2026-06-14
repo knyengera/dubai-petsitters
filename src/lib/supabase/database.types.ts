@@ -154,6 +154,20 @@ export interface Database {
           updated_at?: string;
         };
       };
+      user_notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          event_type: string;
+          template_key: string;
+          payload: Json;
+          read_at: string | null;
+          idempotency_key: string;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+      };
       notification_outbox: {
         Row: {
           id: string;

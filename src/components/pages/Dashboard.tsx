@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { entities } from '@/lib/data/entities';
 import { useLanguage } from '@/lib/language-context';
-import { PawPrint, Calendar, Bot, MapPin, Stethoscope, Plus, ChevronRight, Syringe, CalendarDays, ShieldCheck, LayoutDashboard } from 'lucide-react';
+import { PawPrint, Calendar, Bot, Stethoscope, Plus, ChevronRight, Syringe, CalendarDays, ShieldCheck, LayoutDashboard, MessageCircle } from 'lucide-react';
 import { ADMIN_NAV_ITEMS } from '@/lib/admin/config';
 import PetRemindersSection from '@/components/home/PetRemindersSection';
 import { usePetHealthAssistant } from '@/lib/pet-health-assistant-context';
@@ -19,7 +19,7 @@ const quickActions = [
   { icon: Calendar, color: 'bg-info', en: 'Book Appointment', ar: 'احجز موعداً', to: '/appointments' },
   { icon: Stethoscope, color: 'bg-success', en: 'Find a Vet', ar: 'ابحث عن طبيب', to: '/vets' },
   { icon: CalendarDays, color: 'bg-secondary', en: 'Manage Calendar', ar: 'إدارة التقويم', to: '/host-calendar' },
-  { icon: MapPin, color: 'bg-warning', en: 'Lost Pets', ar: 'الحيوانات الضائعة', to: '/lost-pets' },
+  { icon: MessageCircle, color: 'bg-warning', en: 'Messages', ar: 'الرسائل', to: '/messages' },
 ];
 
 export default function Dashboard() {

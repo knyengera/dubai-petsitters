@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { MessageCircle, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useAuth } from "@/lib/auth-context";
 import {
   getHeaderNavLinks,
-  PROTECTED_EXTRA_NAV_LINKS,
   ADMIN_NAV_LINK,
 } from "@/lib/auth/navigation";
+import NotificationBell from "@/components/layout/NotificationBell";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -68,21 +68,7 @@ export default function Navbar() {
                 {t(ADMIN_NAV_LINK.labelEn, ADMIN_NAV_LINK.labelAr)}
               </Link>
             )}
-            {user &&
-              PROTECTED_EXTRA_NAV_LINKS.map((link) => (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  className={`relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
-                    pathname === link.path
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  {t(link.labelEn, link.labelAr)}
-                </Link>
-              ))}
+            {user && <NotificationBell />}
             <button
               type="button"
               onClick={toggleLang}
@@ -130,6 +116,7 @@ export default function Navbar() {
             )}
             {user && (
               <>
+                <NotificationBell />
                 <Link
                   href="/settings"
                   className="p-2 rounded-lg hover:bg-muted select-none min-h-[44px] min-w-[44px] flex items-center justify-center"

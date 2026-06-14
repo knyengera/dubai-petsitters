@@ -131,6 +131,11 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
     subtitle: "Chat with hosts, vets, and other pet owners",
     imageAlt: DEFAULT_ALT,
   },
+  "/notifications": {
+    title: "Notifications",
+    subtitle: "Stay up to date with your pet care activity",
+    imageAlt: DEFAULT_ALT,
+  },
   "/host-calendar": {
     title: "Calendar Management",
     subtitle: "Manage your availability and pricing",

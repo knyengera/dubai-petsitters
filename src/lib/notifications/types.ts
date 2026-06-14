@@ -65,6 +65,16 @@ export interface RenderedNotification {
   text: string;
 }
 
+export interface UserNotification {
+  id: string;
+  user_id: string;
+  event_type: NotificationEventType;
+  template_key: string;
+  payload: Record<string, unknown>;
+  read_at: string | null;
+  created_at: string;
+}
+
 export function eventCategory(eventType: string): NotificationCategory | null {
   if (eventType.startsWith("booking.")) return "booking";
   if (eventType.startsWith("payment.")) return "payment";

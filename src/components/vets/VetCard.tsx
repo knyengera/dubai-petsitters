@@ -11,14 +11,11 @@ import {
   AlertCircle,
   Globe,
   Sparkles,
-  MessageCircle,
   Send,
   BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { entities } from "@/lib/data/entities";
-import { base44 } from "@/lib/data";
-import { toast } from "sonner";
+import StartChatButton from "@/components/messaging/StartChatButton";
 
 const VET_IMAGES = [
   "https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=80",
@@ -58,42 +55,6 @@ export default function VetCard({
   const bgImage = clinic.image_url || VET_IMAGES[index % VET_IMAGES.length];
 
   const goToDetail = () => router.push(`/vets/${clinic.id}`);
-
-  const handleMessage = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      const user = await base44.auth.me();
-      if (!user) {
-        base44.auth.redirectToLogin();
-        return;
-      }
-
-      const conversations = await entities.Conversation.filter({
-        owner_email: user.email,
-        contact_id: clinic.id,
-        contact_type: "vet",
-      });
-
-      let conversation = conversations[0];
-      if (!conversation) {
-        conversation = await entities.Conversation.create({
-          owner_email: user.email,
-          owner_name: user.full_name,
-          contact_id: clinic.id,
-          contact_name: clinic.name,
-          contact_type: "vet",
-          contact_email:
-            clinic.email ||
-            "admin@" + clinic.name.toLowerCase().replace(/\s+/g, ""),
-          subject: `Inquiry about ${clinic.name}`,
-        });
-      }
-      router.push("/messages");
-      toast.success("Chat opened!");
-    } catch {
-      toast.error("Failed to open chat");
-    }
-  };
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -168,16 +129,18 @@ export default function VetCard({
             </div>
           )}
           <div className="mt-3 flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
+            <StartChatButton
+              contactId={clinic.id}
+              contactName={clinic.name}
+              contactType="vet"
+              contactEmail={clinic.email}
+              subject={`Inquiry about ${clinic.name}`}
+              stopPropagation
               size="sm"
               className="flex-1 rounded-xl text-xs"
-              onClick={handleMessage}
             >
-              <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
               Message
-            </Button>
+            </StartChatButton>
             {clinic.phone && (
               <Button
                 type="button"
@@ -282,16 +245,18 @@ export default function VetCard({
         )}
 
         <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
+          <StartChatButton
+            contactId={clinic.id}
+            contactName={clinic.name}
+            contactType="vet"
+            contactEmail={clinic.email}
+            subject={`Inquiry about ${clinic.name}`}
+            stopPropagation
             size="sm"
             className="rounded-xl flex-1 text-xs"
-            onClick={handleMessage}
           >
-            <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
             Message
-          </Button>
+          </StartChatButton>
           {clinic.phone && (
             <Button
               type="button"

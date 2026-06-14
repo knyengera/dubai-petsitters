@@ -34,10 +34,6 @@ export const PROTECTED_NAV_LINKS: NavLinkItem[] = [
   { labelEn: "My Pets", labelAr: "حيواناتي", path: "/pets" },
 ];
 
-export const PROTECTED_EXTRA_NAV_LINKS: NavLinkItem[] = [
-  { labelEn: "Messages", labelAr: "الرسائل", path: "/messages" },
-];
-
 export const ADMIN_NAV_LINK: NavLinkItem = {
   labelEn: "Admin",
   labelAr: "الإدارة",

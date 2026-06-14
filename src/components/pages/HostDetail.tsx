@@ -421,6 +421,7 @@ export default function HostDetail() {
                     contactId={host.id}
                     contactName={host.full_name}
                     contactType="host"
+                    contactEmail={host.created_by}
                     subject={`Question about hosting with ${host.full_name}`}
                     className="w-full h-10"
                   />

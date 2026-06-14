@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,50 +13,61 @@ export default function ChatWindow({ conversation, currentUser }) {
   const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
 
+  const loadMessages = useCallback(async () => {
+    if (!conversation) return;
+    const msgs = await base44.entities.Message.filter(
+      { conversation_id: conversation.id },
+      'created_date',
+      100
+    );
+    setMessages(msgs);
+  }, [conversation?.id]);
+
   useEffect(() => {
     if (!conversation) return;
-    // Load messages
-    base44.entities.Message.filter({ conversation_id: conversation.id }, 'created_date', 100)
-      .then(setMessages);
 
-    // Real-time subscription
-    const unsub = base44.entities.Message.subscribe((event) => {
-      if (event.data?.conversation_id !== conversation.id) return;
-      if (event.type === 'create') setMessages(prev => [...prev, event.data]);
-      if (event.type === 'update') setMessages(prev => prev.map(m => m.id === event.id ? event.data : m));
-      if (event.type === 'delete') setMessages(prev => prev.filter(m => m.id !== event.id));
+    loadMessages();
+
+    const unsub = base44.entities.Message.subscribe(() => {
+      loadMessages();
     });
 
-    // Mark messages as read
-    base44.entities.Message.filter({ conversation_id: conversation.id, read: false }, 'created_date', 100)
-      .then(msgs => {
-        msgs.filter(m => m.sender_email !== currentUser?.email)
-          .forEach(m => base44.entities.Message.update(m.id, { read: true }));
-      });
+    base44.entities.Message.filter(
+      { conversation_id: conversation.id, read: false },
+      'created_date',
+      100
+    ).then(msgs => {
+      msgs
+        .filter(m => m.sender_email !== currentUser?.email)
+        .forEach(m => base44.entities.Message.update(m.id, { read: true }));
+    });
 
     return () => unsub();
-  }, [conversation?.id, currentUser?.email]);
+  }, [conversation?.id, currentUser?.email, loadMessages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSend = async () => {
-    if (!text.trim() || sending) return;
+    if (!text.trim() || sending || !conversation) return;
     setSending(true);
-    const msg = await base44.entities.Message.create({
-      conversation_id: conversation.id,
-      sender_email: currentUser.email,
-      sender_name: currentUser.full_name || currentUser.email,
-      content: text.trim(),
-    });
-    // Update conversation last message
-    await base44.entities.Conversation.update(conversation.id, {
-      last_message: text.trim().slice(0, 80),
-      last_message_date: new Date().toISOString(),
-    });
-    setText('');
-    setSending(false);
+    try {
+      const msg = await base44.entities.Message.create({
+        conversation_id: conversation.id,
+        sender_email: currentUser.email,
+        sender_name: currentUser.full_name || currentUser.email,
+        content: text.trim(),
+      });
+      await base44.entities.Conversation.update(conversation.id, {
+        last_message: text.trim().slice(0, 80),
+        last_message_date: new Date().toISOString(),
+      });
+      setMessages(prev => [...prev, msg]);
+      setText('');
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleKey = (e) => {

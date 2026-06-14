@@ -29,4 +29,5 @@ export const entities = {
   HostAvailability: createEntityClient("host_availability"),
   VetSubscription: createEntityClient("vet_subscriptions"),
   Review: createEntityClient("reviews"),
+  UserNotification: createEntityClient("user_notifications"),
 };

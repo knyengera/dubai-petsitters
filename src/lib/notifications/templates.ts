@@ -44,6 +44,133 @@ export function renderNotification(
   return renderer(channel, payload);
 }
 
+export type InAppNotificationContent = {
+  title: string;
+  body: string;
+  actionUrl: string;
+};
+
+export function renderInAppNotification(
+  templateKey: string,
+  payload: Record<string, unknown>
+): InAppNotificationContent {
+  const renderer = IN_APP_TEMPLATES[templateKey] ?? IN_APP_TEMPLATES.generic;
+  return renderer(payload);
+}
+
+type InAppTemplateFn = (payload: Record<string, unknown>) => InAppNotificationContent;
+
+const IN_APP_TEMPLATES: Record<string, InAppTemplateFn> = {
+  "booking.request": (p) => {
+    const owner = str(p.owner_name, "A pet owner");
+    const pet = str(p.pet_name, "a pet");
+    const dates = [p.start_date, p.end_date].filter(Boolean).join(" – ");
+    return {
+      title: `New booking request for ${pet}`,
+      body: `${owner} requested hosting for ${pet}${dates ? ` (${dates})` : ""}.`,
+      actionUrl: "/host-calendar",
+    };
+  },
+  "booking.confirmed": (p) => {
+    const pet = str(p.pet_name, "your pet");
+    return {
+      title: `Booking confirmed — ${pet}`,
+      body: `Your hosting booking for ${pet} is confirmed.`,
+      actionUrl: "/my-appointments",
+    };
+  },
+  "booking.confirmed.host": (p) => {
+    const pet = str(p.pet_name, "a pet");
+    const owner = str(p.owner_name, "the owner");
+    return {
+      title: `Booking confirmed — ${pet}`,
+      body: `${owner}'s booking for ${pet} is confirmed and payment has been received.`,
+      actionUrl: "/host-calendar",
+    };
+  },
+  "payment.confirmed": (p) => {
+    const amount = str(p.amount);
+    const currency = str(p.currency, "USD");
+    return {
+      title: "Payment confirmed",
+      body: `Payment of ${amount} ${currency} received. Thank you!`,
+      actionUrl: "/dashboard",
+    };
+  },
+  "message.new": (p) => {
+    const sender = str(p.sender_name, "Someone");
+    const preview = str(p.preview);
+    const convId = str(p.conversation_id);
+    return {
+      title: `New message from ${sender}`,
+      body: preview ? `"${preview}"` : "You have a new message.",
+      actionUrl: convId ? `/messages?id=${convId}` : "/messages",
+    };
+  },
+  "appointment.request": (p) => {
+    const pet = str(p.pet_name, "your pet");
+    const clinic = str(p.clinic_name, "the clinic");
+    return {
+      title: "Appointment request received",
+      body: `Appointment request submitted for ${pet} at ${clinic}. We'll notify you when it's reviewed.`,
+      actionUrl: "/my-appointments",
+    };
+  },
+  "appointment.status": (p) => {
+    const status = str(p.status);
+    const pet = str(p.pet_name, "your pet");
+    return {
+      title: `Appointment ${status}`,
+      body: `Your appointment for ${pet} is now ${status}.`,
+      actionUrl: "/my-appointments",
+    };
+  },
+  "adoption.received": (p) => {
+    const pet = str(p.pet_name, "your pet");
+    const applicant = str(p.applicant_name, "Someone");
+    return {
+      title: `Adoption request for ${pet}`,
+      body: `${applicant} applied to adopt ${pet}.`,
+      actionUrl: "/dashboard",
+    };
+  },
+  "payout.status": (p) => {
+    const status = str(p.status);
+    const amount = str(p.net_amount);
+    const currency = str(p.currency, "USD");
+    return {
+      title: `Payout ${status}`,
+      body: `Payout ${status}: ${amount} ${currency}.`,
+      actionUrl: "/dashboard",
+    };
+  },
+  "escrow.released": (p) => {
+    const amount = str(p.host_earnings);
+    const currency = str(p.currency, "USD");
+    const pet = str(p.pet_name, "booking");
+    return {
+      title: "Earnings released",
+      body: `Earnings of ${amount} ${currency} released for ${pet}.`,
+      actionUrl: "/host-calendar",
+    };
+  },
+  "reminder.pet_health": (p) => {
+    const pet = str(p.pet_name, "your pet");
+    const vaccine = str(p.vaccine_name, "vaccination");
+    const due = str(p.due_date);
+    return {
+      title: `${pet} health reminder`,
+      body: `Reminder: ${pet}'s ${vaccine} is due on ${due}.`,
+      actionUrl: "/dashboard",
+    };
+  },
+  generic: (p) => ({
+    title: "Notification",
+    body: str(p.text, "You have a new notification from Saudi Petsitters."),
+    actionUrl: "/dashboard",
+  }),
+};
+
 type TemplateFn = (channel: NotificationChannel, payload: Record<string, unknown>) => RenderedNotification;
 
 const TEMPLATES: Record<string, TemplateFn> = {

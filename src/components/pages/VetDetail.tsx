@@ -1,7 +1,5 @@
 "use client";
 
-import { base44 } from "@/lib/data";
-
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -10,12 +8,10 @@ import { entities } from '@/lib/data/entities';
 import { Button } from '@/components/ui/button';
 import StartChatButton from '@/components/messaging/StartChatButton';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Phone, Globe, Clock, AlertCircle, ArrowLeft, CheckCircle, ExternalLink, Loader2, CalendarDays, MessageCircle, Send } from 'lucide-react';
+import { Star, MapPin, Phone, Globe, Clock, AlertCircle, ArrowLeft, CheckCircle, ExternalLink, Loader2, CalendarDays, Send } from 'lucide-react';
 import PhotoGallery from '@/components/common/PhotoGallery';
 import ReviewsList from '@/components/reviews/ReviewsList';
 import AppointmentBookingModal from '@/components/vets/AppointmentBookingModal';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 const VET_IMAGES = [
   'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=1200&q=85',
@@ -26,7 +22,6 @@ const VET_IMAGES = [
 
 export default function VetDetail() {
   const { id } = useParams();
-  const router = useRouter();
 
   const [showBooking, setShowBooking] = useState(false);
 
@@ -41,37 +36,6 @@ export default function VetDetail() {
     queryFn: () => entities.VetSubscription.filter({ clinic_id: clinic?.id, status: 'active' }, '-updated_date', 1).then(results => results[0] || null),
     enabled: !!clinic?.id,
   });
-
-  const handleMessage = async () => {
-    try {
-      const user = await base44.auth.me();
-      if (!user) {
-        base44.auth.redirectToLogin();
-        return;
-      }
-      const conversations = await entities.Conversation.filter({
-        owner_email: user.email,
-        contact_id: clinic.id,
-        contact_type: 'vet'
-      });
-      let conversation = conversations[0];
-      if (!conversation) {
-        conversation = await entities.Conversation.create({
-          owner_email: user.email,
-          owner_name: user.full_name,
-          contact_id: clinic.id,
-          contact_name: clinic.name,
-          contact_type: 'vet',
-          contact_email: clinic.email || 'admin@' + clinic.name.toLowerCase().replace(/\s+/g, ''),
-          subject: `Inquiry about ${clinic.name}`,
-        });
-      }
-      router.push('/messages');
-      toast.success('Chat opened!');
-    } catch (error) {
-      toast.error('Failed to open chat');
-    }
-  };
 
   const handleWhatsApp = () => {
     if (clinic.phone) {
@@ -237,9 +201,16 @@ export default function VetDetail() {
                   </Button>
                 </a>
               )}
-              <Button variant="outline" onClick={handleMessage} className="w-full rounded-xl h-11">
-                <MessageCircle className="w-4 h-4 mr-2" /> Message
-              </Button>
+              <StartChatButton
+                contactId={clinic.id}
+                contactName={clinic.name}
+                contactType="vet"
+                contactEmail={subscription?.created_by || subscription?.contact_email || clinic.email}
+                subject={`Inquiry about ${clinic.name}`}
+                className="w-full h-11"
+              >
+                Message
+              </StartChatButton>
               {clinic.phone && (
                 <Button variant="outline" onClick={handleWhatsApp} className="w-full rounded-xl h-11">
                   <Send className="w-4 h-4 mr-2" /> WhatsApp

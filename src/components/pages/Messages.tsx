@@ -3,9 +3,9 @@
 import { base44 } from "@/lib/data";
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { entities } from '@/lib/data/entities';
-import { MessageCircle, Loader2, ChevronLeft } from 'lucide-react';
+import { loadUserConversations } from '@/lib/messaging/conversations';
+import { MessageCircle, ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import ChatWindow from '@/components/messaging/ChatWindow';
@@ -27,25 +27,14 @@ export default function Messages() {
     base44.auth.me().then(u => {
       setCurrentUser(u);
       if (!u) { base44.auth.redirectToLogin(); return; }
-      loadConversations(u);
+      loadUserConversations(u).then(setConversations);
     });
   }, []);
-
-  const loadConversations = async (user) => {
-    const [asOwner, asContact] = await Promise.all([
-      entities.Conversation.filter({ owner_email: user.email }, '-last_message_date', 50),
-      entities.Conversation.filter({ contact_email: user.email }, '-last_message_date', 50),
-    ]);
-    const merged = [...asOwner, ...asContact].sort((a, b) =>
-      new Date(b.last_message_date || b.created_date) - new Date(a.last_message_date || a.created_date)
-    );
-    setConversations(merged);
-  };
 
   // Real-time subscription for conversations
   useEffect(() => {
     const unsub = entities.Conversation.subscribe(() => {
-      if (currentUser) loadConversations(currentUser);
+      if (currentUser) loadUserConversations(currentUser).then(setConversations);
     });
     return () => unsub();
   }, [currentUser]);
