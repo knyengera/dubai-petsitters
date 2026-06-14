@@ -17,6 +17,7 @@ type AdminDataListProps = {
   columns: AdminColumn[];
   isLoading?: boolean;
   emptyMessage?: string;
+  layout?: "cards" | "table";
   onView?: (row: Row) => void;
   onEdit?: (row: Row) => void;
   onDelete?: (row: Row) => void;
@@ -29,6 +30,7 @@ export default function AdminDataList({
   columns,
   isLoading,
   emptyMessage = "No records found.",
+  layout = "cards",
   onView,
   onEdit,
   onDelete,
@@ -52,6 +54,92 @@ export default function AdminDataList({
   }
 
   const hasActions = Boolean(onView || onEdit || onDelete || rowActions);
+
+  if (layout === "table") {
+    return (
+      <div className="overflow-x-auto border border-border rounded-2xl bg-card">
+        <table className="w-full min-w-[640px] text-sm">
+          <thead>
+            <tr className="border-b border-border bg-muted/40">
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  className={`px-4 py-3 text-left text-[10px] font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap ${col.className ?? ""}`}
+                >
+                  {col.label}
+                </th>
+              ))}
+              {hasActions ? (
+                <th className="px-4 py-3 text-left text-[10px] font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap">
+                  Actions
+                </th>
+              ) : null}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr
+                key={getRowKey(row)}
+                className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors"
+              >
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={`px-4 py-3 text-foreground align-middle ${col.className ?? ""}`}
+                  >
+                    <div className="truncate max-w-[240px]">
+                      {col.render ? col.render(row) : formatCell(row[col.key])}
+                    </div>
+                  </td>
+                ))}
+                {hasActions ? (
+                  <td className="px-4 py-3 align-middle whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {rowActions?.(row)}
+                      {onView ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl gap-1"
+                          onClick={() => onView(row)}
+                        >
+                          <Eye className="w-4 h-4" />
+                          View
+                        </Button>
+                      ) : null}
+                      {onEdit ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl"
+                          onClick={() => onEdit(row)}
+                        >
+                          Edit
+                        </Button>
+                      ) : null}
+                      {onDelete ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="rounded-xl text-destructive hover:text-destructive"
+                          onClick={() => onDelete(row)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      ) : null}
+                    </div>
+                  </td>
+                ) : null}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

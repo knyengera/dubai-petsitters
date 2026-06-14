@@ -76,6 +76,7 @@ export default function AdminPayments() {
       <AdminDataList
         rows={payments}
         isLoading={isLoading}
+        layout="table"
         columns={[
           { key: "payment_type", label: "Type" },
           { key: "payer_name", label: "Payer" },

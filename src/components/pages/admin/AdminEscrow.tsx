@@ -66,6 +66,8 @@ export default function AdminEscrow() {
         <AdminDataList
           rows={rows}
           isLoading={false}
+          layout="table"
+          getRowKey={(row) => String(row.booking_id ?? row.id)}
           columns={[
             { key: "booking_id", label: "Booking" },
             { key: "host_id", label: "Host" },
@@ -90,7 +92,7 @@ export default function AdminEscrow() {
             },
           ]}
           rowActions={(row) => (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {row.status === "held" && (
                 <Button
                   size="sm"

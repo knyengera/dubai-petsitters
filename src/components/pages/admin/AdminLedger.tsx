@@ -34,6 +34,7 @@ export default function AdminLedger() {
         <AdminDataList
           rows={rows}
           isLoading={false}
+          layout="table"
           columns={[
             {
               key: "entry_type",
