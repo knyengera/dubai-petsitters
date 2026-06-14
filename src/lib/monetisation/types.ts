@@ -65,6 +65,17 @@ export type PlatformFeeSettings = {
   effective_until: string | null;
 };
 
+export type PaymentProviderSettings = {
+  provider_id: string;
+  display_name: string;
+  currencies: string;
+  is_enabled: boolean;
+  sort_order: number;
+  integration_mode: "live" | "manual";
+  updated_at?: string;
+  updated_by?: string | null;
+};
+
 export type CreateBookingInput = {
   hostId: string;
   serviceType: string;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
@@ -12,8 +13,11 @@ import {
 } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
+import { adminCaptureManualPayment } from "@/lib/monetisation/actions";
+import { useToast } from "@/components/ui/use-toast";
+import { CheckCircle } from "lucide-react";
 
-const STATUSES = ["pending", "completed", "failed", "refunded"];
+const STATUSES = ["pending", "requires_payment", "captured", "completed", "failed", "refunded"];
 const FIELDS: AdminRecordField[] = [
   { key: "payment_type", label: "Payment Type", required: true },
   { key: "gateway", label: "Gateway", required: true },
@@ -27,16 +31,40 @@ const FIELDS: AdminRecordField[] = [
   { key: "notes", label: "Notes", type: "textarea", className: "col-span-2" },
 ];
 
+function canManualCapture(row: Row): boolean {
+  const status = String(row.status ?? "pending");
+  const gateway = String(row.gateway ?? row.payment_provider ?? "");
+  return (
+    (status === "pending" || status === "requires_payment") &&
+    !["stripe", "paypal"].includes(gateway)
+  );
+}
+
 export default function AdminPayments() {
-  const { data: payments = [], isLoading, updateRow, deleteRow } = useAdminList(
+  const { toast } = useToast();
+  const { data: payments = [], isLoading, updateRow, deleteRow, invalidate } = useAdminList(
     ADMIN_TABLES.payments,
     "admin-payments"
   );
   const [viewingPayment, setViewingPayment] = useState<Row | null>(null);
   const [editingPayment, setEditingPayment] = useState<Row | null>(null);
+  const [capturingId, setCapturingId] = useState<string | null>(null);
 
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Payment updated");
+
+  const handleManualCapture = async (row: Row) => {
+    const id = String(row.id);
+    setCapturingId(id);
+    const result = await adminCaptureManualPayment(id);
+    setCapturingId(null);
+    if (result.ok === false) {
+      toast({ title: "Capture failed", description: result.error, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Payment marked as paid" });
+    invalidate();
+  };
 
   return (
     <div className="pb-10">
@@ -70,21 +98,35 @@ export default function AdminPayments() {
         onView={setViewingPayment}
         onEdit={setEditingPayment}
         rowActions={(row) => (
-          <Select
-            value={String(row.status ?? "pending")}
-            onValueChange={(v) => updateRow(String(row.id), { status: v }, "Status updated")}
-          >
-            <SelectTrigger className="w-28 h-8 rounded-lg text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUSES.map((s) => (
-                <SelectItem key={s} value={s} className="capitalize">
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            {canManualCapture(row) && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 rounded-lg text-xs gap-1"
+                disabled={capturingId === String(row.id)}
+                onClick={() => handleManualCapture(row)}
+              >
+                <CheckCircle className="w-3.5 h-3.5" />
+                Mark paid
+              </Button>
+            )}
+            <Select
+              value={String(row.status ?? "pending")}
+              onValueChange={(v) => updateRow(String(row.id), { status: v }, "Status updated")}
+            >
+              <SelectTrigger className="w-28 h-8 rounded-lg text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s} className="capitalize">
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
         onDelete={(row) =>
           deleteRow(String(row.id), `Delete payment from ${row.payer_email}?`)

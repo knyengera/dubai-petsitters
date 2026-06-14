@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2, Star, MapPin } from "lucide-react";
 import PaymentModal from "@/components/payment/PaymentModal";
-import { createHostingBookingWithEscrow, captureBookingPayment } from "@/lib/monetisation/actions";
+import { createHostingBookingWithEscrow } from "@/lib/monetisation/actions";
 import { quoteToSummary } from "@/lib/monetisation/pricing";
 import { useHostingBookingQuote } from "@/lib/monetisation/use-booking-quote";
 
@@ -60,7 +60,7 @@ export default function HostBookingModal({ host, open, onClose }) {
     setShowPayment(true);
   };
 
-  const handlePaymentConfirm = async (gateway) => {
+  const handlePaymentConfirm = async (gateway: string) => {
     setLoading(true);
     const result = await createHostingBookingWithEscrow({
       hostId: host.id,
@@ -83,21 +83,18 @@ export default function HostBookingModal({ host, open, onClose }) {
       throw new Error(result.error);
     }
     const id = String(result.data.booking.id);
+    const paymentId = String(result.data.payment.id);
     setBookingId(id);
-    const capture = await captureBookingPayment({
-      bookingId: id,
-      providerPaymentId: `placeholder-${gateway}-${Date.now()}`,
-      idempotencyKey: crypto.randomUUID(),
-    });
     setLoading(false);
-    if (capture.ok === false) {
-      toast({ title: "Payment failed", description: capture.error, variant: "destructive" });
-      throw new Error(capture.error);
-    }
+    return { paymentId };
+  };
+
+  const handlePaymentComplete = () => {
     toast({
-      title: "Payment secured in escrow",
-      description: "Your booking is confirmed. Funds are held until the service is completed.",
+      title: "Booking submitted",
+      description: "We will confirm your payment shortly.",
     });
+    handleClose();
   };
 
   const handleClose = () => {
@@ -129,6 +126,7 @@ export default function HostBookingModal({ host, open, onClose }) {
         onClose={handleClose}
         summary={paymentSummary}
         onConfirm={handlePaymentConfirm}
+        onComplete={handlePaymentComplete}
       />
       <Dialog open={open && !showPayment} onOpenChange={handleClose}>
         <DialogContent className="max-w-xl rounded-2xl max-h-[90vh] overflow-y-auto">

@@ -11,6 +11,7 @@ import type {
   HostBalance,
   HostPayoutRequest,
   MonetisationActionResult,
+  PaymentProviderSettings,
   PlatformFeeSettings,
 } from "@/lib/monetisation/types";
 
@@ -430,6 +431,158 @@ export async function adminUpdateHostTrust(input: {
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin/hosts");
     return { ok: true, data: data as Record<string, unknown> };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
+}
+
+export async function adminListPaymentProviders(): Promise<
+  MonetisationActionResult<PaymentProviderSettings[]>
+> {
+  try {
+    await requireAdmin();
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("payment_provider_settings")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, data: (data ?? []) as PaymentProviderSettings[] };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
+}
+
+export async function adminUpdatePaymentProvider(input: {
+  providerId: string;
+  isEnabled: boolean;
+  sortOrder?: number;
+}): Promise<MonetisationActionResult<PaymentProviderSettings>> {
+  try {
+    const admin = await requireAdmin();
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("payment_provider_settings")
+      .update({
+        is_enabled: input.isEnabled,
+        sort_order: input.sortOrder,
+        updated_at: new Date().toISOString(),
+        updated_by: admin.email,
+      } as never)
+      .eq("provider_id", input.providerId)
+      .select()
+      .single();
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/admin/payment-settings");
+    return { ok: true, data: data as PaymentProviderSettings };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
+}
+
+export async function createVetSubscriptionPayment(input: {
+  subscriptionId: string;
+  gateway: string;
+  amount: number;
+  payerName: string;
+  payerEmail: string;
+  currency?: string;
+}): Promise<MonetisationActionResult<Record<string, unknown>>> {
+  try {
+    if (!isSupportedPaymentProvider(input.gateway)) {
+      return { ok: false, error: "Unsupported payment provider" };
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("payments")
+      .insert({
+        payment_type: "vet_subscription",
+        gateway: input.gateway,
+        payment_provider: input.gateway,
+        amount: input.amount,
+        currency: input.currency || "SAR",
+        status: "pending",
+        reference_id: input.subscriptionId,
+        payer_name: input.payerName,
+        payer_email: input.payerEmail,
+      } as never)
+      .select()
+      .single();
+
+    if (error) return { ok: false, error: error.message };
+
+    await supabase
+      .from("vet_subscriptions")
+      .update({
+        gateway: input.gateway,
+        payment_id: (data as Record<string, unknown>).id,
+        status: "pending_payment",
+        updated_at: new Date().toISOString(),
+      } as never)
+      .eq("id", input.subscriptionId);
+
+    return { ok: true, data: data as Record<string, unknown> };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
+}
+
+export async function createPartnerAdvertisingPayment(input: {
+  inquiryId: string;
+  gateway: string;
+  amount: number;
+  payerName: string;
+  payerEmail: string;
+  notes?: string;
+  currency?: string;
+}): Promise<MonetisationActionResult<Record<string, unknown>>> {
+  try {
+    if (!isSupportedPaymentProvider(input.gateway)) {
+      return { ok: false, error: "Unsupported payment provider" };
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("payments")
+      .insert({
+        payment_type: "partner_advertising",
+        gateway: input.gateway,
+        payment_provider: input.gateway,
+        amount: input.amount,
+        currency: input.currency || "SAR",
+        status: "pending",
+        reference_id: input.inquiryId,
+        payer_name: input.payerName,
+        payer_email: input.payerEmail,
+        notes: input.notes || null,
+      } as never)
+      .select()
+      .single();
+
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, data: data as Record<string, unknown> };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
+}
+
+export async function adminCaptureManualPayment(
+  paymentId: string
+): Promise<MonetisationActionResult<Record<string, unknown>>> {
+  try {
+    await requireAdmin();
+    const supabase = await createClient();
+    const { data, error } = await callRpc(supabase, "monetisation_capture_payment", {
+      p_payment_id: paymentId,
+      p_provider_payment_id: `manual-${Date.now()}`,
+      p_provider_payload: { source: "admin_manual" },
+    });
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/admin/payments");
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin/escrow");
+    return { ok: true, data: parseRow(data) };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }

@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Star, MapPin, CheckCircle, Clock, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { createHostingBookingWithEscrow, captureBookingPayment } from '@/lib/monetisation/actions';
+import { createHostingBookingWithEscrow } from '@/lib/monetisation/actions';
 import { quoteToSummary } from '@/lib/monetisation/pricing';
 import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
 import PaymentModal from '@/components/payment/PaymentModal';
@@ -50,7 +50,7 @@ export default function HostDetailModal({ host, open, onClose }) {
     setShowPayment(true);
   };
 
-  const handlePaymentConfirm = async (gateway) => {
+  const handlePaymentConfirm = async (gateway: string) => {
     setLoading(true);
     const result = await createHostingBookingWithEscrow({
       hostId: host.id,
@@ -73,18 +73,14 @@ export default function HostDetailModal({ host, open, onClose }) {
       throw new Error(result.error);
     }
     const id = String(result.data.booking.id);
+    const paymentId = String(result.data.payment.id);
     setBookingId(id);
-    const capture = await captureBookingPayment({
-      bookingId: id,
-      providerPaymentId: `placeholder-${gateway}-${Date.now()}`,
-      idempotencyKey: crypto.randomUUID(),
-    });
     setLoading(false);
-    if (capture.ok === false) {
-      toast({ title: 'Payment failed', description: capture.error, variant: 'destructive' });
-      throw new Error(capture.error);
-    }
-    toast({ title: 'Booking confirmed!', description: `Your request to stay with ${host.full_name} is confirmed.` });
+    return { paymentId };
+  };
+
+  const handlePaymentComplete = () => {
+    toast({ title: 'Booking submitted!', description: `Your request to stay with ${host.full_name} was submitted.` });
     onClose();
     setStep('profile');
     setShowPayment(false);
@@ -99,6 +95,7 @@ export default function HostDetailModal({ host, open, onClose }) {
       onClose={() => setShowPayment(false)}
       summary={quote ? quoteToSummary(quote, `Booking with ${host.full_name}`) : { title: `Booking with ${host.full_name}`, lines: [], total: '—' }}
       onConfirm={handlePaymentConfirm}
+      onComplete={handlePaymentComplete}
     />
     <Dialog open={open && !showPayment} onOpenChange={() => { onClose(); setStep('profile'); }}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">

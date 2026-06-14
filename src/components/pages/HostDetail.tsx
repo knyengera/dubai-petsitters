@@ -17,7 +17,7 @@ import { Star, MapPin, Clock, CheckCircle, ArrowLeft, Home, Sun, Dog, Footprints
 import PhotoGallery from '@/components/common/PhotoGallery';
 import StartChatButton from '@/components/messaging/StartChatButton';
 import ReviewsList from '@/components/reviews/ReviewsList';
-import { createHostingBookingWithEscrow, captureBookingPayment } from '@/lib/monetisation/actions';
+import { createHostingBookingWithEscrow } from '@/lib/monetisation/actions';
 import { quoteToSummary } from '@/lib/monetisation/pricing';
 import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
 
@@ -74,7 +74,7 @@ export default function HostDetail() {
     setShowPayment(true);
   };
 
-  const handlePayConfirm = async (gateway) => {
+  const handlePayConfirm = async (gateway: string) => {
     setLoading(true);
     const result = await createHostingBookingWithEscrow({
       hostId: host.id,
@@ -97,17 +97,9 @@ export default function HostDetail() {
       throw new Error(result.error);
     }
     const id = String(result.data.booking.id);
+    const paymentId = String(result.data.payment.id);
     setBookingId(id);
-    const capture = await captureBookingPayment({
-      bookingId: id,
-      providerPaymentId: `placeholder-${gateway}-${Date.now()}`,
-      idempotencyKey: crypto.randomUUID(),
-    });
     setLoading(false);
-    if (capture.ok === false) {
-      toast({ title: 'Payment failed', description: capture.error, variant: 'destructive' });
-      throw new Error(capture.error);
-    }
     if (window.gtag) {
       window.gtag('event', 'booking_request', {
         host_id: host.id, host_name: host.full_name,
@@ -115,7 +107,11 @@ export default function HostDetail() {
         platform_fee: quote?.guest_fee_amount, gateway,
       });
     }
-    toast({ title: 'Booking confirmed!', description: 'Payment is held in escrow until service completion.' });
+    return { paymentId };
+  };
+
+  const handlePaymentComplete = () => {
+    toast({ title: 'Booking submitted!', description: 'We will confirm your payment shortly.' });
     setShowPayment(false);
     setBooked(true);
   };
@@ -352,6 +348,7 @@ export default function HostDetail() {
         onClose={() => setShowPayment(false)}
         summary={paymentSummary}
         onConfirm={handlePayConfirm}
+        onComplete={handlePaymentComplete}
       />
     </div>
   );

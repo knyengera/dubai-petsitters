@@ -19,6 +19,7 @@ import {
   Percent,
   Lock,
   BookOpenCheck,
+  Settings2,
 } from "lucide-react";
 
 export type AdminNavItem = {
@@ -140,6 +141,13 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     href: "/admin/fees",
     icon: Percent,
     description: "Guest and host payout fees",
+    group: "commerce",
+  },
+  {
+    label: "Payment Settings",
+    href: "/admin/payment-settings",
+    icon: Settings2,
+    description: "Enable payment gateways",
     group: "commerce",
   },
   {

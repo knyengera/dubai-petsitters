@@ -1,4 +1,4 @@
-/** Supported payment providers (UI + server validation). No live integration in this phase. */
+/** Supported payment providers (UI + server validation). Live integration for Stripe/PayPal. */
 export const SUPPORTED_PAYMENT_PROVIDERS = [
   { id: "paypal", name: "PayPal", currencies: "USD / SAR" },
   { id: "payfast", name: "PayFast", currencies: "ZAR / SAR" },

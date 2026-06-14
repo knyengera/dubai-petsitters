@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Stethoscope, CheckCircle, Star, Megaphone, Calendar } from 'lucide-react';
 import PaymentModal from '@/components/payment/PaymentModal';
+import { createVetSubscriptionPayment } from '@/lib/monetisation/actions';
 
 const ANNUAL_FEE = 999; // SAR
 const SAUDI_CITIES = ['Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar', 'Tabuk', 'Abha', 'Other'];
@@ -73,36 +74,32 @@ export default function VetAdvertise() {
   };
 
   const handlePayConfirm = async (gateway: string) => {
-    if (!subscriptionId) return;
-    try {
-      const payment = await entities.Payment.create({
-        payment_type: 'vet_subscription',
-        gateway,
-        amount: ANNUAL_FEE,
-        currency: 'SAR',
-        status: 'pending',
-        reference_id: subscriptionId,
-        payer_name: form.contact_name,
-        payer_email: user?.email ?? form.contact_email,
-      });
-      const today = new Date();
-      const nextYear = new Date(today);
-      nextYear.setFullYear(today.getFullYear() + 1);
-      await entities.VetSubscription.update(subscriptionId, {
-        gateway,
-        payment_id: payment.id,
-        status: 'pending_payment',
-        start_date: today.toISOString().split('T')[0],
-        end_date: nextYear.toISOString().split('T')[0],
-      });
-    } catch (err) {
+    if (!subscriptionId) throw new Error('Subscription not found');
+    const result = await createVetSubscriptionPayment({
+      subscriptionId,
+      gateway,
+      amount: ANNUAL_FEE * 1.15,
+      payerName: form.contact_name,
+      payerEmail: user?.email ?? form.contact_email,
+      currency: 'SAR',
+    });
+    if (result.ok === false) {
       toast({
         title: 'Payment setup failed',
-        description: err instanceof Error ? err.message : 'Please try again.',
+        description: result.error,
         variant: 'destructive',
       });
-      throw err;
+      throw new Error(result.error);
     }
+    return { paymentId: String(result.data.id) };
+  };
+
+  const handlePaymentComplete = () => {
+    toast({
+      title: 'Subscription submitted',
+      description: 'We will confirm your payment and activate your listing shortly.',
+    });
+    setShowPayment(false);
   };
 
   const paymentSummary = {
@@ -208,6 +205,7 @@ export default function VetAdvertise() {
         onClose={() => setShowPayment(false)}
         summary={paymentSummary}
         onConfirm={handlePayConfirm}
+        onComplete={handlePaymentComplete}
       />
     </div>
   );
