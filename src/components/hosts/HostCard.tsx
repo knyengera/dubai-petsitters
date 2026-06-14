@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Clock, CheckCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
 const serviceLabels = {
   boarding: 'Boarding',
@@ -73,10 +74,10 @@ export default function HostCard({ host, onSelect }) {
       <div className="flex items-center justify-between">
         <div>
           {host.price_per_night && (
-            <span className="font-bold text-foreground">SAR {host.price_per_night}<span className="text-sm font-normal text-muted-foreground"> / night</span></span>
+            <span className="font-bold text-foreground">{DEFAULT_CURRENCY} {host.price_per_night}<span className="text-sm font-normal text-muted-foreground"> / night</span></span>
           )}
           {!host.price_per_night && host.price_per_day && (
-            <span className="font-bold text-foreground">SAR {host.price_per_day}<span className="text-sm font-normal text-muted-foreground"> / day</span></span>
+            <span className="font-bold text-foreground">{DEFAULT_CURRENCY} {host.price_per_day}<span className="text-sm font-normal text-muted-foreground"> / day</span></span>
           )}
         </div>
         {host.response_time && (

@@ -12,6 +12,7 @@ import LostPetFilters, {
 } from "@/components/lost-pets/LostPetFilters";
 import LostPetCard from "@/components/lost-pets/LostPetCard";
 import PullToRefresh from "@/components/common/PullToRefresh";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -299,7 +300,7 @@ export default function LostPets() {
                     />
                   </div>
                   <div>
-                    <Label>{t("Reward (SAR)", "مكافأة (ريال)")}</Label>
+                    <Label>{t(`Reward (${DEFAULT_CURRENCY})`, "مكافأة (دولار)")}</Label>
                     <Input
                       value={form.reward_offered}
                       onChange={(e) =>

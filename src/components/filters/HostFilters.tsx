@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Search, SlidersHorizontal, X, Star, RotateCcw } from 'lucide-react';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
 const CITIES = ['Riyadh', 'Jeddah', 'Dammam', 'Makkah', 'Madinah', 'Khobar', 'Tabuk', 'Abha'];
 const SERVICE_TAGS = ['boarding', 'daycare', 'home_sitting', 'dog_walking'];
@@ -144,7 +145,7 @@ export default function HostFilters({ filters, onChange }) {
           {/* Max Price */}
           <div>
             <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 block">
-              Max Price: SAR {filters.maxPrice === 2000 ? 'Any' : filters.maxPrice}
+              Max Price: {DEFAULT_CURRENCY} {filters.maxPrice === 2000 ? 'Any' : filters.maxPrice}
             </Label>
             <Slider
               min={50} max={2000} step={50}
@@ -217,7 +218,7 @@ export default function HostFilters({ filters, onChange }) {
           {filters.services.map(s => <Badge key={s} variant="secondary" className="gap-1 cursor-pointer" onClick={() => toggleArr('services', s)}>{SERVICE_LABELS[s]}<X className="w-3 h-3" /></Badge>)}
           {filters.petTypes.map(p => <Badge key={p} variant="secondary" className="gap-1 capitalize cursor-pointer" onClick={() => toggleArr('petTypes', p)}>{p}<X className="w-3 h-3" /></Badge>)}
           {filters.minRating > 0 && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('minRating', 0)}><Star className="w-3 h-3 fill-rating text-rating" />{filters.minRating}+<X className="w-3 h-3" /></Badge>}
-          {filters.maxPrice < 2000 && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('maxPrice', 2000)}>≤ SAR {filters.maxPrice}<X className="w-3 h-3" /></Badge>}
+          {filters.maxPrice < 2000 && <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => set('maxPrice', 2000)}>≤ {DEFAULT_CURRENCY} {filters.maxPrice}<X className="w-3 h-3" /></Badge>}
         </div>
       )}
     </div>

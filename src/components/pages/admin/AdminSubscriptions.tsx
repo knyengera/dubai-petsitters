@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 const STATUSES = ["pending", "pending_payment", "active", "cancelled", "expired"];
 const FIELDS: AdminRecordField[] = [
@@ -70,7 +71,7 @@ export default function AdminSubscriptions() {
             label: "Amount",
             render: (row) => {
               const amt = row.amount_paid ?? row.amount;
-              return amt ? `SAR ${amt}` : "—";
+              return amt ? `${DEFAULT_CURRENCY} ${amt}` : "—";
             },
           },
           { key: "gateway", label: "Gateway" },

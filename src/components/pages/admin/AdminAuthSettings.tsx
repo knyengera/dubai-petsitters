@@ -1,0 +1,137 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Loader2, ShieldCheck } from "lucide-react";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  adminGetAuthSettings,
+  adminUpdateAuthSettings,
+  type PlatformAuthSettingsRow,
+} from "@/lib/auth/actions";
+
+export default function AdminAuthSettings() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [settings, setSettings] = useState<PlatformAuthSettingsRow | null>(null);
+
+  useEffect(() => {
+    adminGetAuthSettings().then((result) => {
+      if (result.ok) setSettings(result.data);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleToggle = async (
+    field: "email" | "phone",
+    enabled: boolean
+  ) => {
+    setSaving(field);
+    const result = await adminUpdateAuthSettings(
+      field === "email"
+        ? { emailVerificationEnabled: enabled }
+        : { phoneVerificationEnabled: enabled }
+    );
+    setSaving(null);
+
+    if (result.ok === false) {
+      toast({ title: "Update failed", description: result.error, variant: "destructive" });
+      return;
+    }
+
+    setSettings(result.data);
+    toast({
+      title: enabled ? "Verification enabled" : "Verification disabled",
+      description:
+        field === "email"
+          ? enabled
+            ? "New users must confirm their email."
+            : "New users will have email auto-verified."
+          : enabled
+            ? "Users must verify phone via SMS OTP."
+            : "Phone numbers will be auto-verified without SMS.",
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <div className="pb-10">
+        <AdminPageHeader
+          title="Auth Settings"
+          description="Configure email and phone verification requirements."
+        />
+        <p className="text-sm text-muted-foreground">Auth settings could not be loaded.</p>
+      </div>
+    );
+  }
+
+  const bothDisabled =
+    !settings.email_verification_enabled && !settings.phone_verification_enabled;
+
+  return (
+    <div className="pb-10">
+      <AdminPageHeader
+        title="Auth Settings"
+        description="Enable or disable email confirmation and phone SMS verification for new and existing users in onboarding."
+      />
+
+      {bothDisabled && (
+        <div className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-800 dark:text-amber-200">
+          Both email and phone verification are disabled. Accounts will be auto-verified
+          during onboarding — useful for development, but reduces account security in
+          production.
+        </div>
+      )}
+
+      <div className="rounded-2xl border border-border bg-card divide-y divide-border">
+        <div className="flex items-center justify-between gap-4 p-4 sm:p-5">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+              <p className="font-semibold text-foreground">Email verification</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Require email confirmation link before account access. When disabled, email
+              is auto-verified on signup and during onboarding.
+            </p>
+          </div>
+          <Switch
+            checked={settings.email_verification_enabled}
+            disabled={saving === "email"}
+            onCheckedChange={(checked) => handleToggle("email", checked)}
+            aria-label="Toggle email verification"
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-4 p-4 sm:p-5">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+              <p className="font-semibold text-foreground">Phone SMS verification</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Require SMS OTP before phone is marked verified. When disabled, users still
+              enter a phone number but it is auto-verified without sending a code.
+            </p>
+          </div>
+          <Switch
+            checked={settings.phone_verification_enabled}
+            disabled={saving === "phone"}
+            onCheckedChange={(checked) => handleToggle("phone", checked)}
+            aria-label="Toggle phone SMS verification"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

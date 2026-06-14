@@ -9,7 +9,7 @@ import { Loader2, Wallet } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { requestHostPayout } from "@/lib/monetisation/actions";
 import { estimatePayoutNet } from "@/lib/monetisation/pricing";
-import { formatMoney } from "@/lib/monetisation/constants";
+import { formatMoney, DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import type { HostBalance } from "@/lib/monetisation/types";
 
 export default function HostEarningsPanel({
@@ -80,7 +80,7 @@ export default function HostEarningsPanel({
 
       <form onSubmit={handleWithdraw} className="space-y-3">
         <div>
-          <Label className="text-xs">Withdraw amount (SAR)</Label>
+          <Label className="text-xs">Withdraw amount ({DEFAULT_CURRENCY})</Label>
           <Input
             type="number"
             min="0"

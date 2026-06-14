@@ -17,6 +17,7 @@ import { CalendarX, DollarSign, Loader2, Trash2, CalendarDays, ChevronDown, Chev
 import BookingTimeline from '@/components/host/BookingTimeline';
 import HostEarningsPanel from '@/components/host/HostEarningsPanel';
 import { getHostBalance } from '@/lib/monetisation/actions';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
 const today = startOfToday();
 
@@ -230,7 +231,7 @@ export default function HostCalendar() {
 
                 {mode === 'custom_price' && (
                   <div>
-                    <Label className="text-xs">Price per night/day (SAR)</Label>
+                    <Label className="text-xs">Price per night/day ({DEFAULT_CURRENCY})</Label>
                     <Input type="number" min="0" value={customPrice} onChange={e => setCustomPrice(e.target.value)} placeholder="e.g. 250" className="rounded-xl mt-1" />
                   </div>
                 )}
@@ -263,7 +264,7 @@ export default function HostCalendar() {
                         <Badge variant="outline" className={a.type === 'unavailable' ? 'border-destructive/30 text-destructive bg-destructive/10' : 'border-warning-border text-warning bg-warning-muted'}>
                           {format(parseISO(a.date), 'MMM d, yyyy')}
                         </Badge>
-                        <span className="text-muted-foreground capitalize text-xs">{a.type === 'custom_price' ? `SAR ${a.custom_price}` : 'Blocked'}</span>
+                        <span className="text-muted-foreground capitalize text-xs">{a.type === 'custom_price' ? `${DEFAULT_CURRENCY} ${a.custom_price}` : 'Blocked'}</span>
                         {a.note && <span className="text-xs text-muted-foreground italic truncate max-w-32">{a.note}</span>}
                       </div>
                       <button

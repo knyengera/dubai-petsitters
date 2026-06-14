@@ -1,5 +1,6 @@
 import { Webhook } from "standardwebhooks";
 
+import { getAuthVerificationSettings } from "@/lib/auth/verification-settings";
 import { getAppBaseUrl } from "@/lib/notifications/config";
 import { renderNotification } from "@/lib/notifications/templates";
 import { sendEmail } from "@/lib/notifications/send-email";
@@ -76,6 +77,16 @@ export async function handleSendEmailHook(
   const { token_hash, redirect_to, email_action_type, site_url } =
     payload.email_data;
 
+  const settings = await getAuthVerificationSettings();
+  if (
+    !settings.emailVerificationEnabled &&
+    (email_action_type === "signup" ||
+      email_action_type === "invite" ||
+      email_action_type === "confirmation")
+  ) {
+    return { ok: true };
+  }
+
   const base = getAppBaseUrl();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
 
@@ -138,6 +149,11 @@ export async function handleSendSmsHook(
   const phone = payload.user?.phone;
   const otp = payload.sms?.otp;
   if (!phone || !otp) return { ok: false, error: "Missing phone or OTP" };
+
+  const settings = await getAuthVerificationSettings();
+  if (!settings.phoneVerificationEnabled) {
+    return { ok: true };
+  }
 
   const result = await sendTwilioSms({
     to: phone,

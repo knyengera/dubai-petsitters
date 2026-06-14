@@ -21,6 +21,7 @@ import {
   Lock,
   BookOpenCheck,
   Settings2,
+  ShieldCheck,
 } from "lucide-react";
 
 export type AdminNavItem = {
@@ -44,6 +45,13 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     href: "/admin/users",
     icon: Users,
     description: "Manage profiles and roles",
+    group: "operations",
+  },
+  {
+    label: "Auth Settings",
+    href: "/admin/auth-settings",
+    icon: ShieldCheck,
+    description: "Email and phone verification toggles",
     group: "operations",
   },
   {

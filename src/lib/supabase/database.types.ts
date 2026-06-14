@@ -70,6 +70,29 @@ export interface Database {
         Update: Record<string, unknown>;
       };
       platform_fee_settings: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      platform_auth_settings: {
+        Row: {
+          id: string;
+          email_verification_enabled: boolean;
+          phone_verification_enabled: boolean;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          email_verification_enabled?: boolean;
+          phone_verification_enabled?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          email_verification_enabled?: boolean;
+          phone_verification_enabled?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+      };
       escrow_accounts: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       ledger_entries: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       host_balances: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
@@ -254,6 +277,10 @@ export interface Database {
       notification_enqueue_pet_health_reminders: {
         Args: Record<string, never>;
         Returns: number;
+      };
+      get_auth_verification_settings: {
+        Args: Record<string, never>;
+        Returns: Database["public"]["Tables"]["platform_auth_settings"]["Row"];
       };
     };
     Enums: Record<string, never>;

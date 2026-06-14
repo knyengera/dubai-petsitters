@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Calendar } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { lostPetStatus } from "@/lib/ui/status-styles";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 const petImageFallbacks: Record<string, string[]> = {
   dog: [
@@ -99,7 +100,7 @@ export default function LostPetCard({ pet }: { pet: LostPet }) {
           </h3>
           {pet.reward_offered ? (
             <span className="text-xs font-semibold text-warning shrink-0">
-              SAR {pet.reward_offered}
+              {DEFAULT_CURRENCY} {pet.reward_offered}
             </span>
           ) : null}
         </div>

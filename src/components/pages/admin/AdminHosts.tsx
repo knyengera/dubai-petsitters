@@ -21,6 +21,7 @@ import ImageUpload from "@/components/common/ImageUpload";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 const EMPTY_FORM = {
   full_name: "",
@@ -366,7 +367,7 @@ function HostRow({
         <p className="text-xs text-muted-foreground truncate">
           {[
             Array.isArray(host.services) ? host.services.join(", ") : host.services,
-            host.price_per_night ? `SAR ${host.price_per_night}/night` : null,
+            host.price_per_night ? `${DEFAULT_CURRENCY} ${host.price_per_night}/night` : null,
             host.response_time,
           ].filter(Boolean).map(String).join(" · ") || "No service details"}
         </p>

@@ -5,6 +5,7 @@ import { CalendarDays, User, PawPrint, Clock } from 'lucide-react';
 import { format, differenceInDays, isPast, isToday } from 'date-fns';
 
 import { bookingStatus } from '@/lib/ui/status-styles';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
 const STATUS_STYLES = {
   ...bookingStatus,
@@ -72,7 +73,7 @@ export default function BookingTimeline({ bookings }) {
                 <p className="text-xs text-muted-foreground">
                   {format(start, 'MMM d')} {end ? `→ ${format(end, 'MMM d')} (${nights} night${nights !== 1 ? 's' : ''})` : '(1 day)'}
                 </p>
-                {b.total_price && <p className="text-sm font-bold text-primary">SAR {b.total_price}</p>}
+                {b.total_price && <p className="text-sm font-bold text-primary">{DEFAULT_CURRENCY} {b.total_price}</p>}
               </div>
             </div>
           </div>

@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { uploadAppFile } from '@/lib/storage/upload';
 import { CheckCircle, Upload, Home, Sun, Dog, Footprints, Star, Users, DollarSign, Shield, Loader2 } from 'lucide-react';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
 const perks = [
   { icon: DollarSign, title: 'Earn Extra Income', desc: 'Set your own rates and earn on your schedule.' },
@@ -189,11 +190,11 @@ export default function BecomeHost() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Price per Night (SAR)</Label>
+                <Label>Price per Night ({DEFAULT_CURRENCY})</Label>
                 <Input type="number" value={form.price_per_night} onChange={e => setForm(f => ({ ...f, price_per_night: e.target.value }))} className="rounded-xl mt-1" placeholder="e.g. 120" />
               </div>
               <div>
-                <Label>Price per Day (SAR)</Label>
+                <Label>Price per Day ({DEFAULT_CURRENCY})</Label>
                 <Input type="number" value={form.price_per_day} onChange={e => setForm(f => ({ ...f, price_per_day: e.target.value }))} className="rounded-xl mt-1" placeholder="e.g. 80" />
               </div>
             </div>

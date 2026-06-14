@@ -31,6 +31,12 @@ import LegalAcceptanceCheckbox from "@/components/legal/LegalAcceptanceCheckbox"
 import { PENDING_LEGAL_ACCEPTANCE_KEY } from "@/lib/legal/constants";
 import { recordLegalAcceptance } from "@/lib/legal/actions";
 import {
+  autoConfirmEmailIfDisabled,
+  getVerificationSettingsForClient,
+  savePhoneWithoutVerification,
+} from "@/lib/auth/actions";
+import type { AuthVerificationSettings } from "@/lib/auth/verification-settings";
+import {
   getProfile,
   saveProfileDetails,
   syncPhoneVerified,
@@ -86,6 +92,12 @@ export default function ProfileCompletionWizard() {
   const [idDocFile, setIdDocFile] = useState<File | null>(null);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
+  const [verificationSettings, setVerificationSettings] =
+    useState<AuthVerificationSettings>({
+      emailVerificationEnabled: true,
+      phoneVerificationEnabled: true,
+    });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -136,7 +148,14 @@ export default function ProfileCompletionWizard() {
   }, [user]);
 
   useEffect(() => {
-    if (!user || isLoadingAuth) return;
+    getVerificationSettingsForClient().then((settings) => {
+      setVerificationSettings(settings);
+      setSettingsLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!user || isLoadingAuth || !settingsLoaded) return;
 
     const syncPendingLegalAcceptance = async () => {
       if (typeof window === "undefined") return;
@@ -157,9 +176,27 @@ export default function ProfileCompletionWizard() {
 
     const checkComplete = async () => {
       await syncPendingLegalAcceptance();
+
+      if (
+        !verificationSettings.emailVerificationEnabled &&
+        !isEmailVerified
+      ) {
+        const autoConfirm = await autoConfirmEmailIfDisabled();
+        if (autoConfirm.confirmed) {
+          const supabase = createClient();
+          await supabase.auth.refreshSession();
+        }
+      }
+
+      const supabase = createClient();
+      const {
+        data: { user: freshUser },
+      } = await supabase.auth.getUser();
+      const activeUser = freshUser ?? user;
+
       const profile = await getProfile();
-      if (isOnboardingComplete(user, profile)) {
-        router.replace(resolvePostAuthRedirect(user, profile, nextPath));
+      if (isOnboardingComplete(activeUser, profile)) {
+        router.replace(resolvePostAuthRedirect(activeUser, profile, nextPath));
         return;
       }
       if (!hasLegalAcceptance(profile)) {
@@ -167,15 +204,27 @@ export default function ProfileCompletionWizard() {
         return;
       }
       if (hasProfileDetails(profile)) {
-        if (!isEmailVerified) setStep("email");
-        else if (!isPhoneVerified) setStep("phone");
+        const emailVerified =
+          !!activeUser.email_confirmed_at ||
+          !verificationSettings.emailVerificationEnabled;
+        if (!emailVerified) setStep("email");
+        else if (!activeUser.phone_confirmed_at) setStep("phone");
         else setStep("profile");
       } else {
         setStep("profile");
       }
     };
     checkComplete();
-  }, [user, isLoadingAuth, isEmailVerified, isPhoneVerified, router, nextPath]);
+  }, [
+    user,
+    isLoadingAuth,
+    isEmailVerified,
+    isPhoneVerified,
+    settingsLoaded,
+    verificationSettings.emailVerificationEnabled,
+    router,
+    nextPath,
+  ]);
 
   const handleLegalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,7 +315,11 @@ export default function ProfileCompletionWizard() {
       }
 
       toast({ title: "Profile details saved" });
-      setStep(isEmailVerified ? "phone" : "email");
+      setStep(
+        isEmailVerified || !verificationSettings.emailVerificationEnabled
+          ? "phone"
+          : "email"
+      );
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Failed to save profile",
@@ -319,6 +372,41 @@ export default function ProfileCompletionWizard() {
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Failed to send code",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSavePhone = async () => {
+    if (!phone.trim()) {
+      toast({ title: "Enter your phone number", variant: "destructive" });
+      return;
+    }
+    if (!isValidE164Phone(phone)) {
+      toast({
+        title: "Invalid phone number",
+        description: "Include your country code, e.g. +966 5XX XXX XXXX or +1 555 123 4567.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await savePhoneWithoutVerification(phone);
+      if (result.success === false) {
+        toast({ title: result.error, variant: "destructive" });
+        return;
+      }
+      const supabase = createClient();
+      await supabase.auth.refreshSession();
+      toast({ title: "Phone saved — welcome!" });
+      const profile = await getProfile();
+      router.replace(resolvePostAuthRedirect(user, profile, nextPath));
+    } catch (err) {
+      toast({
+        title: err instanceof Error ? err.message : "Failed to save phone",
         variant: "destructive",
       });
     } finally {
@@ -666,8 +754,9 @@ export default function ProfileCompletionWizard() {
           ) : (
             <>
               <p className="text-center text-sm text-muted-foreground">
-                Enter your mobile number with country code. We&apos;ll text you a
-                6-digit code to verify it.
+                {verificationSettings.phoneVerificationEnabled
+                  ? "Enter your mobile number with country code. We'll text you a 6-digit code to verify it."
+                  : "Enter your mobile number with country code. It will be saved to your account."}
               </p>
 
               <div className="space-y-2">
@@ -689,70 +778,83 @@ export default function ProfileCompletionWizard() {
                 </p>
               </div>
 
-              <Button
-                type="button"
-                variant={otpSent ? "outline" : "default"}
-                className="w-full rounded-xl"
-                onClick={handleSendOtp}
-                disabled={loading || !phone.trim()}
-              >
-                {loading
-                  ? "Sending…"
-                  : otpSent
-                    ? "Resend verification code"
-                    : "Send verification code"}
-              </Button>
+              {verificationSettings.phoneVerificationEnabled ? (
+                <>
+                  <Button
+                    type="button"
+                    variant={otpSent ? "outline" : "default"}
+                    className="w-full rounded-xl"
+                    onClick={handleSendOtp}
+                    disabled={loading || !phone.trim()}
+                  >
+                    {loading
+                      ? "Sending…"
+                      : otpSent
+                        ? "Resend verification code"
+                        : "Send verification code"}
+                  </Button>
 
-              {otpSent ? (
-                <p className="text-center text-xs text-muted-foreground">
-                  Code sent to {toE164Phone(verifiedPhone || phone)}
-                </p>
-              ) : null}
+                  {otpSent ? (
+                    <p className="text-center text-xs text-muted-foreground">
+                      Code sent to {toE164Phone(verifiedPhone || phone)}
+                    </p>
+                  ) : null}
 
-              <div className="space-y-2">
-                <Label htmlFor="otp">Verification code *</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  placeholder={otpSent ? "Enter 6-digit code" : "Send code first"}
-                  maxLength={6}
-                  className="rounded-xl text-center text-lg tracking-widest"
-                  disabled={!otpSent || loading}
-                />
-                {!otpSent ? (
-                  <p className="text-xs text-muted-foreground">
-                    Tap &quot;Send verification code&quot; above, then enter the code
-                    from your SMS here.
-                  </p>
-                ) : null}
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="otp">Verification code *</Label>
+                    <Input
+                      id="otp"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                      placeholder={otpSent ? "Enter 6-digit code" : "Send code first"}
+                      maxLength={6}
+                      className="rounded-xl text-center text-lg tracking-widest"
+                      disabled={!otpSent || loading}
+                    />
+                    {!otpSent ? (
+                      <p className="text-xs text-muted-foreground">
+                        Tap &quot;Send verification code&quot; above, then enter the code
+                        from your SMS here.
+                      </p>
+                    ) : null}
+                  </div>
 
-              <Button
-                type="button"
-                className="w-full rounded-xl"
-                onClick={handleVerifyOtp}
-                disabled={loading || !otpSent || otp.length < 6}
-              >
-                {loading ? "Verifying…" : "Verify phone"}
-              </Button>
+                  <Button
+                    type="button"
+                    className="w-full rounded-xl"
+                    onClick={handleVerifyOtp}
+                    disabled={loading || !otpSent || otp.length < 6}
+                  >
+                    {loading ? "Verifying…" : "Verify phone"}
+                  </Button>
 
-              {otpSent ? (
-                <button
+                  {otpSent ? (
+                    <button
+                      type="button"
+                      className="w-full text-sm text-primary hover:underline"
+                      onClick={() => {
+                        setOtpSent(false);
+                        setOtp("");
+                        setVerifiedPhone("");
+                      }}
+                    >
+                      Use a different number
+                    </button>
+                  ) : null}
+                </>
+              ) : (
+                <Button
                   type="button"
-                  className="w-full text-sm text-primary hover:underline"
-                  onClick={() => {
-                    setOtpSent(false);
-                    setOtp("");
-                    setVerifiedPhone("");
-                  }}
+                  className="w-full rounded-xl"
+                  onClick={handleSavePhone}
+                  disabled={loading || !phone.trim()}
                 >
-                  Use a different number
-                </button>
-              ) : null}
+                  {loading ? "Saving…" : "Save phone number"}
+                </Button>
+              )}
             </>
           )}
         </div>

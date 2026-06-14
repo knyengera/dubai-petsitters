@@ -30,7 +30,7 @@ type AuthContextValue = {
       legal_documents_version: string;
       legal_accepted_at: string;
     }
-  ) => Promise<{ needsEmailConfirmation: boolean }>;
+  ) => Promise<{ needsEmailConfirmation: boolean; userId?: string }>;
   signInWithOAuth: (provider: OAuthProvider, redirectTo: string) => Promise<void>;
   signInWithGoogle: (redirectTo: string) => Promise<void>;
   signInWithApple: (redirectTo: string) => Promise<void>;
@@ -103,7 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (error) throw error;
       const needsEmailConfirmation = !data.session;
-      return { needsEmailConfirmation };
+      return {
+        needsEmailConfirmation,
+        userId: data.user?.id,
+      };
     },
     []
   );

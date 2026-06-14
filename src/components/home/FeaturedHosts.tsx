@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Star, MapPin, CheckCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HostDetailModal from '../hosts/HostDetailModal';
+import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
 const serviceLabels = {
   boarding: 'Boarding',
@@ -58,9 +59,9 @@ function HostPreviewCard({ host, onSelect }) {
         <div className="flex items-center justify-between">
           <div className="text-sm font-bold text-foreground">
             {host.price_per_night ? (
-              <>SAR {host.price_per_night} <span className="font-normal text-muted-foreground">/ night</span></>
+              <>{DEFAULT_CURRENCY} {host.price_per_night} <span className="font-normal text-muted-foreground">/ night</span></>
             ) : host.price_per_day ? (
-              <>SAR {host.price_per_day} <span className="font-normal text-muted-foreground">/ day</span></>
+              <>{DEFAULT_CURRENCY} {host.price_per_day} <span className="font-normal text-muted-foreground">/ day</span></>
             ) : null}
           </div>
           <Button size="sm" className="rounded-xl bg-primary hover:bg-primary/90 text-xs px-4">

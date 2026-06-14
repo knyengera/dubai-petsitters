@@ -18,6 +18,7 @@ import {
   PENDING_LEGAL_ACCEPTANCE_KEY,
 } from "@/lib/legal/constants";
 import { recordLegalAcceptance } from "@/lib/legal/actions";
+import { autoConfirmEmailIfDisabled } from "@/lib/auth/actions";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -90,20 +91,33 @@ function LoginForm() {
           typeof window !== "undefined"
             ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
             : undefined;
-        const { needsEmailConfirmation } = await signUpWithEmail(
+        const { needsEmailConfirmation, userId } = await signUpWithEmail(
           email,
           password,
           emailRedirectTo,
           legalMetadata
         );
         if (needsEmailConfirmation) {
-          setEmailConfirmationSent(true);
-          return;
-        }
-        const acceptanceResult = await recordLegalAcceptance();
-        if (acceptanceResult.success === false) {
-          setError(acceptanceResult.error);
-          return;
+          const autoConfirm = await autoConfirmEmailIfDisabled(
+            userId && email ? { userId, email } : undefined
+          );
+          if (autoConfirm.confirmed) {
+            await signInWithEmail(email, password);
+            const acceptanceResult = await recordLegalAcceptance();
+            if (acceptanceResult.success === false) {
+              setError(acceptanceResult.error);
+              return;
+            }
+          } else {
+            setEmailConfirmationSent(true);
+            return;
+          }
+        } else {
+          const acceptanceResult = await recordLegalAcceptance();
+          if (acceptanceResult.success === false) {
+            setError(acceptanceResult.error);
+            return;
+          }
         }
       } else {
         await signInWithEmail(email, password);

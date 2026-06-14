@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 const BOOKING_STATUSES = ["pending", "confirmed", "completed", "cancelled"];
 const PAYMENT_STATUSES = ["unpaid", "paid", "refunded"];
@@ -76,7 +77,7 @@ export default function AdminBookings() {
             key: "total_price",
             label: "Total",
             render: (row) =>
-              row.total_price ? `SAR ${row.total_price}` : "—",
+              row.total_price ? `${DEFAULT_CURRENCY} ${row.total_price}` : "—",
           },
         ]}
         onView={setViewingBooking}
