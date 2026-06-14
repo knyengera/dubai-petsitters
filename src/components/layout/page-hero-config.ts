@@ -141,6 +141,11 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
     subtitle: "Manage your availability and pricing",
     imageAlt: DEFAULT_ALT,
   },
+  "/host-earnings": {
+    title: "Earnings & Payouts",
+    subtitle: "View your balance, set your payout method, and request withdrawals",
+    imageAlt: DEFAULT_ALT,
+  },
   "/settings": {
     title: "Settings",
     subtitle: "Manage your account and preferences",

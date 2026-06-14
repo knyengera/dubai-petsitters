@@ -26,6 +26,7 @@ import {
 
 const quickActions = [
   { icon: CalendarDays, color: "bg-secondary", en: "Manage Calendar", ar: "إدارة التقويم", to: "/host-calendar" },
+  { icon: Wallet, color: "bg-primary/80", en: "Earnings", ar: "الأرباح", to: "/host-earnings" },
   { icon: MessageCircle, color: "bg-warning", en: "Messages", ar: "الرسائل", to: "/messages" },
   { icon: Pencil, color: "bg-accent", en: "Edit Listing", ar: "تعديل الإعلان", to: "/host-profile/edit" },
   { icon: Bell, color: "bg-info", en: "Notifications", ar: "الإشعارات", to: "/notifications" },
@@ -107,7 +108,7 @@ export default function HostDashboard({ hostProfile }: { hostProfile: NonNullabl
             en: "Available",
             ar: "متاح",
             icon: Wallet,
-            to: "/host-calendar",
+            to: "/host-earnings",
           },
           {
             val: unreadMessages,
@@ -276,10 +277,10 @@ export default function HostDashboard({ hostProfile }: { hostProfile: NonNullabl
             )}
           </div>
           <Link
-            href="/host-calendar"
+            href="/host-earnings"
             className="text-primary text-sm font-medium flex items-center gap-1 shrink-0"
           >
-            {t("Payouts & calendar", "المدفوعات والتقويم")} <ChevronRight className="w-4 h-4" />
+            {t("Earnings & payouts", "الأرباح والمدفوعات")} <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

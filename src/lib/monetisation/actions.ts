@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin, getSessionUser } from "@/lib/admin/auth";
+import { getHostPayoutSettings } from "@/lib/hosting/payout-settings";
 import { isSupportedPaymentProvider, DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { parseBookingQuote } from "@/lib/monetisation/pricing";
 import type {
@@ -183,6 +184,7 @@ export async function createHostingBookingWithEscrow(
 
     revalidatePath("/admin/bookings");
     revalidatePath("/host-calendar");
+    revalidatePath("/host-earnings");
     revalidatePath("/dashboard");
 
     return {
@@ -214,6 +216,7 @@ export async function captureBookingPayment(input: {
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin/bookings");
     revalidatePath("/host-calendar");
+    revalidatePath("/host-earnings");
     revalidatePath("/dashboard");
     return { ok: true, data: parseRow(data) };
   } catch (e) {
@@ -232,6 +235,7 @@ export async function markBookingCompleted(
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin/bookings");
     revalidatePath("/host-calendar");
+    revalidatePath("/host-earnings");
     revalidatePath("/dashboard");
     return { ok: true, data: parseRow(data) };
   } catch (e) {
@@ -252,6 +256,7 @@ export async function releaseEscrow(
     revalidatePath("/admin/bookings");
     revalidatePath("/admin/escrow");
     revalidatePath("/host-calendar");
+    revalidatePath("/host-earnings");
     revalidatePath("/dashboard");
     return { ok: true, data: parseRow(data) };
   } catch (e) {
@@ -295,9 +300,23 @@ export async function requestHostPayout(input: {
   idempotencyKey?: string;
 }): Promise<MonetisationActionResult<{ payout: HostPayoutRequest; balance: HostBalance }>> {
   try {
-    const provider = input.paymentProvider || "bank_transfer";
+    const settingsResult = await getHostPayoutSettings(input.hostId);
+    if (settingsResult.ok === false) {
+      return { ok: false, error: settingsResult.error };
+    }
+    if (!settingsResult.data) {
+      return {
+        ok: false,
+        error: "Add a payout method before requesting a withdrawal",
+      };
+    }
+
+    const provider = input.paymentProvider || settingsResult.data.payout_method;
     if (!isSupportedPaymentProvider(provider)) {
       return { ok: false, error: "Unsupported payout provider" };
+    }
+    if (provider !== settingsResult.data.payout_method) {
+      return { ok: false, error: "Payout method does not match saved settings" };
     }
     if (!Number.isFinite(input.grossAmount) || input.grossAmount <= 0) {
       return { ok: false, error: "Invalid payout amount" };
@@ -318,6 +337,7 @@ export async function requestHostPayout(input: {
     const balance = payload.balance as Record<string, unknown>;
 
     revalidatePath("/host-calendar");
+    revalidatePath("/host-earnings");
     revalidatePath("/dashboard");
     revalidatePath("/admin/payouts");
 
@@ -482,7 +502,44 @@ export async function adminListPayoutRequests(): Promise<MonetisationActionResul
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) return { ok: false, error: error.message };
-    return { ok: true, data: (data ?? []) as Record<string, unknown>[] };
+
+    const payouts = (data ?? []) as Record<string, unknown>[];
+    const hostIds = [...new Set(payouts.map((p) => String(p.host_id)).filter(Boolean))];
+    if (hostIds.length === 0) {
+      return { ok: true, data: payouts };
+    }
+
+    const { data: settingsRows, error: settingsError } = await supabase
+      .from("host_payout_settings")
+      .select("*")
+      .in("host_id", hostIds);
+    if (settingsError) return { ok: false, error: settingsError.message };
+
+    const settingsByHost = new Map(
+      (settingsRows ?? []).map((row) => [String((row as Record<string, unknown>).host_id), row])
+    );
+
+    const enriched = payouts.map((payout) => {
+      const settings = settingsByHost.get(String(payout.host_id));
+      if (!settings) {
+        return { ...payout, payout_destination: "Not configured" };
+      }
+      const s = settings as Record<string, unknown>;
+      if (s.payout_method === "paypal") {
+        return {
+          ...payout,
+          payout_destination: String(s.paypal_email ?? "PayPal"),
+        };
+      }
+      const acct = String(s.bank_account_number ?? "");
+      const masked = acct.length > 4 ? `****${acct.slice(-4)}` : "****";
+      return {
+        ...payout,
+        payout_destination: `${s.bank_name ?? "Bank"} · ${masked}`,
+      };
+    });
+
+    return { ok: true, data: enriched };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }

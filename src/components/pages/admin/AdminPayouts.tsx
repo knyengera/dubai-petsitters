@@ -57,6 +57,16 @@ export default function AdminPayouts() {
           columns={[
             { key: "requested_by_email", label: "Host email" },
             {
+              key: "payment_provider",
+              label: "Method",
+              render: (row) => String(row.payment_provider ?? "—").replace("_", " "),
+            },
+            {
+              key: "payout_destination",
+              label: "Destination",
+              render: (row) => String(row.payout_destination ?? "—"),
+            },
+            {
               key: "gross_amount",
               label: "Gross",
               render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.gross_amount}`,

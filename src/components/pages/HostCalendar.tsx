@@ -13,8 +13,6 @@ import { format, isSameDay, parseISO, isBefore, startOfToday } from 'date-fns';
 import { enumerateServiceNights } from '@/lib/hosting/availability';
 import { CalendarX, DollarSign, Loader2, Trash2, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import BookingTimeline from '@/components/host/BookingTimeline';
-import HostEarningsPanel from '@/components/host/HostEarningsPanel';
-import { getHostBalance } from '@/lib/monetisation/actions';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 import { useAuth } from '@/lib/auth-context';
 import { hostsQueries } from '@/features/hosts/queries';
@@ -57,15 +55,6 @@ export default function HostCalendar() {
   const { data: bookings = [] } = useQuery({
     queryKey: ['host-bookings', hostProfile?.id],
     queryFn: () => entities.HostingBooking.filter({ host_id: hostProfile.id }, '-start_date', 100),
-    enabled: !!hostProfile?.id,
-  });
-
-  const { data: hostBalance, refetch: refetchBalance } = useQuery({
-    queryKey: ['host-balance', hostProfile?.id],
-    queryFn: async () => {
-      const result = await getHostBalance(hostProfile.id);
-      return result.ok ? result.data : null;
-    },
     enabled: !!hostProfile?.id,
   });
 
@@ -288,13 +277,8 @@ export default function HostCalendar() {
             )}
           </div>
 
-          {/* Right — Timeline + Earnings */}
+          {/* Right — Timeline */}
           <div className="space-y-5">
-            <HostEarningsPanel
-              hostId={hostProfile.id}
-              balance={hostBalance}
-              onUpdated={() => refetchBalance()}
-            />
             <button
               onClick={() => setShowTimeline(v => !v)}
               className="w-full flex items-center justify-between p-4 bg-card border border-border rounded-2xl mb-3"

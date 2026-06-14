@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,15 +12,18 @@ import { requestHostPayout } from "@/lib/monetisation/actions";
 import { estimatePayoutNet } from "@/lib/monetisation/pricing";
 import { formatMoney, DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import type { HostBalance } from "@/lib/monetisation/types";
+import type { HostPayoutSettings } from "@/lib/hosting/payout-settings-types";
 
 export default function HostEarningsPanel({
   hostId,
   balance,
+  payoutSettings,
   payoutFeePct = 2,
   onUpdated,
 }: {
   hostId: string;
   balance: HostBalance | null;
+  payoutSettings?: HostPayoutSettings | null;
   payoutFeePct?: number;
   onUpdated?: () => void;
 }) {
@@ -29,9 +33,18 @@ export default function HostEarningsPanel({
 
   const available = balance?.available_balance ?? 0;
   const preview = amount ? estimatePayoutNet(parseFloat(amount) || 0, payoutFeePct) : null;
+  const hasPayoutMethod = !!payoutSettings?.payout_method;
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasPayoutMethod || !payoutSettings) {
+      toast({
+        title: "Payout method required",
+        description: "Save a payout method before requesting a withdrawal.",
+        variant: "destructive",
+      });
+      return;
+    }
     const gross = parseFloat(amount);
     if (!Number.isFinite(gross) || gross <= 0) {
       toast({ title: "Enter a valid amount", variant: "destructive" });
@@ -41,7 +54,7 @@ export default function HostEarningsPanel({
     const result = await requestHostPayout({
       hostId,
       grossAmount: gross,
-      paymentProvider: "bank_transfer",
+      paymentProvider: payoutSettings.payout_method,
       idempotencyKey: crypto.randomUUID(),
     });
     setLoading(false);
@@ -78,6 +91,15 @@ export default function HostEarningsPanel({
         </div>
       </div>
 
+      {!hasPayoutMethod && (
+        <p className="text-sm text-muted-foreground bg-secondary rounded-xl p-3">
+          Add a payout method above before you can request a withdrawal.{" "}
+          <Link href="#payout-method" className="text-primary font-medium hover:underline">
+            Set up payout method
+          </Link>
+        </p>
+      )}
+
       <form onSubmit={handleWithdraw} className="space-y-3">
         <div>
           <Label className="text-xs">Withdraw amount ({DEFAULT_CURRENCY})</Label>
@@ -90,6 +112,7 @@ export default function HostEarningsPanel({
             onChange={(e) => setAmount(e.target.value)}
             placeholder={`Max ${available.toFixed(2)}`}
             className="rounded-xl mt-1"
+            disabled={!hasPayoutMethod}
           />
         </div>
         {preview && preview.gross > 0 && (
@@ -106,7 +129,7 @@ export default function HostEarningsPanel({
         )}
         <Button
           type="submit"
-          disabled={loading || available <= 0 || !amount}
+          disabled={loading || available <= 0 || !amount || !hasPayoutMethod}
           className="w-full rounded-xl"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}

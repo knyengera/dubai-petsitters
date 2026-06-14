@@ -22,6 +22,7 @@ const EXACT_TITLES: Record<string, string> = {
   "/messages": "Messages",
   "/notifications": "Notifications",
   "/host-calendar": "Host Calendar",
+  "/host-earnings": "Earnings & Payouts",
   "/host-profile/edit": "Edit Host Listing",
   "/about": "About Us",
   "/privacy": "Privacy Policy",

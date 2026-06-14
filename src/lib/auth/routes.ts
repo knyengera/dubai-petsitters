@@ -14,6 +14,7 @@ const PROTECTED_EXACT = new Set([
   "/notifications",
   "/settings",
   "/host-calendar",
+  "/host-earnings",
   "/appointments",
   "/become-host",
   "/host-profile/edit",

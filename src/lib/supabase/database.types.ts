@@ -97,6 +97,7 @@ export interface Database {
       ledger_entries: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       host_balances: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       host_payout_requests: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      host_payout_settings: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       notification_preferences: {
         Row: {
           user_id: string;
