@@ -31,7 +31,6 @@ export const PUBLIC_NAV_LINKS: NavLinkItem[] = [
 /** Account routes — only when authenticated (listed after public). */
 export const PROTECTED_NAV_LINKS: NavLinkItem[] = [
   { labelEn: "Dashboard", labelAr: "لوحة التحكم", path: "/dashboard" },
-  { labelEn: "My Pets", labelAr: "حيواناتي", path: "/pets" },
 ];
 
 export const ADMIN_NAV_LINK: NavLinkItem = {
