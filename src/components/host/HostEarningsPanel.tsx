@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,12 +18,16 @@ export default function HostEarningsPanel({
   balance,
   payoutSettings,
   payoutFeePct = 2,
+  embedded = false,
+  onSetupPayoutMethod,
   onUpdated,
 }: {
   hostId: string;
   balance: HostBalance | null;
   payoutSettings?: HostPayoutSettings | null;
   payoutFeePct?: number;
+  embedded?: boolean;
+  onSetupPayoutMethod?: () => void;
   onUpdated?: () => void;
 }) {
   const { toast } = useToast();
@@ -70,15 +73,25 @@ export default function HostEarningsPanel({
     onUpdated?.();
   };
 
-  return (
-    <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-      <div className="flex items-center gap-2">
-        <Wallet className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold text-foreground">Earnings</h3>
-        <Badge variant="secondary" className="text-[10px] ml-auto">
-          Escrow-protected
-        </Badge>
-      </div>
+  const content = (
+    <>
+      {!embedded && (
+        <div className="flex items-center gap-2">
+          <Wallet className="w-5 h-5 text-primary" />
+          <h3 className="font-semibold text-foreground">Earnings</h3>
+          <Badge variant="secondary" className="text-[10px] ml-auto">
+            Escrow-protected
+          </Badge>
+        </div>
+      )}
+
+      {embedded && (
+        <div className="flex items-center gap-2 mb-1">
+          <Badge variant="secondary" className="text-[10px]">
+            Escrow-protected
+          </Badge>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="bg-primary/5 rounded-xl p-3">
@@ -93,10 +106,16 @@ export default function HostEarningsPanel({
 
       {!hasPayoutMethod && (
         <p className="text-sm text-muted-foreground bg-secondary rounded-xl p-3">
-          Add a payout method above before you can request a withdrawal.{" "}
-          <Link href="#payout-method" className="text-primary font-medium hover:underline">
-            Set up payout method
-          </Link>
+          Add a payout method before you can request a withdrawal.{" "}
+          {onSetupPayoutMethod ? (
+            <button
+              type="button"
+              onClick={onSetupPayoutMethod}
+              className="text-primary font-medium hover:underline"
+            >
+              Set up payout method
+            </button>
+          ) : null}
         </p>
       )}
 
@@ -136,6 +155,16 @@ export default function HostEarningsPanel({
           Request withdrawal
         </Button>
       </form>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="space-y-4">{content}</div>;
+  }
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+      {content}
     </div>
   );
 }

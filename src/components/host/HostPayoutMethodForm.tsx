@@ -40,10 +40,12 @@ function settingsToForm(settings: HostPayoutSettings): HostPayoutSettingsInput {
 export default function HostPayoutMethodForm({
   hostId,
   settings,
+  embedded = false,
   onSaved,
 }: {
   hostId: string;
   settings: HostPayoutSettings | null;
+  embedded?: boolean;
   onSaved?: () => void;
 }) {
   const { toast } = useToast();
@@ -75,12 +77,14 @@ export default function HostPayoutMethodForm({
     onSaved?.();
   };
 
-  return (
-    <div id="payout-method" className="bg-card border border-border rounded-2xl p-5 space-y-4">
-      <div className="flex items-center gap-2">
-        <CreditCard className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold text-foreground">Payout method</h3>
-      </div>
+  const content = (
+    <>
+      {!embedded && (
+        <div className="flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-primary" />
+          <h3 className="font-semibold text-foreground">Payout method</h3>
+        </div>
+      )}
       <p className="text-sm text-muted-foreground">
         Choose how you want to receive withdrawals. You must save a payout method before requesting a withdrawal.
       </p>
@@ -189,6 +193,16 @@ export default function HostPayoutMethodForm({
           Save payout method
         </Button>
       </form>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="space-y-4">{content}</div>;
+  }
+
+  return (
+    <div id="payout-method" className="bg-card border border-border rounded-2xl p-5 space-y-4">
+      {content}
     </div>
   );
 }
