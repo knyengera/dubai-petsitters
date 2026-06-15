@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import PaymentModal from "@/components/payment/PaymentModal";
+import ImageUpload from "@/components/common/ImageUpload";
 import PartnerTypeFields from "@/components/partners/PartnerTypeFields";
 import { createPartnerAdvertisingPayment } from "@/lib/monetisation/actions";
 import { getActiveAdvertisingPlans } from "@/lib/partners/actions";
@@ -68,6 +69,7 @@ const emptyForm = {
   phone: "",
   city: "",
   website: "",
+  image_url: "",
   plan: "",
 };
 
@@ -147,6 +149,15 @@ export default function Partners({ initialBusinessType = null }: PartnersProps) 
       return;
     }
 
+    if (!form.image_url) {
+      toast({
+        title: "Business photo required",
+        description: "Please upload a photo of your business. Sign in if you have not already.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const validation = validateBusinessDetails(businessTypeId, businessDetails);
     if (!validation.success) {
       setDetailErrors(validation.errors);
@@ -170,6 +181,7 @@ export default function Partners({ initialBusinessType = null }: PartnersProps) 
         phone: form.phone || null,
         city: form.city,
         website: form.website || null,
+        image_url: form.image_url,
         plan: form.plan,
         message: `Advertising plan signup for ${selectedPlan.name}`,
         business_details: validation.data,
@@ -434,6 +446,20 @@ export default function Partners({ initialBusinessType = null }: PartnersProps) 
                   onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
                   className="rounded-xl mt-1"
                   placeholder="https://"
+                />
+              </div>
+              <div className="sm:col-span-2 flex flex-col">
+                <Label className="mb-2">Business Photo *</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  This image appears on your partner listing, similar to clinic photos on vet profiles.
+                </p>
+                <ImageUpload
+                  value={form.image_url}
+                  onChange={(url) => setForm((f) => ({ ...f, image_url: url }))}
+                  category="partners"
+                  label="Upload Business Photo"
+                  variant="wide"
+                  className="w-full"
                 />
               </div>
             </div>
