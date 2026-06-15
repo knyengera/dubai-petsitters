@@ -4,7 +4,7 @@ export default function VetPaymentCancelPage() {
   return (
     <PaymentCancelPage
       title="Payment cancelled"
-      backHref="/vet-advertise"
+      backHref="/partners?type=vet-clinics"
       backLabel="Back to vet advertising"
     />
   );

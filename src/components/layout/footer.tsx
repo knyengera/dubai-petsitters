@@ -18,7 +18,7 @@ const companyLinks: NavLinkItem[] = [
   { labelEn: "Partners", labelAr: "الشركاء", path: "/partners" },
   { labelEn: "Blog", labelAr: "المدونة", path: "/blog" },
   { labelEn: "Forum", labelAr: "المنتدى", path: "/forum" },
-  { labelEn: "Advertise Your Vet Clinic", labelAr: "أعلن عن عيادتك", path: "/vet-advertise" },
+  { labelEn: "Advertise Your Vet Clinic", labelAr: "أعلن عن عيادتك", path: "/partners?type=vet-clinics" },
 ];
 
 const footerLinkClass =

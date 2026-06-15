@@ -12,6 +12,10 @@ import {
 } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
+import {
+  formatBusinessDetailsForDisplay,
+  type BusinessDetails,
+} from "@/lib/partners/partner-types";
 
 const STATUSES = ["new", "contacted", "converted", "closed"];
 const FIELDS: AdminRecordField[] = [
@@ -21,10 +25,31 @@ const FIELDS: AdminRecordField[] = [
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone" },
   { key: "city", label: "City" },
+  { key: "website", label: "Website" },
   { key: "plan", label: "Plan" },
   { key: "message", label: "Message", type: "textarea", className: "col-span-2" },
   { key: "status", label: "Status", type: "select", options: STATUSES },
 ];
+
+function BusinessDetailsPanel({ row }: { row: Row }) {
+  const details = row.business_details as BusinessDetails | null | undefined;
+  const rows = formatBusinessDetailsForDisplay(String(row.business_type ?? ""), details);
+  const detailRows = rows.filter((r) => r.label !== "Business Type");
+
+  if (detailRows.length === 0) return null;
+
+  return (
+    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      <p className="col-span-full font-heading font-semibold text-sm text-foreground">Business Details</p>
+      {detailRows.map(({ label, value }) => (
+        <div key={label} className="rounded-xl border border-border bg-muted/20 p-3">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">{label}</p>
+          <p className="text-sm text-foreground break-words">{value}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function AdminPartnerInquiries() {
   const { data: inquiries = [], isLoading, updateRow, deleteRow } = useAdminList(
@@ -103,6 +128,7 @@ export default function AdminPartnerInquiries() {
             {String(row.status ?? "new")}
           </Badge>
         )}
+        extraContent={(row) => <BusinessDetailsPanel row={row} />}
         onOpenChange={(open) => !open && setViewingInquiry(null)}
       />
       <AdminRecordEditDialog

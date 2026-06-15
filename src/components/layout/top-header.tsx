@@ -18,7 +18,6 @@ const EXACT_TITLES: Record<string, string> = {
   "/lost-pets": "Lost Pets",
   "/become-host": "Become a Host",
   "/partners": "Partners & Advertise",
-  "/vet-advertise": "Vet Advertising",
   "/messages": "Messages",
   "/notifications": "Notifications",
   "/host-calendar": "Host Calendar",

@@ -46,7 +46,7 @@ export default function AdminSubscriptions() {
     <div className="pb-10">
       <AdminPageHeader
         title="Vet Subscriptions"
-        description="Vet advertising submissions from /vet-advertise."
+        description="Legacy vet advertising subscriptions. New vet clinic sign-ups come through /partners."
       />
       <AdminDataList
         rows={subs}

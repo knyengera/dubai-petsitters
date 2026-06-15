@@ -80,12 +80,6 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
       "Advertise to Saudi Arabia's most engaged community of pet owners.",
     imageAlt: DEFAULT_ALT,
   },
-  "/vet-advertise": {
-    title: "Advertise Your Clinic",
-    subtitle:
-      "Reach thousands of pet owners across Saudi Arabia. List your clinic, post specials, and grow your practice.",
-    imageAlt: DEFAULT_ALT,
-  },
   "/terms": {
     title: "Terms & Conditions",
     subtitle: "Last updated: May 2026",

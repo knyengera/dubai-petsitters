@@ -167,7 +167,7 @@ function FeaturedVetsSection({ t }) {
         </div>
 
         <div className="mt-10 text-center">
-          <Link href="/vet-advertise">
+          <Link href="/partners?type=vet-clinics">
             <span className="inline-flex items-center gap-2 bg-success hover:bg-success/90 text-success-foreground font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-md shadow-success/20">
               <BadgeCheck className="w-4 h-4" /> {t('Get Your Clinic Featured', 'احصل على إدراج عيادتك')}
             </span>

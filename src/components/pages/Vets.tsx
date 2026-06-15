@@ -22,7 +22,7 @@ export default function Vets() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <Link href="/vet-advertise" className="inline-block mb-6">
+        <Link href="/partners?type=vet-clinics" className="inline-block mb-6">
           <Button className="rounded-xl gap-2 font-semibold">
             <Megaphone className="w-4 h-4" /> Advertise Your Clinic
           </Button>

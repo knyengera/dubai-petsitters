@@ -35,6 +35,7 @@ type AdminRecordViewDialogProps = {
   titleKey?: string;
   badges?: (row: Row) => React.ReactNode;
   actions?: (row: Row) => React.ReactNode;
+  extraContent?: (row: Row) => React.ReactNode;
   onOpenChange: (open: boolean) => void;
 };
 
@@ -57,6 +58,7 @@ export function AdminRecordViewDialog({
   titleKey,
   badges,
   actions,
+  extraContent,
   onOpenChange,
 }: AdminRecordViewDialogProps) {
   return (
@@ -88,6 +90,8 @@ export function AdminRecordViewDialog({
                   <DetailItem key={field.key} label={field.label} value={row[field.key]} className={field.className} />
                 ))}
             </div>
+
+            {extraContent ? extraContent(row) : null}
           </>
         ) : null}
       </DialogContent>
