@@ -12,6 +12,8 @@ import {
   getPublicBlogComments,
   getPublicBlogPostBySlug,
 } from "@/lib/blog/actions";
+import { blogProseClassName } from "@/lib/blog/prose";
+import { cn } from "@/lib/utils";
 import { useBlogI18n } from "@/lib/i18n/use-blog-i18n";
 
 type BlogPostPageProps = {
@@ -126,7 +128,7 @@ export default function BlogPostPage({ slug }: BlogPostPageProps) {
         )}
 
         <div
-          className="prose prose-lg max-w-none text-foreground prose-headings:font-heading prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-img:rounded-xl"
+          className={cn(blogProseClassName, "prose-lg")}
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { blogProseClassName } from "@/lib/blog/prose";
 
 type RichTextEditorProps = {
   value: string;
@@ -82,8 +83,10 @@ export default function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class:
-          "prose prose-sm sm:prose-base max-w-none min-h-[220px] px-4 py-3 focus:outline-none text-foreground prose-headings:font-heading prose-headings:text-foreground prose-a:text-primary",
+        class: cn(
+          blogProseClassName,
+          "prose-sm sm:prose-base min-h-[220px] px-4 py-3 focus:outline-none",
+        ),
       },
     },
   });
