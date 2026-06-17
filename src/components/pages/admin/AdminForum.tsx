@@ -16,17 +16,15 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
-import { useAdminList } from "@/components/admin/useAdminList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
+import {
+  useAdminPaginatedList,
+  useAdminPaginatedQuery,
+} from "@/components/admin/useAdminPaginatedList";
 import { ADMIN_TABLES } from "@/lib/admin/tables";
 import {
   adminDeleteForumReply,
@@ -65,9 +63,6 @@ export default function AdminForum() {
   const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [topicFilter, setTopicFilter] = useState<string>("all");
-  const [replyFilter, setReplyFilter] = useState<string>("all");
-  const [reportFilter, setReportFilter] = useState<string>("all");
   const [boardForm, setBoardForm] = useState({
     title: "",
     slug: "",
@@ -76,8 +71,17 @@ export default function AdminForum() {
     display_order: 0,
   });
 
-  const { data: boards = [], isLoading: boardsLoading, updateRow } =
-    useAdminList(ADMIN_TABLES.forum_boards, "admin-forum-boards", "display_order");
+  const {
+    rows: boards,
+    total: boardsTotal,
+    page: boardsPage,
+    pageSize: boardsPageSize,
+    setPage: setBoardsPage,
+    search: boardsSearch,
+    setSearch: setBoardsSearch,
+    isLoading: boardsLoading,
+    updateRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.forum_boards, "admin-forum-boards");
 
   const { data: pendingCounts } = useQuery({
     queryKey: ["admin-forum-pending"],
@@ -88,38 +92,65 @@ export default function AdminForum() {
     },
   });
 
-  const { data: topics = [], isLoading: topicsLoading } = useQuery({
-    queryKey: ["admin-forum-topics", topicFilter],
-    queryFn: async () => {
-      const result = await adminListForumTopics(
-        topicFilter === "all" ? undefined : (topicFilter as ForumModerationStatus)
-      );
+  const {
+    rows: topics,
+    total: topicsTotal,
+    page: topicsPage,
+    pageSize: topicsPageSize,
+    setPage: setTopicsPage,
+    search: topicsSearch,
+    setSearch: setTopicsSearch,
+    filters: topicFilters,
+    setFilter: setTopicFilter,
+    isLoading: topicsLoading,
+  } = useAdminPaginatedQuery<ForumTopic>(
+    ["admin-forum-topics"],
+    async ({ page, pageSize, search, filters }) => {
+      const result = await adminListForumTopics({ page, pageSize, search, filters });
       if (result.ok === false) throw new Error(result.error);
       return result.data;
-    },
-  });
+    }
+  );
 
-  const { data: replies = [], isLoading: repliesLoading } = useQuery({
-    queryKey: ["admin-forum-replies", replyFilter],
-    queryFn: async () => {
-      const result = await adminListForumReplies(
-        replyFilter === "all" ? undefined : (replyFilter as ForumModerationStatus)
-      );
+  const {
+    rows: replies,
+    total: repliesTotal,
+    page: repliesPage,
+    pageSize: repliesPageSize,
+    setPage: setRepliesPage,
+    search: repliesSearch,
+    setSearch: setRepliesSearch,
+    filters: replyFilters,
+    setFilter: setReplyFilter,
+    isLoading: repliesLoading,
+  } = useAdminPaginatedQuery<ForumReply>(
+    ["admin-forum-replies"],
+    async ({ page, pageSize, search, filters }) => {
+      const result = await adminListForumReplies({ page, pageSize, search, filters });
       if (result.ok === false) throw new Error(result.error);
       return result.data;
-    },
-  });
+    }
+  );
 
-  const { data: reports = [], isLoading: reportsLoading } = useQuery({
-    queryKey: ["admin-forum-reports", reportFilter],
-    queryFn: async () => {
-      const result = await adminListForumReports(
-        reportFilter === "all" ? undefined : (reportFilter as ForumReport["status"])
-      );
+  const {
+    rows: reports,
+    total: reportsTotal,
+    page: reportsPage,
+    pageSize: reportsPageSize,
+    setPage: setReportsPage,
+    search: reportsSearch,
+    setSearch: setReportsSearch,
+    filters: reportFilters,
+    setFilter: setReportFilter,
+    isLoading: reportsLoading,
+  } = useAdminPaginatedQuery<ForumReport>(
+    ["admin-forum-reports"],
+    async ({ page, pageSize, search, filters }) => {
+      const result = await adminListForumReports({ page, pageSize, search, filters });
       if (result.ok === false) throw new Error(result.error);
       return result.data;
-    },
-  });
+    }
+  );
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-forum-topics"] });
@@ -235,86 +266,57 @@ export default function AdminForum() {
       />
 
       <Tabs defaultValue="topics" className="space-y-6">
-        <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-          <TabsList className="rounded-xl flex flex-wrap h-auto w-full lg:flex-1">
-            <TabsTrigger value="topics" className="rounded-lg flex-1">
-              Topics
-              {(pendingCounts?.pending_topics ?? 0) > 0 && (
-                <Badge className="ml-2 text-[10px]" variant="secondary">
-                  {pendingCounts?.pending_topics}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="replies" className="rounded-lg flex-1">
-              Replies
-              {(pendingCounts?.pending_replies ?? 0) > 0 && (
-                <Badge className="ml-2 text-[10px]" variant="secondary">
-                  {pendingCounts?.pending_replies}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="rounded-lg flex-1">
-              Reports
-              {(pendingCounts?.pending_reports ?? 0) > 0 && (
-                <Badge className="ml-2 text-[10px]" variant="secondary">
-                  {pendingCounts?.pending_reports}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="boards" className="rounded-lg flex-1">
-              Boards
-            </TabsTrigger>
-          </TabsList>
-          <div className="w-full lg:w-56">
-            <TabsContent value="topics" className="m-0">
-              <Select value={topicFilter} onValueChange={setTopicFilter}>
-                <SelectTrigger className="w-full rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  {Object.entries(MODERATION_STATUS_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </TabsContent>
-            <TabsContent value="replies" className="m-0">
-              <Select value={replyFilter} onValueChange={setReplyFilter}>
-                <SelectTrigger className="w-full rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  {Object.entries(MODERATION_STATUS_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </TabsContent>
-            <TabsContent value="reports" className="m-0">
-              <Select value={reportFilter} onValueChange={setReportFilter}>
-                <SelectTrigger className="w-full rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  {Object.entries(REPORT_STATUS_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </TabsContent>
-          </div>
-        </div>
+        <TabsList className="rounded-xl flex flex-wrap h-auto w-full">
+          <TabsTrigger value="topics" className="rounded-lg flex-1">
+            Topics
+            {(pendingCounts?.pending_topics ?? 0) > 0 && (
+              <Badge className="ml-2 text-[10px]" variant="secondary">
+                {pendingCounts?.pending_topics}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="replies" className="rounded-lg flex-1">
+            Replies
+            {(pendingCounts?.pending_replies ?? 0) > 0 && (
+              <Badge className="ml-2 text-[10px]" variant="secondary">
+                {pendingCounts?.pending_replies}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="rounded-lg flex-1">
+            Reports
+            {(pendingCounts?.pending_reports ?? 0) > 0 && (
+              <Badge className="ml-2 text-[10px]" variant="secondary">
+                {pendingCounts?.pending_reports}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="boards" className="rounded-lg flex-1">
+            Boards
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="topics" className="space-y-4">
+          <AdminFilterBar
+            search={topicsSearch}
+            onSearchChange={setTopicsSearch}
+            searchPlaceholder="Search by title or author..."
+            filters={[
+              {
+                key: "status",
+                value: topicFilters.status ?? "all",
+                options: Object.entries(MODERATION_STATUS_LABELS).map(
+                  ([value, label]) => ({ value, label })
+                ),
+                allLabel: "All statuses",
+              },
+            ]}
+            onFilterChange={setTopicFilter}
+            total={topicsTotal}
+            page={topicsPage}
+            pageSize={topicsPageSize}
+            resultNoun="topics"
+          />
           <AdminDataList
             rows={topics as unknown as Record<string, unknown>[]}
             isLoading={topicsLoading}
@@ -391,9 +393,35 @@ export default function AdminForum() {
               );
             }}
           />
+          <AdminPagination
+            page={topicsPage}
+            total={topicsTotal}
+            pageSize={topicsPageSize}
+            onPageChange={setTopicsPage}
+          />
         </TabsContent>
 
         <TabsContent value="replies" className="space-y-4">
+          <AdminFilterBar
+            search={repliesSearch}
+            onSearchChange={setRepliesSearch}
+            searchPlaceholder="Search by content or author..."
+            filters={[
+              {
+                key: "status",
+                value: replyFilters.status ?? "all",
+                options: Object.entries(MODERATION_STATUS_LABELS).map(
+                  ([value, label]) => ({ value, label })
+                ),
+                allLabel: "All statuses",
+              },
+            ]}
+            onFilterChange={setReplyFilter}
+            total={repliesTotal}
+            page={repliesPage}
+            pageSize={repliesPageSize}
+            resultNoun="replies"
+          />
           <AdminDataList
             rows={replies as unknown as Record<string, unknown>[]}
             isLoading={repliesLoading}
@@ -458,9 +486,35 @@ export default function AdminForum() {
               );
             }}
           />
+          <AdminPagination
+            page={repliesPage}
+            total={repliesTotal}
+            pageSize={repliesPageSize}
+            onPageChange={setRepliesPage}
+          />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
+          <AdminFilterBar
+            search={reportsSearch}
+            onSearchChange={setReportsSearch}
+            searchPlaceholder="Search by reporter email..."
+            filters={[
+              {
+                key: "status",
+                value: reportFilters.status ?? "all",
+                options: Object.entries(REPORT_STATUS_LABELS).map(
+                  ([value, label]) => ({ value, label })
+                ),
+                allLabel: "All statuses",
+              },
+            ]}
+            onFilterChange={setReportFilter}
+            total={reportsTotal}
+            page={reportsPage}
+            pageSize={reportsPageSize}
+            resultNoun="reports"
+          />
           <AdminDataList
             rows={reports as unknown as Record<string, unknown>[]}
             isLoading={reportsLoading}
@@ -522,6 +576,12 @@ export default function AdminForum() {
               );
             }}
           />
+          <AdminPagination
+            page={reportsPage}
+            total={reportsTotal}
+            pageSize={reportsPageSize}
+            onPageChange={setReportsPage}
+          />
         </TabsContent>
 
         <TabsContent value="boards" className="space-y-6">
@@ -564,6 +624,16 @@ export default function AdminForum() {
             </Button>
           </form>
 
+          <AdminFilterBar
+            search={boardsSearch}
+            onSearchChange={setBoardsSearch}
+            searchPlaceholder="Search by title or slug..."
+            total={boardsTotal}
+            page={boardsPage}
+            pageSize={boardsPageSize}
+            resultNoun="boards"
+          />
+
           <AdminDataList
             rows={boards}
             isLoading={boardsLoading}
@@ -591,6 +661,12 @@ export default function AdminForum() {
                 Toggle visibility
               </Button>
             )}
+          />
+          <AdminPagination
+            page={boardsPage}
+            total={boardsTotal}
+            pageSize={boardsPageSize}
+            onPageChange={setBoardsPage}
           />
         </TabsContent>
       </Tabs>

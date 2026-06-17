@@ -1,23 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Eye, Pencil, Trash2, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { AdminRecordEditDialog } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { BOOKING_FIELDS, BOOKING_STATUSES, PAYMENT_STATUSES } from "@/components/pages/admin/booking-fields";
 
-const STATUS_GROUPS: { value: string; label: string }[] = [
-  { value: "pending", label: "Pending" },
-  { value: "confirmed", label: "Confirmed" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-];
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.hosting_bookings);
 
 const STATUS_BADGE: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
   pending: "warning",
@@ -39,35 +37,44 @@ function cap(value: unknown): string {
 
 export default function AdminBookings() {
   const router = useRouter();
-  const { data: bookings = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.hosting_bookings,
-    "admin-bookings",
-    "-created_at"
-  );
+  const {
+    rows: bookings,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.hosting_bookings, "admin-bookings");
   const [editingBooking, setEditingBooking] = useState<Row | null>(null);
 
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Booking updated");
 
-  const groups = useMemo(() => {
-    const known = new Set(STATUS_GROUPS.map((g) => g.value));
-    const base = STATUS_GROUPS.map((g) => ({
-      ...g,
-      rows: bookings.filter((b) => String(b.status ?? "pending") === g.value),
-    }));
-    const otherRows = bookings.filter((b) => !known.has(String(b.status ?? "pending")));
-    if (otherRows.length > 0) base.push({ value: "other", label: "Other", rows: otherRows });
-    return base.filter((g) => g.rows.length > 0);
-  }, [bookings]);
-
-  const pendingCount = bookings.filter((b) => String(b.status ?? "pending") === "pending").length;
-  const confirmedCount = bookings.filter((b) => String(b.status ?? "") === "confirmed").length;
-
   return (
     <div className="pb-10">
-      <AdminPageHeader
-        title="Hosting Bookings"
-        description={`${pendingCount} pending · ${confirmedCount} confirmed`}
+      <AdminPageHeader title="Hosting Bookings" description={`${total} bookings`} />
+
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by pet, owner, email, or city..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All statuses",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="bookings"
       />
 
       {isLoading ? (
@@ -79,29 +86,22 @@ export default function AdminBookings() {
           No bookings yet.
         </div>
       ) : (
-        <div className="space-y-8">
-          {groups.map((group) => (
-            <section key={group.value}>
-              <h2 className="font-heading text-lg font-bold text-foreground mb-4">
-                {group.label} ({group.rows.length})
-              </h2>
-              <div className="space-y-3">
-                {group.rows.map((booking) => (
-                  <BookingRow
-                    key={String(booking.id)}
-                    booking={booking}
-                    onView={() => router.push(`/admin/bookings/${booking.id}`)}
-                    onEdit={() => setEditingBooking(booking)}
-                    onStatus={(v) => updateRow(String(booking.id), { status: v }, "Status updated")}
-                    onPayment={(v) => updateRow(String(booking.id), { payment_status: v }, "Payment updated")}
-                    onDelete={() => deleteRow(String(booking.id), `Delete booking for ${booking.pet_name}?`)}
-                  />
-                ))}
-              </div>
-            </section>
+        <div className="space-y-3">
+          {bookings.map((booking) => (
+            <BookingRow
+              key={String(booking.id)}
+              booking={booking}
+              onView={() => router.push(`/admin/bookings/${booking.id}`)}
+              onEdit={() => setEditingBooking(booking)}
+              onStatus={(v) => updateRow(String(booking.id), { status: v }, "Status updated")}
+              onPayment={(v) => updateRow(String(booking.id), { payment_status: v }, "Payment updated")}
+              onDelete={() => deleteRow(String(booking.id), `Delete booking for ${booking.pet_name}?`)}
+            />
           ))}
         </div>
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordEditDialog
         row={editingBooking}

@@ -5,22 +5,21 @@ import { Loader2, Eye, Pencil, Trash2, PawPrint } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
   type AdminRecordField,
 } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import StartChatButton from "@/components/messaging/StartChatButton";
 
 const STATUSES = ["pending", "approved", "rejected"];
-
-const STATUS_GROUPS: { value: string; label: string }[] = [
-  { value: "pending", label: "Pending" },
-  { value: "approved", label: "Approved" },
-  { value: "rejected", label: "Rejected" },
-];
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.adoption_requests);
 
 const STATUS_BADGE: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
   pending: "warning",
@@ -43,10 +42,20 @@ const FIELDS: AdminRecordField[] = [
 ];
 
 export default function AdminAdoptionRequests() {
-  const { data: requests = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.adoption_requests,
-    "admin-adoption-requests"
-  );
+  const {
+    rows: requests,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.adoption_requests, "admin-adoption-requests");
   const { data: pets = [] } = useAdminList(ADMIN_TABLES.pets, "admin-pets");
   const [viewingRequest, setViewingRequest] = useState<Row | null>(null);
   const [editingRequest, setEditingRequest] = useState<Row | null>(null);
@@ -76,24 +85,25 @@ export default function AdminAdoptionRequests() {
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Request updated");
 
-  const groups = useMemo(() => {
-    const known = new Set(STATUS_GROUPS.map((g) => g.value));
-    const base = STATUS_GROUPS.map((g) => ({
-      ...g,
-      rows: requests.filter((r) => String(r.status ?? "pending") === g.value),
-    }));
-    const otherRows = requests.filter((r) => !known.has(String(r.status ?? "pending")));
-    if (otherRows.length > 0) base.push({ value: "other", label: "Other", rows: otherRows });
-    return base.filter((g) => g.rows.length > 0);
-  }, [requests]);
-
-  const pendingCount = requests.filter((r) => String(r.status ?? "pending") === "pending").length;
-
   return (
     <div className="pb-10">
-      <AdminPageHeader
-        title="Adoption Requests"
-        description={`${requests.length} total · ${pendingCount} pending`}
+      <AdminPageHeader title="Adoption Requests" description={`${total} requests`} />
+
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by applicant name, email, or city..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All statuses",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="requests"
       />
 
       {isLoading ? (
@@ -105,31 +115,24 @@ export default function AdminAdoptionRequests() {
           No adoption requests yet.
         </div>
       ) : (
-        <div className="space-y-8">
-          {groups.map((group) => (
-            <section key={group.value}>
-              <h2 className="font-heading text-lg font-bold text-foreground mb-4">
-                {group.label} ({group.rows.length})
-              </h2>
-              <div className="space-y-3">
-                {group.rows.map((request) => (
-                  <RequestRow
-                    key={String(request.id)}
-                    request={request}
-                    petName={petName(request)}
-                    petListedBy={petListedBy(request)}
-                    petImage={petImage(request)}
-                    onView={() => setViewingRequest(request)}
-                    onEdit={() => setEditingRequest(request)}
-                    onStatus={(v) => updateRow(String(request.id), { status: v }, "Status updated")}
-                    onDelete={() => deleteRow(String(request.id), `Delete request from ${request.applicant_name}?`)}
-                  />
-                ))}
-              </div>
-            </section>
+        <div className="space-y-3">
+          {requests.map((request) => (
+            <RequestRow
+              key={String(request.id)}
+              request={request}
+              petName={petName(request)}
+              petListedBy={petListedBy(request)}
+              petImage={petImage(request)}
+              onView={() => setViewingRequest(request)}
+              onEdit={() => setEditingRequest(request)}
+              onStatus={(v) => updateRow(String(request.id), { status: v }, "Status updated")}
+              onDelete={() => deleteRow(String(request.id), `Delete request from ${request.applicant_name}?`)}
+            />
           ))}
         </div>
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordViewDialog
         row={decorate(viewingRequest)}

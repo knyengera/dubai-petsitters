@@ -5,15 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
   type AdminRecordField,
 } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 
 const STATUSES = ["pending", "confirmed", "completed", "cancelled"];
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.appointments);
 const FIELDS: AdminRecordField[] = [
   { key: "pet_name", label: "Pet Name", required: true },
   { key: "pet_id", label: "Pet ID", viewOnly: true },
@@ -31,11 +35,20 @@ const FIELDS: AdminRecordField[] = [
 ];
 
 export default function AdminAppointments() {
-  const { data: appointments = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.appointments,
-    "admin-appointments",
-    "-date"
-  );
+  const {
+    rows: appointments,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.appointments, "admin-appointments");
   const [viewingAppointment, setViewingAppointment] = useState<Row | null>(null);
   const [editingAppointment, setEditingAppointment] = useState<Row | null>(null);
 
@@ -47,6 +60,22 @@ export default function AdminAppointments() {
       <AdminPageHeader
         title="Appointments"
         description="Manage vet appointment requests across the platform."
+      />
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by pet, clinic, or owner..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All statuses",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="appointments"
       />
       <AdminDataList
         rows={appointments}
@@ -91,6 +120,8 @@ export default function AdminAppointments() {
           deleteRow(String(row.id), `Delete appointment for ${row.pet_name}?`)
         }
       />
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordViewDialog
         row={viewingAppointment}

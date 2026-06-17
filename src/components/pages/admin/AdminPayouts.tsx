@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { adminListPayoutRequests, adminUpdatePayoutStatus } from "@/lib/monetisation/actions";
+import { useAdminPaginatedQuery } from "@/components/admin/useAdminPaginatedList";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import type { Row } from "@/lib/admin/tables";
@@ -16,19 +17,23 @@ const STATUSES = ["pending", "approved", "processing", "paid", "rejected", "canc
 
 export default function AdminPayouts() {
   const { toast } = useToast();
-  const [rows, setRows] = useState<Row[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = async () => {
-    setLoading(true);
-    const result = await adminListPayoutRequests();
-    if (result.ok) setRows(result.data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
+  const {
+    rows,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    refetch,
+  } = useAdminPaginatedQuery<Row>(["admin-payouts"], async ({ page, pageSize, search, filters }) => {
+    const result = await adminListPayoutRequests({ page, pageSize, search, filters });
+    if (result.ok === false) throw new Error(result.error);
+    return result.data;
+  });
 
   const updateStatus = async (id: string, status: string) => {
     const result = await adminUpdatePayoutStatus({ payoutId: id, status: status as never });
@@ -37,7 +42,7 @@ export default function AdminPayouts() {
       return;
     }
     toast({ title: `Payout ${status}` });
-    load();
+    refetch();
   };
 
   return (
@@ -46,7 +51,25 @@ export default function AdminPayouts() {
         title="Host Payouts"
         description="Review withdrawal requests. Host payout fee is deducted server-side."
       />
-      {loading ? (
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by host email..."
+        filters={[
+          {
+            key: "status",
+            value: filters.status ?? "all",
+            options: STATUSES.map((value) => ({ value, label: value })),
+            allLabel: "All statuses",
+          },
+        ]}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="payout requests"
+      />
+      {isLoading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -118,6 +141,8 @@ export default function AdminPayouts() {
           )}
         />
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
     </div>
   );
 }

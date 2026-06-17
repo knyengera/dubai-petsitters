@@ -134,22 +134,44 @@ export async function submitBlogComment(payload: {
   }
 }
 
+export type AdminBlogCommentListParams = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  filters?: Record<string, string>;
+  postId?: string;
+};
+
 export async function adminListBlogComments(
-  postId?: string
-): Promise<BlogActionResult<BlogComment[]>> {
+  params: AdminBlogCommentListParams = {}
+): Promise<BlogActionResult<{ rows: BlogComment[]; total: number }>> {
   try {
     await requireAdmin();
     const supabase = await createClient();
-    let query = supabase
-      .from("blog_comments")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const page = Math.max(1, params.page ?? 1);
+    const pageSize = Math.max(1, params.pageSize ?? 20);
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
 
-    if (postId) query = query.eq("post_id", postId);
+    let query = supabase.from("blog_comments").select("*", { count: "exact" });
+    if (params.postId) query = query.eq("post_id", params.postId);
+    const status = params.filters?.status;
+    if (status && status !== "all") query = query.eq("status", status);
+    const search = (params.search ?? "").trim().replace(/[%,()]/g, " ").trim();
+    if (search) {
+      query = query.or(
+        `author_name.ilike.%${search}%,author_email.ilike.%${search}%,content.ilike.%${search}%`
+      );
+    }
 
-    const { data, error } = await query;
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .range(from, to);
     if (error) return { ok: false, error: error.message };
-    return { ok: true, data: (data ?? []) as BlogComment[] };
+    return {
+      ok: true,
+      data: { rows: (data ?? []) as BlogComment[], total: count ?? 0 },
+    };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }

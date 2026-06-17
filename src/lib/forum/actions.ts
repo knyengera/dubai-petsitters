@@ -560,58 +560,92 @@ export async function getUserForumReactions(
 // Admin actions
 // ---------------------------------------------------------------------------
 
+export type AdminForumListParams = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  filters?: Record<string, string>;
+};
+
+function resolveAdminForumRange(params: AdminForumListParams) {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.max(1, params.pageSize ?? 20);
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  return { from, to };
+}
+
+function sanitizeForumSearch(search?: string): string {
+  return (search ?? "").trim().replace(/[%,()]/g, " ").trim();
+}
+
 export async function adminListForumTopics(
-  status?: ForumModerationStatus
-): Promise<ForumActionResult<ForumTopic[]>> {
+  params: AdminForumListParams = {}
+): Promise<ForumActionResult<{ rows: ForumTopic[]; total: number }>> {
   try {
     await requireAdmin();
     const supabase = await createClient();
+    const { from, to } = resolveAdminForumRange(params);
     let query = supabase
       .from("forum_topics")
-      .select("*, board:forum_boards(title, slug)")
-      .order("created_at", { ascending: false });
-    if (status) query = query.eq("moderation_status", status);
-    const { data, error } = await query;
+      .select("*, board:forum_boards(title, slug)", { count: "exact" });
+    const status = params.filters?.status;
+    if (status && status !== "all") query = query.eq("moderation_status", status);
+    const search = sanitizeForumSearch(params.search);
+    if (search) query = query.or(`title.ilike.%${search}%,author_name.ilike.%${search}%`);
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .range(from, to);
     if (error) return { ok: false, error: error.message };
-    return { ok: true, data: (data ?? []) as ForumTopic[] };
+    return { ok: true, data: { rows: (data ?? []) as ForumTopic[], total: count ?? 0 } };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }
 }
 
 export async function adminListForumReplies(
-  status?: ForumModerationStatus
-): Promise<ForumActionResult<ForumReply[]>> {
+  params: AdminForumListParams = {}
+): Promise<ForumActionResult<{ rows: ForumReply[]; total: number }>> {
   try {
     await requireAdmin();
     const supabase = await createClient();
+    const { from, to } = resolveAdminForumRange(params);
     let query = supabase
       .from("forum_replies")
-      .select("*, topic:forum_topics(title, slug, board:forum_boards(slug))")
-      .order("created_at", { ascending: false });
-    if (status) query = query.eq("moderation_status", status);
-    const { data, error } = await query;
+      .select("*, topic:forum_topics(title, slug, board:forum_boards(slug))", {
+        count: "exact",
+      });
+    const status = params.filters?.status;
+    if (status && status !== "all") query = query.eq("moderation_status", status);
+    const search = sanitizeForumSearch(params.search);
+    if (search) query = query.or(`content.ilike.%${search}%,author_name.ilike.%${search}%`);
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .range(from, to);
     if (error) return { ok: false, error: error.message };
-    return { ok: true, data: (data ?? []) as ForumReply[] };
+    return { ok: true, data: { rows: (data ?? []) as ForumReply[], total: count ?? 0 } };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }
 }
 
 export async function adminListForumReports(
-  status?: ForumReportStatus
-): Promise<ForumActionResult<ForumReport[]>> {
+  params: AdminForumListParams = {}
+): Promise<ForumActionResult<{ rows: ForumReport[]; total: number }>> {
   try {
     await requireAdmin();
     const supabase = await createClient();
-    let query = supabase
-      .from("forum_reports")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (status) query = query.eq("status", status);
-    const { data, error } = await query;
+    const { from, to } = resolveAdminForumRange(params);
+    let query = supabase.from("forum_reports").select("*", { count: "exact" });
+    const status = params.filters?.status;
+    if (status && status !== "all") query = query.eq("status", status);
+    const search = sanitizeForumSearch(params.search);
+    if (search) query = query.ilike("reporter_email", `%${search}%`);
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .range(from, to);
     if (error) return { ok: false, error: error.message };
-    return { ok: true, data: (data ?? []) as ForumReport[] };
+    return { ok: true, data: { rows: (data ?? []) as ForumReport[], total: count ?? 0 } };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }

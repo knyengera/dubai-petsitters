@@ -8,14 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
   type AdminRecordField,
 } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
+
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.partner_deals);
 
 const EMPTY = {
   title: "",
@@ -38,10 +43,21 @@ const FIELDS: AdminRecordField[] = [
 ];
 
 export default function AdminPartnerDeals() {
-  const { data: deals = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
-    ADMIN_TABLES.partner_deals,
-    "admin-partner-deals"
-  );
+  const {
+    rows: deals,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+    createRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.partner_deals, "admin-partner-deals");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -73,6 +89,22 @@ export default function AdminPartnerDeals() {
           </Button>
         }
       />
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by title or partner..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="deals"
+      />
       <AdminDataList
         rows={deals}
         isLoading={isLoading}
@@ -99,6 +131,8 @@ export default function AdminPartnerDeals() {
         )}
         onDelete={(row) => deleteRow(String(row.id), `Delete "${row.title}"?`)}
       />
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-lg rounded-2xl">

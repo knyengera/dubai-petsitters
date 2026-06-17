@@ -10,6 +10,7 @@ import {
   parseOrder,
   ADMIN_TABLES,
 } from "@/lib/admin/tables";
+import { ADMIN_PAGE_SIZE, getAdminListConfig } from "@/lib/admin/list-config";
 
 export type AdminActionResult<T = unknown> =
   | { ok: true; data: T }
@@ -41,6 +42,70 @@ export async function adminList(
       .limit(limit);
     if (error) return { ok: false, error: error.message };
     return { ok: true, data: (data ?? []) as Row[] };
+  } catch (e) {
+    return { ok: false, error: toErrorMessage(e) };
+  }
+}
+
+export type AdminListParams = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  filters?: Record<string, string>;
+};
+
+export type AdminListPage = {
+  rows: Row[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export async function adminListPaginated(
+  table: AdminTable,
+  order?: string,
+  params: AdminListParams = {}
+): Promise<AdminActionResult<AdminListPage>> {
+  try {
+    const supabase = await getAdminSupabase();
+    const config = getAdminListConfig(table);
+    const { column, ascending } = parseOrder(order ?? config.defaultOrder ?? "-created_at");
+    const page = Math.max(1, params.page ?? 1);
+    const pageSize = Math.max(1, params.pageSize ?? ADMIN_PAGE_SIZE);
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let query = supabase.from(table).select("*", { count: "exact" });
+
+    if (params.filters) {
+      const defsByKey = new Map((config.filters ?? []).map((def) => [def.key, def]));
+      for (const [key, value] of Object.entries(params.filters)) {
+        if (!value || value === "all") continue;
+        const def = defsByKey.get(key);
+        if (!def) continue;
+        query = query.eq(def.column, def.boolean ? value === "true" : value);
+      }
+    }
+
+    const search = params.search?.trim();
+    if (search && config.searchColumns?.length) {
+      const safe = search.replace(/[%,()]/g, " ").trim();
+      if (safe) {
+        const orExpr = config.searchColumns
+          .map((col) => `${col}.ilike.%${safe}%`)
+          .join(",");
+        query = query.or(orExpr);
+      }
+    }
+
+    const { data, error, count } = await query
+      .order(column, { ascending })
+      .range(from, to);
+    if (error) return { ok: false, error: error.message };
+    return {
+      ok: true,
+      data: { rows: (data ?? []) as Row[], total: count ?? 0, page, pageSize },
+    };
   } catch (e) {
     return { ok: false, error: toErrorMessage(e) };
   }

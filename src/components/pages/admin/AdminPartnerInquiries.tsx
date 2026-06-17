@@ -5,12 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
   type AdminRecordField,
 } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import {
   formatBusinessDetailsForDisplay,
@@ -18,6 +21,7 @@ import {
 } from "@/lib/partners/partner-types";
 
 const STATUSES = ["new", "contacted", "converted", "closed"];
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.partner_inquiries);
 const FIELDS: AdminRecordField[] = [
   { key: "business_name", label: "Business Name", required: true },
   { key: "business_type", label: "Business Type" },
@@ -53,10 +57,20 @@ function BusinessDetailsPanel({ row }: { row: Row }) {
 }
 
 export default function AdminPartnerInquiries() {
-  const { data: inquiries = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.partner_inquiries,
-    "admin-partner-inquiries"
-  );
+  const {
+    rows: inquiries,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.partner_inquiries, "admin-partner-inquiries");
   const [viewingInquiry, setViewingInquiry] = useState<Row | null>(null);
   const [editingInquiry, setEditingInquiry] = useState<Row | null>(null);
 
@@ -68,6 +82,22 @@ export default function AdminPartnerInquiries() {
       <AdminPageHeader
         title="Partner Inquiries"
         description="Review partnership and advertising inquiries from /partners."
+      />
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by business, contact, email, or city..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All statuses",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="inquiries"
       />
       <AdminDataList
         rows={inquiries}
@@ -118,6 +148,8 @@ export default function AdminPartnerInquiries() {
           deleteRow(String(row.id), `Delete inquiry from ${row.business_name}?`)
         }
       />
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordViewDialog
         row={viewingInquiry}

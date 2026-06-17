@@ -23,6 +23,32 @@ function toError(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
+const ADMIN_LIST_PAGE_SIZE = 20;
+
+export type AdminMonetisationListParams = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  filters?: Record<string, string>;
+};
+
+export type AdminMonetisationListPage = {
+  rows: Record<string, unknown>[];
+  total: number;
+};
+
+function resolvePageRange(params: AdminMonetisationListParams) {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.max(1, params.pageSize ?? ADMIN_LIST_PAGE_SIZE);
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  return { from, to };
+}
+
+function sanitizeSearch(search?: string): string {
+  return (search ?? "").trim().replace(/[%,()]/g, " ").trim();
+}
+
 type RpcResult = { data: unknown; error: { message: string } | null };
 
 async function callRpc(
@@ -553,15 +579,23 @@ export async function adminUpsertFeeSettings(
   }
 }
 
-export async function adminListEscrowAccounts(): Promise<MonetisationActionResult<Record<string, unknown>[]>> {
+export async function adminListEscrowAccounts(
+  params: AdminMonetisationListParams = {}
+): Promise<MonetisationActionResult<AdminMonetisationListPage>> {
   try {
     await requireAdmin();
     const supabase = await createClient();
-    const { data, error } = await supabase
+    const { from, to } = resolvePageRange(params);
+
+    let query = supabase
       .from("escrow_accounts")
-      .select("*")
+      .select("*", { count: "exact" });
+    const status = params.filters?.status;
+    if (status && status !== "all") query = query.eq("status", status);
+
+    const { data, error, count } = await query
       .order("created_at", { ascending: false })
-      .limit(200);
+      .range(from, to);
     if (error) return { ok: false, error: error.message };
 
     const accounts = (data ?? []) as Record<string, unknown>[];
@@ -618,43 +652,67 @@ export async function adminListEscrowAccounts(): Promise<MonetisationActionResul
       };
     });
 
-    return { ok: true, data: enriched };
+    return { ok: true, data: { rows: enriched, total: count ?? 0 } };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }
 }
 
-export async function adminListLedgerEntries(): Promise<MonetisationActionResult<Record<string, unknown>[]>> {
+export async function adminListLedgerEntries(
+  params: AdminMonetisationListParams = {}
+): Promise<MonetisationActionResult<AdminMonetisationListPage>> {
   try {
     await requireAdmin();
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("ledger_entries")
-      .select("*")
+    const { from, to } = resolvePageRange(params);
+
+    let query = supabase.from("ledger_entries").select("*", { count: "exact" });
+    const entryType = params.filters?.entry_type;
+    const direction = params.filters?.direction;
+    if (entryType && entryType !== "all") query = query.eq("entry_type", entryType);
+    if (direction && direction !== "all") query = query.eq("direction", direction);
+    const search = sanitizeSearch(params.search);
+    if (search) query = query.ilike("actor_email", `%${search}%`);
+
+    const { data, error, count } = await query
       .order("created_at", { ascending: false })
-      .limit(300);
+      .range(from, to);
     if (error) return { ok: false, error: error.message };
-    return { ok: true, data: (data ?? []) as Record<string, unknown>[] };
+    return {
+      ok: true,
+      data: { rows: (data ?? []) as Record<string, unknown>[], total: count ?? 0 },
+    };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }
 }
 
-export async function adminListPayoutRequests(): Promise<MonetisationActionResult<Record<string, unknown>[]>> {
+export async function adminListPayoutRequests(
+  params: AdminMonetisationListParams = {}
+): Promise<MonetisationActionResult<AdminMonetisationListPage>> {
   try {
     await requireAdmin();
     const supabase = await createClient();
-    const { data, error } = await supabase
+    const { from, to } = resolvePageRange(params);
+
+    let query = supabase
       .from("host_payout_requests")
-      .select("*")
+      .select("*", { count: "exact" });
+    const status = params.filters?.status;
+    if (status && status !== "all") query = query.eq("status", status);
+    const search = sanitizeSearch(params.search);
+    if (search) query = query.ilike("requested_by_email", `%${search}%`);
+
+    const { data, error, count } = await query
       .order("created_at", { ascending: false })
-      .limit(200);
+      .range(from, to);
     if (error) return { ok: false, error: error.message };
 
+    const total = count ?? 0;
     const payouts = (data ?? []) as Record<string, unknown>[];
     const hostIds = [...new Set(payouts.map((p) => String(p.host_id)).filter(Boolean))];
     if (hostIds.length === 0) {
-      return { ok: true, data: payouts };
+      return { ok: true, data: { rows: payouts, total } };
     }
 
     const { data: settingsRows, error: settingsError } = await supabase
@@ -687,7 +745,7 @@ export async function adminListPayoutRequests(): Promise<MonetisationActionResul
       };
     });
 
-    return { ok: true, data: enriched };
+    return { ok: true, data: { rows: enriched, total } };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }

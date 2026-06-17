@@ -10,12 +10,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
   type AdminRecordField,
 } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { formatAdvertisingPlanPrice } from "@/lib/partners/advertising-plans";
 
@@ -60,11 +62,19 @@ function featuresToInput(value: unknown): string {
 }
 
 export default function AdminAdvertisingPlans() {
-  const { data: plans = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
-    ADMIN_TABLES.advertising_plans,
-    "admin-advertising-plans",
-    "sort_order"
-  );
+  const {
+    rows: plans,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    isLoading,
+    updateRow,
+    deleteRow,
+    createRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.advertising_plans, "admin-advertising-plans");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -119,6 +129,16 @@ export default function AdminAdvertisingPlans() {
         }
       />
 
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by plan name..."
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="plans"
+      />
+
       <AdminDataList
         rows={plans}
         isLoading={isLoading}
@@ -152,6 +172,8 @@ export default function AdminAdvertisingPlans() {
         onEdit={setEditingPlan}
         onDelete={(row) => deleteRow(String(row.id), `Delete plan "${row.name}"?`)}
       />
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">

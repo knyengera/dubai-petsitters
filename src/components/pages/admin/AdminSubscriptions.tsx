@@ -5,16 +5,20 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
   type AdminRecordField,
 } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 const STATUSES = ["pending", "pending_payment", "active", "cancelled", "expired"];
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.vet_subscriptions);
 const FIELDS: AdminRecordField[] = [
   { key: "clinic_id", label: "Clinic ID", viewOnly: true },
   { key: "clinic_name", label: "Clinic Name" },
@@ -32,10 +36,20 @@ const FIELDS: AdminRecordField[] = [
 ];
 
 export default function AdminSubscriptions() {
-  const { data: subs = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.vet_subscriptions,
-    "admin-subscriptions"
-  );
+  const {
+    rows: subs,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.vet_subscriptions, "admin-subscriptions");
   const [viewingSub, setViewingSub] = useState<Row | null>(null);
   const [editingSub, setEditingSub] = useState<Row | null>(null);
 
@@ -47,6 +61,22 @@ export default function AdminSubscriptions() {
       <AdminPageHeader
         title="Vet Subscriptions"
         description="Legacy vet advertising subscriptions. New vet clinic sign-ups come through /partners."
+      />
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by clinic, contact, email, or city..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All statuses",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="subscriptions"
       />
       <AdminDataList
         rows={subs}
@@ -99,6 +129,8 @@ export default function AdminSubscriptions() {
         )}
         onDelete={(row) => deleteRow(String(row.id), "Delete subscription?")}
       />
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordViewDialog
         row={viewingSub}

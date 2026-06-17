@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
   type AdminRecordField,
 } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { adminCaptureManualPayment } from "@/lib/monetisation/actions";
@@ -19,6 +22,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle } from "lucide-react";
 
 const STATUSES = ["pending", "requires_payment", "captured", "completed", "failed", "refunded"];
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.payments);
 const FIELDS: AdminRecordField[] = [
   { key: "payment_type", label: "Payment Type", required: true },
   { key: "gateway", label: "Gateway", required: true },
@@ -43,10 +47,21 @@ function canManualCapture(row: Row): boolean {
 
 export default function AdminPayments() {
   const { toast } = useToast();
-  const { data: payments = [], isLoading, updateRow, deleteRow, invalidate } = useAdminList(
-    ADMIN_TABLES.payments,
-    "admin-payments"
-  );
+  const {
+    rows: payments,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+    invalidate,
+  } = useAdminPaginatedList(ADMIN_TABLES.payments, "admin-payments");
   const [viewingPayment, setViewingPayment] = useState<Row | null>(null);
   const [editingPayment, setEditingPayment] = useState<Row | null>(null);
   const [capturingId, setCapturingId] = useState<string | null>(null);
@@ -72,6 +87,22 @@ export default function AdminPayments() {
       <AdminPageHeader
         title="Payments"
         description="View and update payment records."
+      />
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by payer name, email, or reference..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All statuses",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="payments"
       />
       <AdminDataList
         rows={payments}
@@ -134,6 +165,8 @@ export default function AdminPayments() {
           deleteRow(String(row.id), `Delete payment from ${row.payer_email}?`)
         }
       />
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordViewDialog
         row={viewingPayment}

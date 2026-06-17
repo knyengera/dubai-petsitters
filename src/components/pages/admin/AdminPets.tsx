@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Loader2, Eye, Pencil, Trash2, PawPrint } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,17 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { AdminRecordEditDialog } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import ImageUpload from "@/components/common/ImageUpload";
 import { useAuth } from "@/lib/auth-context";
 import { PET_FIELDS, PET_STATUSES } from "@/components/pages/admin/pet-fields";
+
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.pets);
 
 const EMPTY = {
   name: "",
@@ -34,13 +39,6 @@ const EMPTY = {
 const STATUSES = PET_STATUSES;
 const FIELDS = PET_FIELDS;
 
-const STATUS_GROUPS: { value: string; label: string }[] = [
-  { value: "pending_review", label: "Pending Review" },
-  { value: "available", label: "Available" },
-  { value: "pending", label: "Pending" },
-  { value: "adopted", label: "Adopted" },
-];
-
 const STATUS_BADGE: Record<string, "success" | "warning" | "secondary" | "outline"> = {
   available: "success",
   pending_review: "warning",
@@ -56,10 +54,21 @@ function cap(value: unknown): string {
 export default function AdminPets() {
   const { user } = useAuth();
   const router = useRouter();
-  const { data: pets = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
-    ADMIN_TABLES.pets,
-    "admin-pets"
-  );
+  const {
+    rows: pets,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+    createRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.pets, "admin-pets");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -83,30 +92,33 @@ export default function AdminPets() {
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Pet updated");
 
-  const groups = useMemo(() => {
-    const known = new Set(STATUS_GROUPS.map((g) => g.value));
-    const base = STATUS_GROUPS.map((g) => ({
-      ...g,
-      rows: pets.filter((p) => String(p.status ?? "available") === g.value),
-    }));
-    const otherRows = pets.filter((p) => !known.has(String(p.status ?? "available")));
-    if (otherRows.length > 0) base.push({ value: "other", label: "Other", rows: otherRows });
-    return base.filter((g) => g.rows.length > 0);
-  }, [pets]);
-
-  const availableCount = pets.filter((p) => String(p.status ?? "available") === "available").length;
-  const reviewCount = pets.filter((p) => String(p.status ?? "") === "pending_review").length;
-
   return (
     <div className="pb-10">
       <AdminPageHeader
         title="Adoption Pets"
-        description={`${availableCount} available · ${reviewCount} pending review`}
+        description={`${total} pets`}
         actions={
           <Button onClick={() => setShowForm(true)} className="rounded-xl gap-2">
             <Plus className="w-4 h-4" /> Add Pet
           </Button>
         }
+      />
+
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by name, breed, or location..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All statuses",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="pets"
       />
 
       {isLoading ? (
@@ -118,28 +130,21 @@ export default function AdminPets() {
           No pets listed for adoption yet.
         </div>
       ) : (
-        <div className="space-y-8">
-          {groups.map((group) => (
-            <section key={group.value}>
-              <h2 className="font-heading text-lg font-bold text-foreground mb-4">
-                {group.label} ({group.rows.length})
-              </h2>
-              <div className="space-y-3">
-                {group.rows.map((pet) => (
-                  <PetRow
-                    key={String(pet.id)}
-                    pet={pet}
-                    onView={() => router.push(`/admin/pets/${pet.id}`)}
-                    onEdit={() => setEditingPet(pet)}
-                    onStatus={(v) => updateRow(String(pet.id), { status: v }, "Status updated")}
-                    onDelete={() => deleteRow(String(pet.id), `Delete ${pet.name}?`)}
-                  />
-                ))}
-              </div>
-            </section>
+        <div className="space-y-3">
+          {pets.map((pet) => (
+            <PetRow
+              key={String(pet.id)}
+              pet={pet}
+              onView={() => router.push(`/admin/pets/${pet.id}`)}
+              onEdit={() => setEditingPet(pet)}
+              onStatus={(v) => updateRow(String(pet.id), { status: v }, "Status updated")}
+              onDelete={() => deleteRow(String(pet.id), `Delete ${pet.name}?`)}
+            />
           ))}
         </div>
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">

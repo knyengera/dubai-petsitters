@@ -1,13 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { Plus, Loader2, Star, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -18,7 +17,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
-import { useAdminList } from "@/components/admin/useAdminList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
+import {
+  useAdminPaginatedList,
+  useAdminPaginatedQuery,
+} from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES } from "@/lib/admin/tables";
 import {
   adminDeleteBlogComment,
@@ -40,50 +45,43 @@ const STATUS_BADGE: Record<string, string> = {
   trash: "destructive",
 };
 
+const POSTS_CONFIG = getAdminListConfig(ADMIN_TABLES.blog_posts);
+
 export default function AdminBlog() {
   const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const {
-    data: posts = [],
+    rows: posts,
+    total: postsTotal,
+    page: postsPage,
+    pageSize: postsPageSize,
+    setPage: setPostsPage,
+    search,
+    setSearch,
+    filters: postFilters,
+    setFilter: setPostFilter,
     isLoading,
     updateRow,
-  } = useAdminList(ADMIN_TABLES.blog_posts, "admin-blog");
+  } = useAdminPaginatedList(ADMIN_TABLES.blog_posts, "admin-blog");
 
-  const { data: comments = [], isLoading: commentsLoading } = useQuery({
-    queryKey: ["admin-blog-comments"],
-    queryFn: async () => {
-      const result = await adminListBlogComments();
+  const {
+    rows: comments,
+    total: commentsTotal,
+    page: commentsPage,
+    pageSize: commentsPageSize,
+    setPage: setCommentsPage,
+    filters: commentFilters,
+    setFilter: setCommentFilter,
+    isLoading: commentsLoading,
+  } = useAdminPaginatedQuery<BlogComment>(
+    ["admin-blog-comments"],
+    async ({ page, pageSize, filters }) => {
+      const result = await adminListBlogComments({ page, pageSize, filters });
       if (result.ok === false) throw new Error(result.error);
       return result.data;
-    },
-  });
-
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [commentFilter, setCommentFilter] = useState("all");
-
-  const filteredPosts = useMemo(() => {
-    let result = [...posts];
-    if (statusFilter !== "all") {
-      result = result.filter((row) => String(row.status ?? "draft") === statusFilter);
     }
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (row) =>
-          String(row.title ?? "").toLowerCase().includes(q) ||
-          String(row.slug ?? "").toLowerCase().includes(q) ||
-          String(row.author_name ?? "").toLowerCase().includes(q)
-      );
-    }
-    return result;
-  }, [posts, search, statusFilter]);
-
-  const filteredComments = useMemo(() => {
-    if (commentFilter === "all") return comments;
-    return comments.filter((c) => c.status === commentFilter);
-  }, [comments, commentFilter]);
+  );
 
   const openCreate = () => {
     router.push("/admin/blog/new");
@@ -149,39 +147,29 @@ export default function AdminBlog() {
           <TabsTrigger value="comments" className="rounded-lg gap-2">
             <MessageSquare className="w-3.5 h-3.5" />
             Comments
-            {comments.filter((c) => c.status === "pending").length > 0 && (
-              <Badge className="text-[10px] h-5 px-1.5">
-                {comments.filter((c) => c.status === "pending").length}
-              </Badge>
-            )}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="posts" className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Input
-              placeholder="Search posts..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="rounded-xl"
-            />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-44 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                {Object.entries(BLOG_STATUS_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <AdminFilterBar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search by title, slug, or author..."
+            filters={(POSTS_CONFIG.filters ?? []).map((f) => ({
+              key: f.key,
+              value: postFilters[f.key] ?? "all",
+              options: f.options,
+              allLabel: "All statuses",
+            }))}
+            onFilterChange={setPostFilter}
+            total={postsTotal}
+            page={postsPage}
+            pageSize={postsPageSize}
+            resultNoun="posts"
+          />
 
           <AdminDataList
-            rows={filteredPosts}
+            rows={posts}
             isLoading={isLoading}
             emptyMessage="No blog posts yet. Create your first article."
             onEdit={openEdit}
@@ -247,34 +235,45 @@ export default function AdminBlog() {
               void handleQuickStatus(row, "trash");
             }}
           />
+
+          <AdminPagination
+            page={postsPage}
+            total={postsTotal}
+            pageSize={postsPageSize}
+            onPageChange={setPostsPage}
+          />
         </TabsContent>
 
         <TabsContent value="comments" className="space-y-4">
-          <Select value={commentFilter} onValueChange={setCommentFilter}>
-            <SelectTrigger className="w-full sm:w-48 rounded-xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All comments</SelectItem>
-              {Object.entries(BLOG_COMMENT_STATUS_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <AdminFilterBar
+            filters={[
+              {
+                key: "status",
+                value: commentFilters.status ?? "all",
+                options: Object.entries(BLOG_COMMENT_STATUS_LABELS).map(
+                  ([value, label]) => ({ value, label })
+                ),
+                allLabel: "All comments",
+              },
+            ]}
+            onFilterChange={setCommentFilter}
+            total={commentsTotal}
+            page={commentsPage}
+            pageSize={commentsPageSize}
+            resultNoun="comments"
+          />
 
           {commentsLoading ? (
             <div className="flex justify-center py-16">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : filteredComments.length === 0 ? (
+          ) : comments.length === 0 ? (
             <div className="text-center py-16 text-sm text-muted-foreground border border-dashed border-border rounded-2xl">
               No comments found.
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredComments.map((comment) => {
+              {comments.map((comment) => {
                 const post = posts.find((p) => String(p.id) === comment.post_id);
                 return (
                   <div
@@ -339,6 +338,13 @@ export default function AdminBlog() {
               })}
             </div>
           )}
+
+          <AdminPagination
+            page={commentsPage}
+            total={commentsTotal}
+            pageSize={commentsPageSize}
+            onPageChange={setCommentsPage}
+          />
         </TabsContent>
       </Tabs>
     </div>

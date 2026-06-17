@@ -19,9 +19,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import { useAdminList } from "@/components/admin/useAdminList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
+
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.pet_hosts);
 
 const EMPTY_FORM = {
   full_name: "",
@@ -72,19 +77,26 @@ const WIDE_DIALOG_CLASS =
   "w-[min(1120px,calc(100vw-2rem))] max-w-none sm:max-w-none rounded-2xl max-h-[90vh] overflow-y-auto";
 
 export default function AdminHosts() {
-  const { data: hosts = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
-    ADMIN_TABLES.pet_hosts,
-    "admin-hosts",
-    "-rating"
-  );
+  const {
+    rows: hosts,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+    createRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.pet_hosts, "admin-hosts");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingHost, setEditingHost] = useState<Row | null>(null);
   const [viewingHost, setViewingHost] = useState<Row | null>(null);
   const [saving, setSaving] = useState(false);
-
-  const available = hosts.filter((host) => host.is_available);
-  const unavailable = hosts.length - available.length;
 
   const handleAvailability = async (host: Row) => {
     const nextAvailable = !host.is_available;
@@ -147,12 +159,29 @@ export default function AdminHosts() {
     <div className="pb-10">
       <AdminPageHeader
         title="Pet Hosts"
-        description={`${available.length} available · ${unavailable} unavailable`}
+        description={`${total} hosts`}
         actions={
           <Button onClick={openCreate} className="rounded-xl gap-2">
             <Plus className="w-4 h-4" /> Add Host
           </Button>
         }
+      />
+
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by name, city, or neighborhood..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All hosts",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="hosts"
       />
 
       {isLoading ? (
@@ -178,6 +207,8 @@ export default function AdminHosts() {
           ))}
         </div>
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className={WIDE_DIALOG_CLASS}>

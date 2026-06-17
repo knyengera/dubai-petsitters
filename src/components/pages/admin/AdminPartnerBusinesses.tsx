@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   CheckCircle,
-  XCircle,
   Plus,
   Stethoscope,
   Loader2,
@@ -28,8 +27,11 @@ import {
 } from "@/components/ui/select";
 import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import PartnerTypeFields from "@/components/partners/PartnerTypeFields";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { useToast } from "@/components/ui/use-toast";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import {
@@ -88,11 +90,24 @@ const VET_DETAIL_FIELDS = [
 const WIDE_DIALOG_CLASS =
   "w-[min(1120px,calc(100vw-2rem))] max-w-none sm:max-w-none rounded-2xl max-h-[90vh] overflow-y-auto";
 
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.vet_clinics);
+
 export default function AdminPartnerBusinesses() {
-  const { data: partners = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
-    ADMIN_TABLES.vet_clinics,
-    "admin-partners"
-  );
+  const {
+    rows: partners,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+    createRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.vet_clinics, "admin-partners");
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<PartnerForm>(EMPTY_FORM);
@@ -101,15 +116,9 @@ export default function AdminPartnerBusinesses() {
   const [detailErrors, setDetailErrors] = useState<Record<string, string>>({});
   const [editingPartner, setEditingPartner] = useState<Row | null>(null);
   const [viewingPartner, setViewingPartner] = useState<Row | null>(null);
-  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [saving, setSaving] = useState(false);
 
   const isVet = businessTypeId === "vet-clinics";
-
-  const filtered = useMemo(() => {
-    if (typeFilter === "all") return partners;
-    return partners.filter((p) => String(p.business_type ?? "") === typeFilter);
-  }, [partners, typeFilter]);
 
   const handleApprove = async (partner: Row) => {
     const nextApproved = !partner.is_approved;
@@ -195,84 +204,60 @@ export default function AdminPartnerBusinesses() {
     setSaving(false);
   };
 
-  const approved = filtered.filter((p) => p.is_approved);
-  const pending = filtered.filter((p) => !p.is_approved);
-
   return (
     <div className="pb-10">
       <AdminPageHeader
         title="Partners"
-        description={`${approved.length} approved · ${pending.length} pending`}
+        description={`${total} partners`}
         actions={
-          <div className="flex items-center gap-2">
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="rounded-xl w-44">
-                <SelectValue placeholder="All types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
-                {PARTNER_TYPES.map((t) => (
-                  <SelectItem key={t.id} value={t.label}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={openCreate} className="rounded-xl gap-2">
-              <Plus className="w-4 h-4" /> Add Partner
-            </Button>
-          </div>
+          <Button onClick={openCreate} className="rounded-xl gap-2">
+            <Plus className="w-4 h-4" /> Add Partner
+          </Button>
         }
+      />
+
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by name, city, email, or phone..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: f.key === "business_type" ? "All types" : "All",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="partners"
       />
 
       {isLoading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
+      ) : partners.length === 0 ? (
+        <div className="text-center py-16 text-sm text-muted-foreground border border-dashed border-border rounded-2xl">
+          No partners found.
+        </div>
       ) : (
-        <>
-          <section className="mb-8">
-            <h2 className="font-heading text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-success" /> Approved ({approved.length})
-            </h2>
-            <div className="space-y-3">
-              {approved.map((partner) => (
-                <PartnerRow
-                  key={String(partner.id)}
-                  partner={partner}
-                  onView={setViewingPartner}
-                  onEdit={openEdit}
-                  onApprove={handleApprove}
-                  onFeature={handleFeature}
-                  onDelete={handleDelete}
-                />
-              ))}
-              {approved.length === 0 && <p className="text-sm text-muted-foreground">No approved partners yet.</p>}
-            </div>
-          </section>
-
-          {pending.length > 0 && (
-            <section>
-              <h2 className="font-heading text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                <XCircle className="w-5 h-5 text-warning" /> Pending ({pending.length})
-              </h2>
-              <div className="space-y-3">
-                {pending.map((partner) => (
-                  <PartnerRow
-                    key={String(partner.id)}
-                    partner={partner}
-                    onView={setViewingPartner}
-                    onEdit={openEdit}
-                    onApprove={handleApprove}
-                    onFeature={handleFeature}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-        </>
+        <div className="space-y-3">
+          {partners.map((partner) => (
+            <PartnerRow
+              key={String(partner.id)}
+              partner={partner}
+              onView={setViewingPartner}
+              onEdit={openEdit}
+              onApprove={handleApprove}
+              onFeature={handleFeature}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className={WIDE_DIALOG_CLASS}>

@@ -1,24 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Eye, Pencil, Trash2, PawPrint } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { AdminRecordEditDialog } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { LOST_PET_FIELDS, LOST_PET_STATUSES } from "@/components/pages/admin/lost-pet-fields";
 
 const STATUSES = LOST_PET_STATUSES;
 const FIELDS = LOST_PET_FIELDS;
-
-const STATUS_GROUPS: { value: string; label: string }[] = [
-  { value: "lost", label: "Lost" },
-  { value: "found", label: "Found" },
-  { value: "reunited", label: "Reunited" },
-];
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.lost_pets);
 
 const STATUS_BADGE: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
   lost: "destructive",
@@ -33,34 +31,44 @@ function cap(value: unknown): string {
 
 export default function AdminLostPets() {
   const router = useRouter();
-  const { data: reports = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.lost_pets,
-    "admin-lost-pets"
-  );
+  const {
+    rows: reports,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.lost_pets, "admin-lost-pets");
   const [editingReport, setEditingReport] = useState<Row | null>(null);
 
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Report updated");
 
-  const groups = useMemo(() => {
-    const known = new Set(STATUS_GROUPS.map((g) => g.value));
-    const base = STATUS_GROUPS.map((g) => ({
-      ...g,
-      rows: reports.filter((r) => String(r.status ?? "lost") === g.value),
-    }));
-    const otherRows = reports.filter((r) => !known.has(String(r.status ?? "lost")));
-    if (otherRows.length > 0) base.push({ value: "other", label: "Other", rows: otherRows });
-    return base.filter((g) => g.rows.length > 0);
-  }, [reports]);
-
-  const lostCount = reports.filter((r) => String(r.status ?? "lost") === "lost").length;
-  const reunitedCount = reports.filter((r) => String(r.status ?? "") === "reunited").length;
-
   return (
     <div className="pb-10">
-      <AdminPageHeader
-        title="Lost Pets"
-        description={`${lostCount} lost · ${reunitedCount} reunited`}
+      <AdminPageHeader title="Lost Pets" description={`${total} reports`} />
+
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by pet, breed, location, or contact..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: "All statuses",
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="reports"
       />
 
       {isLoading ? (
@@ -72,28 +80,21 @@ export default function AdminLostPets() {
           No lost pet reports yet.
         </div>
       ) : (
-        <div className="space-y-8">
-          {groups.map((group) => (
-            <section key={group.value}>
-              <h2 className="font-heading text-lg font-bold text-foreground mb-4">
-                {group.label} ({group.rows.length})
-              </h2>
-              <div className="space-y-3">
-                {group.rows.map((report) => (
-                  <LostPetRow
-                    key={String(report.id)}
-                    report={report}
-                    onView={() => router.push(`/admin/lost-pets/${report.id}`)}
-                    onEdit={() => setEditingReport(report)}
-                    onStatus={(v) => updateRow(String(report.id), { status: v }, "Status updated")}
-                    onDelete={() => deleteRow(String(report.id), `Delete report for ${report.pet_name}?`)}
-                  />
-                ))}
-              </div>
-            </section>
+        <div className="space-y-3">
+          {reports.map((report) => (
+            <LostPetRow
+              key={String(report.id)}
+              report={report}
+              onView={() => router.push(`/admin/lost-pets/${report.id}`)}
+              onEdit={() => setEditingReport(report)}
+              onStatus={(v) => updateRow(String(report.id), { status: v }, "Status updated")}
+              onDelete={() => deleteRow(String(report.id), `Delete report for ${report.pet_name}?`)}
+            />
           ))}
         </div>
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordEditDialog
         row={editingReport}

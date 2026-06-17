@@ -1,25 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Eye, Pencil, Trash2, User as UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { AdminRecordEditDialog } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
+import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { adminUpdateProfileRole } from "@/lib/admin/actions";
 import { useToast } from "@/components/ui/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
 import { USER_FIELDS, USER_ROLES } from "@/components/pages/admin/user-fields";
 
-const STATUS_GROUPS: { value: string; label: string }[] = [
-  { value: "admin", label: "Admins" },
-  { value: "host", label: "Hosts" },
-  { value: "vet", label: "Vets" },
-  { value: "user", label: "Users" },
-];
+const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.profiles);
 
 const ROLE_BADGE: Record<string, "destructive" | "secondary" | "outline"> = {
   admin: "destructive",
@@ -31,11 +28,21 @@ const ROLE_BADGE: Record<string, "destructive" | "secondary" | "outline"> = {
 export default function AdminUsers() {
   const { toast } = useToast();
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const { data: users = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.profiles,
-    "admin-users"
-  );
+  const {
+    rows: users,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+    updateRow,
+    deleteRow,
+    invalidate,
+  } = useAdminPaginatedList(ADMIN_TABLES.profiles, "admin-users");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<Row | null>(null);
 
@@ -46,7 +53,7 @@ export default function AdminUsers() {
       toast({ title: "Role update failed", description: result.error, variant: "destructive" });
     } else {
       toast({ title: "Role updated" });
-      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      invalidate();
     }
     setUpdatingId(null);
   };
@@ -54,24 +61,25 @@ export default function AdminUsers() {
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Profile updated");
 
-  const groups = useMemo(() => {
-    const known = new Set(STATUS_GROUPS.map((g) => g.value));
-    const base = STATUS_GROUPS.map((g) => ({
-      ...g,
-      rows: users.filter((u) => String(u.role ?? "user") === g.value),
-    }));
-    const otherRows = users.filter((u) => !known.has(String(u.role ?? "user")));
-    if (otherRows.length > 0) base.push({ value: "other", label: "Other", rows: otherRows });
-    return base.filter((g) => g.rows.length > 0);
-  }, [users]);
-
-  const hostCount = users.filter((u) => String(u.role ?? "") === "host").length;
-
   return (
     <div className="pb-10">
-      <AdminPageHeader
-        title="Users"
-        description={`${users.length} profiles · ${hostCount} hosts`}
+      <AdminPageHeader title="Users" description={`${total} profiles`} />
+
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by name, email, or city..."
+        filters={(LIST_CONFIG.filters ?? []).map((f) => ({
+          key: f.key,
+          value: filters[f.key] ?? "all",
+          options: f.options,
+          allLabel: `All ${f.label.toLowerCase()}s`,
+        }))}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="profiles"
       />
 
       {isLoading ? (
@@ -83,29 +91,22 @@ export default function AdminUsers() {
           No user profiles found.
         </div>
       ) : (
-        <div className="space-y-8">
-          {groups.map((group) => (
-            <section key={group.value}>
-              <h2 className="font-heading text-lg font-bold text-foreground mb-4">
-                {group.label} ({group.rows.length})
-              </h2>
-              <div className="space-y-3">
-                {group.rows.map((user) => (
-                  <UserRow
-                    key={String(user.id)}
-                    user={user}
-                    updating={updatingId === String(user.id)}
-                    onView={() => router.push(`/admin/users/${user.id}`)}
-                    onEdit={() => setEditingUser(user)}
-                    onRole={(v) => handleRoleChange(user, v)}
-                    onDelete={() => deleteRow(String(user.id), `Delete profile for ${user.email}?`)}
-                  />
-                ))}
-              </div>
-            </section>
+        <div className="space-y-3">
+          {users.map((user) => (
+            <UserRow
+              key={String(user.id)}
+              user={user}
+              updating={updatingId === String(user.id)}
+              onView={() => router.push(`/admin/users/${user.id}`)}
+              onEdit={() => setEditingUser(user)}
+              onRole={(v) => handleRoleChange(user, v)}
+              onDelete={() => deleteRow(String(user.id), `Delete profile for ${user.email}?`)}
+            />
           ))}
         </div>
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordEditDialog
         row={editingUser}

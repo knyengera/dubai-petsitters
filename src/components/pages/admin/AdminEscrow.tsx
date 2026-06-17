@@ -1,34 +1,49 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import AdminEscrowRefundDialog from "@/components/pages/admin/AdminEscrowRefundDialog";
 import { adminListEscrowAccounts, releaseEscrow, markBookingCompleted } from "@/lib/monetisation/actions";
+import { useAdminPaginatedQuery } from "@/components/admin/useAdminPaginatedList";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import type { Row } from "@/lib/admin/tables";
 
+const ESCROW_STATUS_OPTIONS = [
+  "pending_payment",
+  "held",
+  "release_pending",
+  "released",
+  "refunded",
+  "disputed",
+  "cancelled",
+].map((value) => ({ value, label: value.replace(/_/g, " ") }));
+
 export default function AdminEscrow() {
   const { toast } = useToast();
-  const [rows, setRows] = useState<Row[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    rows,
+    total,
+    page,
+    pageSize,
+    setPage,
+    filters,
+    setFilter,
+    isLoading,
+    refetch,
+  } = useAdminPaginatedQuery<Row>(["admin-escrow"], async ({ page, pageSize, filters }) => {
+    const result = await adminListEscrowAccounts({ page, pageSize, filters });
+    if (result.ok === false) throw new Error(result.error);
+    return result.data;
+  });
   const [acting, setActing] = useState<string | null>(null);
   const [refundRow, setRefundRow] = useState<Row | null>(null);
-
-  const load = async () => {
-    setLoading(true);
-    const result = await adminListEscrowAccounts();
-    if (result.ok) setRows(result.data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
 
   const handleRelease = async (bookingId: string) => {
     setActing(bookingId);
@@ -39,7 +54,7 @@ export default function AdminEscrow() {
       return;
     }
     toast({ title: "Escrow released to host balance" });
-    load();
+    refetch();
   };
 
   const handleComplete = async (bookingId: string) => {
@@ -51,12 +66,12 @@ export default function AdminEscrow() {
       return;
     }
     toast({ title: "Booking marked completed" });
-    load();
+    refetch();
   };
 
   const handleRefundSuccess = () => {
     toast({ title: "Refund processed" });
-    load();
+    refetch();
   };
 
   return (
@@ -65,7 +80,22 @@ export default function AdminEscrow() {
         title="Escrow"
         description="Review held funds, release host earnings, and process refunds."
       />
-      {loading ? (
+      <AdminFilterBar
+        filters={[
+          {
+            key: "status",
+            value: filters.status ?? "all",
+            options: ESCROW_STATUS_OPTIONS,
+            allLabel: "All statuses",
+          },
+        ]}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="escrow accounts"
+      />
+      {isLoading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -167,6 +197,8 @@ export default function AdminEscrow() {
           )}
         />
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminEscrowRefundDialog
         row={refundRow}

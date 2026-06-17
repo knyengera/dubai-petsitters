@@ -1,24 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { adminListLedgerEntries } from "@/lib/monetisation/actions";
+import { useAdminPaginatedQuery } from "@/components/admin/useAdminPaginatedList";
 import { Loader2 } from "lucide-react";
 import type { Row } from "@/lib/admin/tables";
 
-export default function AdminLedger() {
-  const [rows, setRows] = useState<Row[]>([]);
-  const [loading, setLoading] = useState(true);
+const DIRECTION_OPTIONS = [
+  { value: "credit", label: "Credit" },
+  { value: "debit", label: "Debit" },
+];
 
-  useEffect(() => {
-    adminListLedgerEntries().then((result) => {
-      if (result.ok) setRows(result.data);
-      setLoading(false);
-    });
-  }, []);
+export default function AdminLedger() {
+  const {
+    rows,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    filters,
+    setFilter,
+    isLoading,
+  } = useAdminPaginatedQuery<Row>(["admin-ledger"], async ({ page, pageSize, search, filters }) => {
+    const result = await adminListLedgerEntries({ page, pageSize, search, filters });
+    if (result.ok === false) throw new Error(result.error);
+    return result.data;
+  });
 
   return (
     <div className="pb-10">
@@ -26,7 +40,25 @@ export default function AdminLedger() {
         title="Ledger"
         description="Immutable audit trail for pay-ins, escrow holds, releases, and payouts."
       />
-      {loading ? (
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by actor email..."
+        filters={[
+          {
+            key: "direction",
+            value: filters.direction ?? "all",
+            options: DIRECTION_OPTIONS,
+            allLabel: "All directions",
+          },
+        ]}
+        onFilterChange={setFilter}
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="entries"
+      />
+      {isLoading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -60,6 +92,8 @@ export default function AdminLedger() {
           ]}
         />
       )}
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
     </div>
   );
 }

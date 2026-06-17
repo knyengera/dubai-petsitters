@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminFilterBar from "@/components/admin/AdminFilterBar";
+import AdminPagination from "@/components/admin/AdminPagination";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
   type AdminRecordField,
 } from "@/components/admin/AdminRecordDialogs";
-import { useAdminList } from "@/components/admin/useAdminList";
+import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 
 const FIELDS: AdminRecordField[] = [
@@ -22,10 +24,18 @@ const FIELDS: AdminRecordField[] = [
 ];
 
 export default function AdminReviews() {
-  const { data: reviews = [], isLoading, updateRow, deleteRow } = useAdminList(
-    ADMIN_TABLES.reviews,
-    "admin-reviews"
-  );
+  const {
+    rows: reviews,
+    total,
+    page,
+    pageSize,
+    setPage,
+    search,
+    setSearch,
+    isLoading,
+    updateRow,
+    deleteRow,
+  } = useAdminPaginatedList(ADMIN_TABLES.reviews, "admin-reviews");
   const [viewingReview, setViewingReview] = useState<Row | null>(null);
   const [editingReview, setEditingReview] = useState<Row | null>(null);
 
@@ -37,6 +47,15 @@ export default function AdminReviews() {
       <AdminPageHeader
         title="Reviews"
         description="Moderate user reviews across the platform."
+      />
+      <AdminFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by author or target type..."
+        total={total}
+        page={page}
+        pageSize={pageSize}
+        resultNoun="reviews"
       />
       <AdminDataList
         rows={reviews}
@@ -58,6 +77,8 @@ export default function AdminReviews() {
           deleteRow(String(row.id), `Delete review by ${row.author_name}?`)
         }
       />
+
+      <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <AdminRecordViewDialog
         row={viewingReview}
