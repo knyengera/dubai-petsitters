@@ -494,6 +494,13 @@ export function getPartnerTypeLabel(id: string | null | undefined) {
   return getPartnerTypeById(id)?.label ?? "";
 }
 
+export function getPartnerTypeIdFromLabel(
+  label: string | null | undefined
+): PartnerTypeId | null {
+  if (!label) return null;
+  return PARTNER_TYPES.find((t) => t.label === label)?.id ?? null;
+}
+
 export function parsePartnerTypeFromSearchParams(
   type: string | string[] | null | undefined
 ): PartnerTypeId | null {

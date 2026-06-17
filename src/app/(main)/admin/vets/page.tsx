@@ -1,5 +1,6 @@
-import AdminVets from "@/components/pages/AdminVets";
+import { redirect } from "next/navigation";
 
+/** Legacy route — vet clinics are now managed under the unified partners admin. */
 export default function Page() {
-  return <AdminVets />;
+  redirect("/admin/partners");
 }

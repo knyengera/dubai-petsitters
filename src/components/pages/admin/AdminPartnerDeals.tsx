@@ -37,10 +37,10 @@ const FIELDS: AdminRecordField[] = [
   { key: "is_active", label: "Active", type: "checkbox" },
 ];
 
-export default function AdminPartners() {
+export default function AdminPartnerDeals() {
   const { data: deals = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
     ADMIN_TABLES.partner_deals,
-    "admin-partners"
+    "admin-partner-deals"
   );
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);

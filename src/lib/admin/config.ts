@@ -55,10 +55,10 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     group: "operations",
   },
   {
-    label: "Vet Clinics",
-    href: "/admin/vets",
+    label: "Partners",
+    href: "/admin/partners",
     icon: Stethoscope,
-    description: "Approve and feature clinics",
+    description: "Vet clinics, shops, groomers and more",
     group: "operations",
   },
   {
@@ -119,7 +119,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   },
   {
     label: "Partner Deals",
-    href: "/admin/partners",
+    href: "/admin/partner-deals",
     icon: Handshake,
     description: "Partner promotions",
     group: "commerce",

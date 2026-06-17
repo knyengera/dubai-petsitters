@@ -1,5 +1,5 @@
-import AdminPartners from "@/components/pages/admin/AdminPartners";
+import AdminPartnerBusinesses from "@/components/pages/admin/AdminPartnerBusinesses";
 
 export default function Page() {
-  return <AdminPartners />;
+  return <AdminPartnerBusinesses />;
 }

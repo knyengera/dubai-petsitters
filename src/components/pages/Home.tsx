@@ -99,7 +99,7 @@ function FeaturedVetsSection({ t }) {
   const { data: vets = [] } = useQuery({
     queryKey: ['featured-vets'],
     queryFn: async () => {
-      const featuredVets = await entities.VetClinic.filter({ is_featured: true }, '-rating', 8);
+      const featuredVets = await entities.VetClinic.filter({ is_featured: true, business_type: 'Vet Clinics' }, '-rating', 8);
       return featuredVets.map(toFeaturedVetClinic);
     },
   });

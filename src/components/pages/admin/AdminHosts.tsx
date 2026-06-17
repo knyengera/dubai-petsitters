@@ -305,6 +305,19 @@ export default function AdminHosts() {
                 />
               ) : null}
 
+              {Array.isArray(viewingHost.gallery) && viewingHost.gallery.length > 0 ? (
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                  {viewingHost.gallery.map((url) => (
+                    <img
+                      key={String(url)}
+                      src={String(url)}
+                      alt="Host gallery"
+                      className="aspect-square w-full rounded-lg object-cover"
+                    />
+                  ))}
+                </div>
+              ) : null}
+
               <div className="flex flex-wrap gap-2">
                 <Button type="button" size="sm" className="rounded-xl gap-1" onClick={() => handleAvailability(viewingHost)}>
                   <CheckCircle className="w-3.5 h-3.5" />

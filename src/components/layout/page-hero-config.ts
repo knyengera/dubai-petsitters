@@ -150,9 +150,9 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
     subtitle: "Platform overview and management tools",
     imageAlt: DEFAULT_ALT,
   },
-  "/admin/vets": {
-    title: "Vet Clinic Management",
-    subtitle: "Review and manage vet clinic listings",
+  "/admin/partners": {
+    title: "Partner Management",
+    subtitle: "Manage vet clinics, shops, groomers and other partner listings",
     imageAlt: DEFAULT_ALT,
   },
   "/admin/users": {
@@ -200,7 +200,7 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
     subtitle: "Moderate community threads",
     imageAlt: DEFAULT_ALT,
   },
-  "/admin/partners": {
+  "/admin/partner-deals": {
     title: "Partner Deals",
     subtitle: "Manage partner promotions",
     imageAlt: DEFAULT_ALT,

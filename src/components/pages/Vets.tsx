@@ -14,7 +14,7 @@ export default function Vets() {
 
   const { data: clinics = [], isLoading } = useQuery({
     queryKey: ['vet-clinics'],
-    queryFn: () => entities.VetClinic.filter({ is_approved: true }, '-rating'),
+    queryFn: () => entities.VetClinic.filter({ is_approved: true, business_type: 'Vet Clinics' }, '-rating'),
   });
 
   const filtered = useMemo(() => applyVetFilters(clinics, filters), [clinics, filters]);
