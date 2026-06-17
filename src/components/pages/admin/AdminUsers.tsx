@@ -1,57 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2, Eye, Pencil, Trash2, User as UserIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import AdminDataList from "@/components/admin/AdminDataList";
-import {
-  AdminRecordEditDialog,
-  AdminRecordViewDialog,
-  type AdminRecordField,
-} from "@/components/admin/AdminRecordDialogs";
+import { AdminRecordEditDialog } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { adminUpdateProfileRole } from "@/lib/admin/actions";
-import { getAdminKycSignedUrl } from "@/lib/admin/kyc-actions";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { USER_FIELDS, USER_ROLES } from "@/components/pages/admin/user-fields";
 
-const ROLES = ["user", "admin", "host", "vet"] as const;
-const FIELDS: AdminRecordField[] = [
-  { key: "full_name", label: "Full Name" },
-  { key: "email", label: "Email" },
-  { key: "role", label: "Role", viewOnly: true },
-  { key: "city", label: "City" },
-  { key: "date_of_birth", label: "Date of Birth" },
-  { key: "id_type", label: "ID Type" },
-  { key: "id_number", label: "ID Number" },
-  { key: "id_document_path", label: "ID Document Path" },
-  { key: "phone", label: "Phone" },
-  { key: "profile_completed_at", label: "Profile Completed" },
-  {
-    key: "avatar_url",
-    label: "Avatar",
-    type: "image",
-    hideInView: true,
-    uploadCategory: "avatar",
-    uploadBucket: "avatars",
-  },
+const STATUS_GROUPS: { value: string; label: string }[] = [
+  { value: "admin", label: "Admins" },
+  { value: "host", label: "Hosts" },
+  { value: "vet", label: "Vets" },
+  { value: "user", label: "Users" },
 ];
+
+const ROLE_BADGE: Record<string, "destructive" | "secondary" | "outline"> = {
+  admin: "destructive",
+  host: "outline",
+  vet: "outline",
+  user: "secondary",
+};
 
 export default function AdminUsers() {
   const { toast } = useToast();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: users = [], isLoading, updateRow, deleteRow } = useAdminList(
     ADMIN_TABLES.profiles,
     "admin-users"
   );
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [viewingUser, setViewingUser] = useState<Row | null>(null);
   const [editingUser, setEditingUser] = useState<Row | null>(null);
-  const [loadingKycId, setLoadingKycId] = useState<string | null>(null);
 
   const handleRoleChange = async (user: Row, role: string) => {
     setUpdatingId(String(user.id));
@@ -68,139 +54,137 @@ export default function AdminUsers() {
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Profile updated");
 
-  const handleViewKycDocument = async (user: Row) => {
-    const path = String(user.id_document_path ?? "").trim();
-    if (!path) {
-      toast({ title: "No ID document on file", variant: "destructive" });
-      return;
-    }
+  const groups = useMemo(() => {
+    const known = new Set(STATUS_GROUPS.map((g) => g.value));
+    const base = STATUS_GROUPS.map((g) => ({
+      ...g,
+      rows: users.filter((u) => String(u.role ?? "user") === g.value),
+    }));
+    const otherRows = users.filter((u) => !known.has(String(u.role ?? "user")));
+    if (otherRows.length > 0) base.push({ value: "other", label: "Other", rows: otherRows });
+    return base.filter((g) => g.rows.length > 0);
+  }, [users]);
 
-    setLoadingKycId(String(user.id));
-    try {
-      const result = await getAdminKycSignedUrl(path);
-      if (result.ok === false) {
-        toast({ title: "Could not open document", description: result.error, variant: "destructive" });
-        return;
-      }
-      window.open(result.data, "_blank", "noopener,noreferrer");
-    } finally {
-      setLoadingKycId(null);
-    }
-  };
+  const hostCount = users.filter((u) => String(u.role ?? "") === "host").length;
 
   return (
     <div className="pb-10">
       <AdminPageHeader
         title="Users"
-        description="Manage platform user profiles and roles."
-      />
-      <AdminDataList
-        rows={users}
-        isLoading={isLoading}
-        emptyMessage="No user profiles found."
-        columns={[
-          { key: "full_name", label: "Name" },
-          { key: "email", label: "Email" },
-          {
-            key: "role",
-            label: "Role",
-            render: (row) => (
-              <Badge variant="secondary" className="capitalize text-[10px]">
-                {String(row.role ?? "user")}
-              </Badge>
-            ),
-          },
-          {
-            key: "profile_completed_at",
-            label: "Verified",
-            render: (row) => (
-              <Badge
-                variant={row.profile_completed_at ? "default" : "secondary"}
-                className="text-[10px]"
-              >
-                {row.profile_completed_at ? "Complete" : "Incomplete"}
-              </Badge>
-            ),
-          },
-          {
-            key: "created_at",
-            label: "Joined",
-            render: (row) =>
-              row.created_at
-                ? new Date(String(row.created_at)).toLocaleDateString()
-                : "—",
-          },
-        ]}
-        onView={setViewingUser}
-        onEdit={setEditingUser}
-        rowActions={(row) => (
-          <Select
-            value={String(row.role ?? "user")}
-            onValueChange={(v) => handleRoleChange(row, v)}
-            disabled={updatingId === String(row.id)}
-          >
-            <SelectTrigger className="w-28 h-8 rounded-lg text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ROLES.map((r) => (
-                <SelectItem key={r} value={r} className="capitalize">
-                  {r}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        onDelete={(row) => deleteRow(String(row.id), `Delete profile for ${row.email}?`)}
+        description={`${users.length} profiles · ${hostCount} hosts`}
       />
 
-      <AdminRecordViewDialog
-        row={viewingUser}
-        title="User Profile"
-        titleKey="email"
-        fields={FIELDS}
-        imageKey="avatar_url"
-        badges={(row) => (
-          <>
-            <Badge variant="secondary" className="capitalize text-[10px]">
-              {String(row.role ?? "user")}
-            </Badge>
-            <Badge
-              variant={row.profile_completed_at ? "default" : "secondary"}
-              className="text-[10px]"
-            >
-              {row.profile_completed_at ? "Profile complete" : "Profile incomplete"}
-            </Badge>
-          </>
-        )}
-        actions={(row) =>
-          row.id_document_path ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="rounded-xl"
-              disabled={loadingKycId === String(row.id)}
-              onClick={() => void handleViewKycDocument(row)}
-            >
-              {loadingKycId === String(row.id) ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <ExternalLink className="mr-2 h-4 w-4" />
-              )}
-              View ID document
-            </Button>
-          ) : null
-        }
-        onOpenChange={(open) => !open && setViewingUser(null)}
-      />
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : users.length === 0 ? (
+        <div className="text-center py-16 text-sm text-muted-foreground border border-dashed border-border rounded-2xl">
+          No user profiles found.
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {groups.map((group) => (
+            <section key={group.value}>
+              <h2 className="font-heading text-lg font-bold text-foreground mb-4">
+                {group.label} ({group.rows.length})
+              </h2>
+              <div className="space-y-3">
+                {group.rows.map((user) => (
+                  <UserRow
+                    key={String(user.id)}
+                    user={user}
+                    updating={updatingId === String(user.id)}
+                    onView={() => router.push(`/admin/users/${user.id}`)}
+                    onEdit={() => setEditingUser(user)}
+                    onRole={(v) => handleRoleChange(user, v)}
+                    onDelete={() => deleteRow(String(user.id), `Delete profile for ${user.email}?`)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+
       <AdminRecordEditDialog
         row={editingUser}
         title="Edit User Profile"
-        fields={FIELDS}
+        fields={USER_FIELDS}
         onSave={handleEditSave}
         onOpenChange={(open) => !open && setEditingUser(null)}
       />
+    </div>
+  );
+}
+
+function UserRow({
+  user,
+  updating,
+  onView,
+  onEdit,
+  onRole,
+  onDelete,
+}: {
+  user: Row;
+  updating: boolean;
+  onView: () => void;
+  onEdit: () => void;
+  onRole: (value: string) => void;
+  onDelete: () => void;
+}) {
+  const role = String(user.role ?? "user");
+  const completed = Boolean(user.profile_completed_at);
+  const name = String(user.full_name ?? user.email ?? "User");
+  const joined = user.created_at ? new Date(String(user.created_at)).toLocaleDateString() : "—";
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+      {user.avatar_url ? (
+        <img src={String(user.avatar_url)} alt={name} className="w-12 h-12 rounded-full object-cover shrink-0" />
+      ) : (
+        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <UserIcon className="w-6 h-6 text-primary" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-foreground text-sm flex items-center gap-2 flex-wrap">
+          {name}
+          <Badge variant={ROLE_BADGE[role] ?? "secondary"} className="text-[10px] capitalize">
+            {role}
+          </Badge>
+          <Badge variant={completed ? "success" : "secondary"} className="text-[10px]">
+            {completed ? "Complete" : "Incomplete"}
+          </Badge>
+        </p>
+        <p className="text-xs text-muted-foreground truncate">{String(user.email ?? "—")}</p>
+        <p className="text-xs text-muted-foreground truncate">
+          {[user.city ? String(user.city) : "", `Joined ${joined}`].filter(Boolean).join(" · ")}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <Select value={role} onValueChange={onRole} disabled={updating}>
+          <SelectTrigger className="w-28 h-8 rounded-lg text-xs capitalize">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {USER_ROLES.map((r) => (
+              <SelectItem key={r} value={r} className="capitalize">
+                {r}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <button type="button" onClick={onView} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="View user">
+          <Eye className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={onEdit} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit user">
+          <Pencil className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={onDelete} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10" aria-label="Delete user">
+          <Trash2 className="w-5 h-5" />
+        </button>
+      </div>
     </div>
   );
 }
