@@ -18,6 +18,7 @@ import {
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import ImageUpload from "@/components/common/ImageUpload";
+import { useAuth } from "@/lib/auth-context";
 
 const EMPTY = {
   name: "",
@@ -30,9 +31,10 @@ const EMPTY = {
   image_url: "",
   location: "",
   status: "available",
+  created_by: "",
 };
 
-const STATUSES = ["available", "pending", "adopted"];
+const STATUSES = ["available", "pending_review", "pending", "adopted"];
 const SPECIES = ["dog", "cat", "bird", "rabbit", "fish", "reptile", "other"];
 const FIELDS: AdminRecordField[] = [
   { key: "name", label: "Name", required: true },
@@ -47,10 +49,11 @@ const FIELDS: AdminRecordField[] = [
   { key: "vaccinated", label: "Vaccinated", type: "checkbox" },
   { key: "neutered", label: "Neutered", type: "checkbox" },
   { key: "status", label: "Status", type: "select", options: STATUSES },
-  { key: "created_by", label: "Created By", viewOnly: true },
+  { key: "created_by", label: "Listed By" },
 ];
 
 export default function AdminPets() {
+  const { user } = useAuth();
   const { data: pets = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
     ADMIN_TABLES.pets,
     "admin-pets"
@@ -64,7 +67,11 @@ export default function AdminPets() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const created = await createRow(form, `${form.name} added`);
+    const payload = {
+      ...form,
+      created_by: form.created_by.trim() || user?.email || "",
+    };
+    const created = await createRow(payload, `${form.name} added`);
     if (created) {
       setForm(EMPTY);
       setShowForm(false);
@@ -94,6 +101,15 @@ export default function AdminPets() {
           { key: "species", label: "Species" },
           { key: "breed", label: "Breed" },
           { key: "location", label: "Location" },
+          {
+            key: "created_by",
+            label: "Listed By",
+            render: (row) => (
+              <span className="text-xs text-muted-foreground">
+                {String(row.created_by ?? "—")}
+              </span>
+            ),
+          },
           {
             key: "status",
             label: "Status",
@@ -164,6 +180,16 @@ export default function AdminPets() {
               </div>
               <div><Label>Breed</Label><Input value={form.breed} onChange={(e) => setForm((f) => ({ ...f, breed: e.target.value }))} className="rounded-xl mt-1" /></div>
               <div><Label>Location</Label><Input value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} className="rounded-xl mt-1" /></div>
+              <div className="col-span-2">
+                <Label>Listed By Email</Label>
+                <Input
+                  type="email"
+                  value={form.created_by}
+                  onChange={(e) => setForm((f) => ({ ...f, created_by: e.target.value }))}
+                  className="rounded-xl mt-1"
+                  placeholder={user?.email || "Defaults to your admin email"}
+                />
+              </div>
             </div>
             <Button type="submit" disabled={saving} className="w-full rounded-xl">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add Pet"}

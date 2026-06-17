@@ -10,6 +10,9 @@ export type NotificationEventType =
   | "appointment.request"
   | "appointment.status"
   | "adoption.received"
+  | "adoption.submitted"
+  | "adoption.approved"
+  | "adoption.rejected"
   | "payout.status"
   | "escrow.released"
   | "reminder.pet_health";

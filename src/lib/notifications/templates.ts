@@ -130,8 +130,32 @@ const IN_APP_TEMPLATES: Record<string, InAppTemplateFn> = {
     const applicant = str(p.applicant_name, "Someone");
     return {
       title: `Adoption request for ${pet}`,
-      body: `${applicant} applied to adopt ${pet}.`,
-      actionUrl: "/dashboard",
+      body: `${applicant} applied to adopt ${pet}. Open it to review and reply.`,
+      actionUrl: "/my-adoptions",
+    };
+  },
+  "adoption.submitted": (p) => {
+    const pet = str(p.pet_name, "the pet");
+    return {
+      title: "Adoption request submitted",
+      body: `Your request to adopt ${pet} was received. The lister will be in touch.`,
+      actionUrl: "/messages",
+    };
+  },
+  "adoption.approved": (p) => {
+    const pet = str(p.pet_name, "the pet");
+    return {
+      title: `Adoption approved — ${pet}`,
+      body: `Great news! Your request to adopt ${pet} was approved. Message the lister to arrange next steps.`,
+      actionUrl: "/messages",
+    };
+  },
+  "adoption.rejected": (p) => {
+    const pet = str(p.pet_name, "the pet");
+    return {
+      title: `Adoption update — ${pet}`,
+      body: `Your request to adopt ${pet} was not approved this time. Browse other pets looking for a home.`,
+      actionUrl: "/adopt",
     };
   },
   "payout.status": (p) => {
@@ -373,7 +397,8 @@ const TEMPLATES: Record<string, TemplateFn> = {
   "adoption.received": (channel, p) => {
     const pet = str(p.pet_name, "your pet");
     const applicant = str(p.applicant_name, "Someone");
-    const text = `New adoption request for ${pet} from ${applicant}.`;
+    const listingsUrl = link("/my-adoptions");
+    const text = `New adoption request for ${pet} from ${applicant}. Review and reply: ${listingsUrl}`;
     if (channel === "sms") return { text };
     return {
       subject: `Adoption request for ${pet}`,
@@ -384,9 +409,79 @@ const TEMPLATES: Record<string, TemplateFn> = {
           emailParagraph(
             `<strong>${escapeHtml(applicant)}</strong> applied to adopt <strong>${escapeHtml(pet)}</strong>.`
           ),
+          emailDetailTable([
+            { label: "Applicant", value: applicant },
+            { label: "Email", value: str(p.applicant_email) },
+          ]),
           p.message ? emailQuote(str(p.message)) : "",
         ].join(""),
-        { preheader: `${applicant} wants to adopt ${pet}` }
+        {
+          preheader: `${applicant} wants to adopt ${pet}`,
+          cta: { label: "Review request", href: listingsUrl },
+        }
+      ),
+    };
+  },
+
+  "adoption.submitted": (channel, p) => {
+    const pet = str(p.pet_name, "the pet");
+    const messagesUrl = link("/messages");
+    const text = `Your request to adopt ${pet} was received. The lister will be in touch.`;
+    if (channel === "sms") return { text };
+    return {
+      subject: `Adoption request received — ${pet}`,
+      text,
+      html: brandedHtml(
+        "Request received",
+        emailParagraph(
+          `Thanks! Your request to adopt <strong>${escapeHtml(pet)}</strong> has been submitted. The lister will review it and reach out to you.`
+        ),
+        {
+          preheader: `Your adoption request for ${pet} was received`,
+          cta: { label: "Open messages", href: messagesUrl },
+        }
+      ),
+    };
+  },
+
+  "adoption.approved": (channel, p) => {
+    const pet = str(p.pet_name, "the pet");
+    const messagesUrl = link("/messages");
+    const text = `Good news! Your request to adopt ${pet} was approved. Message the lister: ${messagesUrl}`;
+    if (channel === "sms") return { text };
+    return {
+      subject: `Adoption approved — ${pet}`,
+      text,
+      html: brandedHtml(
+        "Your adoption was approved",
+        emailParagraph(
+          `Great news! Your request to adopt <strong>${escapeHtml(pet)}</strong> has been approved. Message the lister to arrange the next steps.`
+        ),
+        {
+          preheader: `Your request to adopt ${pet} was approved`,
+          cta: { label: "Message the lister", href: messagesUrl },
+        }
+      ),
+    };
+  },
+
+  "adoption.rejected": (channel, p) => {
+    const pet = str(p.pet_name, "the pet");
+    const adoptUrl = link("/adopt");
+    const text = `Your request to adopt ${pet} was not approved this time. Browse other pets: ${adoptUrl}`;
+    if (channel === "sms") return { text };
+    return {
+      subject: `Adoption update — ${pet}`,
+      text,
+      html: brandedHtml(
+        "Adoption update",
+        emailParagraph(
+          `Thank you for your interest in <strong>${escapeHtml(pet)}</strong>. Unfortunately your request was not approved this time. There are many other pets looking for a loving home.`
+        ),
+        {
+          preheader: `An update on your request to adopt ${pet}`,
+          cta: { label: "Browse pets", href: adoptUrl },
+        }
       ),
     };
   },

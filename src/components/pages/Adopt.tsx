@@ -7,17 +7,30 @@ import { motion } from 'framer-motion';
 import PetFilters from '@/components/adopt/PetFilters';
 import PetCard from '@/components/adopt/PetCard';
 import AdoptionModal from '@/components/adopt/AdoptionModal';
-import { PawPrint, Loader2 } from 'lucide-react';
+import ListPetDialog from '@/components/adopt/ListPetDialog';
+import { PawPrint, Loader2, Plus } from 'lucide-react';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth-context';
 
 export default function Adopt() {
   const [filters, setFilters] = useState({ search: '', species: 'all', gender: 'all', size: 'all' });
   const [selectedPet, setSelectedPet] = useState(null);
+  const [showListDialog, setShowListDialog] = useState(false);
+  const { user, navigateToLogin } = useAuth();
 
   const { data: pets = [], isLoading, refetch } = useQuery({
     queryKey: ['pets'],
     queryFn: () => entities.Pet.filter({ status: 'available' }, '-created_date'),
   });
+
+  const handleListClick = () => {
+    if (!user) {
+      navigateToLogin();
+      return;
+    }
+    setShowListDialog(true);
+  };
 
   const filteredPets = useMemo(() => {
     return pets.filter(pet => {
@@ -34,6 +47,11 @@ export default function Adopt() {
     <div className="min-h-screen bg-background">
       <PullToRefresh onRefresh={refetch}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex items-center justify-end mb-6">
+          <Button onClick={handleListClick} className="rounded-xl gap-2">
+            <Plus className="w-4 h-4" /> List a Pet for Adoption
+          </Button>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
           <div className="lg:sticky lg:top-24 lg:self-start">
             <PetFilters filters={filters} setFilters={setFilters} />
@@ -73,6 +91,11 @@ export default function Adopt() {
         pet={selectedPet}
         open={!!selectedPet}
         onClose={() => setSelectedPet(null)}
+      />
+      <ListPetDialog
+        open={showListDialog}
+        onClose={() => setShowListDialog(false)}
+        onCreated={refetch}
       />
     </div>
   );

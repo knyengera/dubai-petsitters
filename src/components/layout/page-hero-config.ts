@@ -29,6 +29,12 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
       "Give a loving home to one of our animals. Browse available pets and submit an adoption application.",
     imageAlt: DEFAULT_ALT,
   },
+  "/my-adoptions": {
+    title: "My Adoption Listings",
+    subtitle:
+      "Track the pets you have listed for adoption and respond to adoption requests.",
+    imageAlt: DEFAULT_ALT,
+  },
   "/hosting": {
     title: "Pet Hosting Services",
     subtitle:

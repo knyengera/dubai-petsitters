@@ -17,6 +17,7 @@ import {
   Syringe,
   MessageCircle,
   MapPin,
+  Heart,
 } from "lucide-react";
 import PetRemindersSection from "@/components/home/PetRemindersSection";
 import { usePetHealthAssistant } from "@/lib/pet-health-assistant-context";
@@ -28,6 +29,7 @@ const quickActions = [
   { icon: Calendar, color: "bg-info", en: "Book Appointment", ar: "احجز موعداً", to: "/appointments" },
   { icon: Stethoscope, color: "bg-success", en: "Find a Vet", ar: "ابحث عن طبيب", to: "/vets" },
   { icon: MessageCircle, color: "bg-warning", en: "Messages", ar: "الرسائل", to: "/messages" },
+  { icon: Heart, color: "bg-destructive", en: "My Listings", ar: "إعلاناتي", to: "/my-adoptions" },
 ];
 
 export default function OwnerDashboard() {

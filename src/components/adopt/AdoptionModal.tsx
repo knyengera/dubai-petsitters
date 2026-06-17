@@ -11,41 +11,97 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { entities } from '@/lib/data/entities';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
-import { Heart, Loader2 } from 'lucide-react';
+import { Heart, Loader2, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
+import StartChatButton from '@/components/messaging/StartChatButton';
+
+const EMPTY_FORM = {
+  applicant_name: '',
+  applicant_email: '',
+  applicant_phone: '',
+  city: '',
+  housing_type: '',
+  has_pets: false,
+  experience: '',
+  message: '',
+};
 
 export default function AdoptionModal({ pet, open, onClose }) {
-  const [form, setForm] = useState({
-    applicant_name: '',
-    applicant_email: '',
-    applicant_phone: '',
-    city: '',
-    housing_type: '',
-    has_pets: false,
-    experience: '',
-    message: '',
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
+  const [submittedRequest, setSubmittedRequest] = useState(null);
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await entities.AdoptionRequest.create({
-      ...form,
-      pet_id: pet.id,
-      pet_name: pet.name,
-    });
-    toast({ title: 'Application Submitted!', description: `Your adoption request for ${pet.name} has been received. We'll be in touch soon!` });
-    queryClient.invalidateQueries({ queryKey: ['pets'] });
-    setLoading(false);
+    try {
+      const created = await entities.AdoptionRequest.create({
+        ...form,
+        pet_id: pet.id,
+      });
+      toast({ title: 'Application Submitted!', description: `Your adoption request for ${pet.name} has been received. We'll be in touch soon!` });
+      queryClient.invalidateQueries({ queryKey: ['pets'] });
+      setSubmittedRequest(created);
+    } catch (err) {
+      toast({
+        title: 'Something went wrong',
+        description: (err instanceof Error && err.message) || 'Could not submit your application. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setSubmittedRequest(null);
+    setForm(EMPTY_FORM);
     onClose();
   };
 
   if (!pet) return null;
 
+  const canMessageLister = Boolean(user && pet.created_by);
+
+  if (submittedRequest) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-xl flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-success" /> Application Sent
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <p className="text-sm text-muted-foreground">
+              Your request to adopt {pet.name} has been received. The lister will review it and reach out. You can also start a conversation now.
+            </p>
+            {canMessageLister ? (
+              <StartChatButton
+                contactId={String(submittedRequest.id)}
+                contactName={pet.name}
+                contactType="adoption"
+                contactEmail={pet.created_by}
+                subject={`Adoption inquiry for ${pet.name}`}
+                className="w-full justify-center"
+              >
+                Message the lister
+              </StartChatButton>
+            ) : null}
+            <Button onClick={handleClose} variant="outline" className="w-full rounded-xl">
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl">
