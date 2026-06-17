@@ -1,152 +1,198 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2, Eye, Pencil, Trash2, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import AdminDataList from "@/components/admin/AdminDataList";
-import {
-  AdminRecordEditDialog,
-  AdminRecordViewDialog,
-  type AdminRecordField,
-} from "@/components/admin/AdminRecordDialogs";
+import { AdminRecordEditDialog } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
+import { BOOKING_FIELDS, BOOKING_STATUSES, PAYMENT_STATUSES } from "@/components/pages/admin/booking-fields";
 
-const BOOKING_STATUSES = ["pending", "confirmed", "completed", "cancelled"];
-const PAYMENT_STATUSES = ["unpaid", "paid", "refunded"];
-const FIELDS: AdminRecordField[] = [
-  { key: "host_id", label: "Host ID", viewOnly: true },
-  { key: "pet_name", label: "Pet Name", required: true },
-  { key: "pet_type", label: "Pet Type", required: true },
-  { key: "service_type", label: "Service Type", required: true },
-  { key: "start_date", label: "Start Date", type: "date" },
-  { key: "end_date", label: "End Date", type: "date" },
-  { key: "owner_name", label: "Owner Name", required: true },
-  { key: "owner_email", label: "Owner Email", required: true },
-  { key: "owner_phone", label: "Owner Phone" },
-  { key: "city", label: "City" },
-  { key: "special_instructions", label: "Special Instructions", type: "textarea", className: "col-span-2" },
-  { key: "quoted_price", label: "Quoted Price", type: "number" },
-  { key: "platform_fee", label: "Platform Fee", type: "number" },
-  { key: "total_price", label: "Total Price", type: "number" },
-  { key: "status", label: "Status", type: "select", options: BOOKING_STATUSES },
-  { key: "payment_status", label: "Payment Status", type: "select", options: PAYMENT_STATUSES },
-  { key: "escrow_status", label: "Escrow Status", viewOnly: true },
-  { key: "release_status", label: "Release Status", viewOnly: true },
+const STATUS_GROUPS: { value: string; label: string }[] = [
+  { value: "pending", label: "Pending" },
+  { value: "confirmed", label: "Confirmed" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
+const STATUS_BADGE: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
+  pending: "warning",
+  confirmed: "success",
+  completed: "secondary",
+  cancelled: "destructive",
+};
+
+const PAYMENT_BADGE: Record<string, "success" | "warning" | "secondary"> = {
+  paid: "success",
+  unpaid: "warning",
+  refunded: "secondary",
+};
+
+function cap(value: unknown): string {
+  const s = String(value ?? "").trim();
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+}
+
 export default function AdminBookings() {
+  const router = useRouter();
   const { data: bookings = [], isLoading, updateRow, deleteRow } = useAdminList(
     ADMIN_TABLES.hosting_bookings,
     "admin-bookings",
     "-created_at"
   );
-  const [viewingBooking, setViewingBooking] = useState<Row | null>(null);
   const [editingBooking, setEditingBooking] = useState<Row | null>(null);
 
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Booking updated");
 
+  const groups = useMemo(() => {
+    const known = new Set(STATUS_GROUPS.map((g) => g.value));
+    const base = STATUS_GROUPS.map((g) => ({
+      ...g,
+      rows: bookings.filter((b) => String(b.status ?? "pending") === g.value),
+    }));
+    const otherRows = bookings.filter((b) => !known.has(String(b.status ?? "pending")));
+    if (otherRows.length > 0) base.push({ value: "other", label: "Other", rows: otherRows });
+    return base.filter((g) => g.rows.length > 0);
+  }, [bookings]);
+
+  const pendingCount = bookings.filter((b) => String(b.status ?? "pending") === "pending").length;
+  const confirmedCount = bookings.filter((b) => String(b.status ?? "") === "confirmed").length;
+
   return (
     <div className="pb-10">
       <AdminPageHeader
         title="Hosting Bookings"
-        description="Review and update pet hosting bookings."
-      />
-      <AdminDataList
-        rows={bookings}
-        isLoading={isLoading}
-        columns={[
-          { key: "pet_name", label: "Pet" },
-          { key: "owner_name", label: "Owner" },
-          { key: "owner_email", label: "Email" },
-          { key: "start_date", label: "Start" },
-          { key: "end_date", label: "End" },
-          {
-            key: "status",
-            label: "Status",
-            render: (row) => (
-              <Badge variant="secondary" className="capitalize text-[10px]">
-                {String(row.status)}
-              </Badge>
-            ),
-          },
-          {
-            key: "total_price",
-            label: "Total",
-            render: (row) =>
-              row.total_price ? `${DEFAULT_CURRENCY} ${row.total_price}` : "—",
-          },
-        ]}
-        onView={setViewingBooking}
-        onEdit={setEditingBooking}
-        rowActions={(row) => (
-          <div className="flex flex-col gap-2">
-            <Select
-              value={String(row.status ?? "pending")}
-              onValueChange={(v) => updateRow(String(row.id), { status: v }, "Status updated")}
-            >
-              <SelectTrigger className="w-32 h-8 rounded-lg text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BOOKING_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s} className="capitalize">
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={String(row.payment_status ?? "unpaid")}
-              onValueChange={(v) =>
-                updateRow(String(row.id), { payment_status: v }, "Payment updated")
-              }
-            >
-              <SelectTrigger className="w-32 h-8 rounded-lg text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENT_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s} className="capitalize">
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-        onDelete={(row) =>
-          deleteRow(String(row.id), `Delete booking for ${row.pet_name}?`)
-        }
+        description={`${pendingCount} pending · ${confirmedCount} confirmed`}
       />
 
-      <AdminRecordViewDialog
-        row={viewingBooking}
-        title="Hosting Booking"
-        titleKey="pet_name"
-        fields={FIELDS}
-        badges={(row) => (
-          <>
-            <Badge variant="secondary" className="capitalize text-[10px]">
-              {String(row.status ?? "pending")}
-            </Badge>
-            <Badge variant="secondary" className="capitalize text-[10px]">
-              {String(row.payment_status ?? "unpaid")}
-            </Badge>
-          </>
-        )}
-        onOpenChange={(open) => !open && setViewingBooking(null)}
-      />
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : bookings.length === 0 ? (
+        <div className="text-center py-16 text-sm text-muted-foreground border border-dashed border-border rounded-2xl">
+          No bookings yet.
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {groups.map((group) => (
+            <section key={group.value}>
+              <h2 className="font-heading text-lg font-bold text-foreground mb-4">
+                {group.label} ({group.rows.length})
+              </h2>
+              <div className="space-y-3">
+                {group.rows.map((booking) => (
+                  <BookingRow
+                    key={String(booking.id)}
+                    booking={booking}
+                    onView={() => router.push(`/admin/bookings/${booking.id}`)}
+                    onEdit={() => setEditingBooking(booking)}
+                    onStatus={(v) => updateRow(String(booking.id), { status: v }, "Status updated")}
+                    onPayment={(v) => updateRow(String(booking.id), { payment_status: v }, "Payment updated")}
+                    onDelete={() => deleteRow(String(booking.id), `Delete booking for ${booking.pet_name}?`)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+
       <AdminRecordEditDialog
         row={editingBooking}
         title="Edit Hosting Booking"
-        fields={FIELDS}
+        fields={BOOKING_FIELDS}
         onSave={handleEditSave}
         onOpenChange={(open) => !open && setEditingBooking(null)}
       />
+    </div>
+  );
+}
+
+function BookingRow({
+  booking,
+  onView,
+  onEdit,
+  onStatus,
+  onPayment,
+  onDelete,
+}: {
+  booking: Row;
+  onView: () => void;
+  onEdit: () => void;
+  onStatus: (value: string) => void;
+  onPayment: (value: string) => void;
+  onDelete: () => void;
+}) {
+  const status = String(booking.status ?? "pending");
+  const paymentStatus = String(booking.payment_status ?? "unpaid");
+  const dateRange = [booking.start_date, booking.end_date].filter(Boolean).map(String).join(" → ");
+  const service = [cap(booking.service_type), cap(booking.city)].filter(Boolean).join(" · ");
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <CalendarDays className="w-6 h-6 text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-foreground text-sm flex items-center gap-2 flex-wrap">
+          {String(booking.pet_name ?? "Booking")}
+          <Badge variant={STATUS_BADGE[status] ?? "secondary"} className="text-[10px] capitalize">
+            {status}
+          </Badge>
+          <Badge variant={PAYMENT_BADGE[paymentStatus] ?? "secondary"} className="text-[10px] capitalize">
+            {paymentStatus}
+          </Badge>
+        </p>
+        <p className="text-xs text-muted-foreground truncate">
+          {String(booking.owner_name ?? "—")}
+          {booking.owner_email ? ` · ${String(booking.owner_email)}` : ""}
+        </p>
+        <p className="text-xs text-muted-foreground truncate">
+          {[service, dateRange].filter(Boolean).join(" · ") || "No details"}
+          {booking.total_price ? ` · ${DEFAULT_CURRENCY} ${booking.total_price}` : ""}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <Select value={status} onValueChange={onStatus}>
+          <SelectTrigger className="w-32 h-8 rounded-lg text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {BOOKING_STATUSES.map((s) => (
+              <SelectItem key={s} value={s} className="capitalize">
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={paymentStatus} onValueChange={onPayment}>
+          <SelectTrigger className="w-28 h-8 rounded-lg text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PAYMENT_STATUSES.map((s) => (
+              <SelectItem key={s} value={s} className="capitalize">
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <button type="button" onClick={onView} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="View booking">
+          <Eye className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={onEdit} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit booking">
+          <Pencil className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={onDelete} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10" aria-label="Delete booking">
+          <Trash2 className="w-5 h-5" />
+        </button>
+      </div>
     </div>
   );
 }
