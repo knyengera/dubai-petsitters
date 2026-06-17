@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import ImageUpload from "@/components/common/ImageUpload";
+import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
@@ -42,7 +42,7 @@ const EMPTY_FORM = {
   is_featured: false,
   languages: "",
   photo_url: "",
-  gallery: "",
+  gallery: [] as string[],
   created_by: "",
 };
 
@@ -241,16 +241,18 @@ export default function AdminHosts() {
                 <Input value={form.languages} onChange={(e) => setForm((f) => ({ ...f, languages: e.target.value }))} className="rounded-xl" placeholder="Comma-separated, e.g. Arabic, English" />
               </div>
               <div className="col-span-2">
-                <Label className="mb-1.5 block">Gallery URLs</Label>
-                <Textarea value={form.gallery} onChange={(e) => setForm((f) => ({ ...f, gallery: e.target.value }))} className="rounded-xl min-h-20" placeholder="Comma-separated image URLs" />
-              </div>
-              <div className="col-span-2">
                 <Label className="mb-1.5 block">Created By Email</Label>
                 <Input value={form.created_by} onChange={(e) => setForm((f) => ({ ...f, created_by: e.target.value }))} className="rounded-xl" />
               </div>
-              <div className="col-span-2 flex flex-col items-center">
-                <Label className="mb-2 block self-start">Host Photo</Label>
-                <ImageUpload value={form.photo_url} onChange={(url) => setForm((f) => ({ ...f, photo_url: url }))} category="hosts" label="Upload Host Photo" variant="wide" className="w-full" />
+              <div className="col-span-2 flex flex-col">
+                <Label className="mb-2 block">Host Photos</Label>
+                <GalleryImageUpload
+                  coverUrl={form.photo_url}
+                  galleryUrls={form.gallery}
+                  onChange={(cover, gallery) => setForm((f) => ({ ...f, photo_url: cover, gallery }))}
+                  category="hosts"
+                  label="Upload Host Photos"
+                />
               </div>
               <CheckboxField id="has-yard" label="Has Yard" checked={form.has_yard} onChange={(checked) => setForm((f) => ({ ...f, has_yard: checked }))} />
               <CheckboxField id="non-smoking" label="Non-Smoking" checked={form.non_smoking} onChange={(checked) => setForm((f) => ({ ...f, non_smoking: checked }))} />
@@ -443,7 +445,7 @@ function rowToForm(row: Row): HostForm {
     is_featured: Boolean(row.is_featured),
     languages: arrayToInput(row.languages),
     photo_url: toInput(row.photo_url),
-    gallery: arrayToInput(row.gallery),
+    gallery: Array.isArray(row.gallery) ? row.gallery.map(String).filter(Boolean) : [],
     created_by: toInput(row.created_by),
   };
 }
@@ -468,7 +470,7 @@ function formToPayload(form: HostForm): Row {
     is_featured: form.is_featured,
     languages: listFromInput(form.languages),
     photo_url: optionalText(form.photo_url),
-    gallery: listFromInput(form.gallery),
+    gallery: form.gallery,
     created_by: optionalText(form.created_by),
     updated_at: new Date().toISOString(),
   };

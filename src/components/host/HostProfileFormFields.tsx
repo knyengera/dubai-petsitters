@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload } from "lucide-react";
+import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import {
   HOST_SERVICE_OPTIONS,
@@ -15,8 +15,9 @@ type HostProfileFormFieldsProps = {
   setForm: React.Dispatch<React.SetStateAction<HostProfileFormState>>;
   selectedServices: string[];
   toggleService: (id: string) => void;
-  photoPreview: string | null;
-  onPhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  coverUrl: string;
+  galleryUrls: string[];
+  onPhotosChange: (cover: string, gallery: string[]) => void;
 };
 
 export default function HostProfileFormFields({
@@ -24,23 +25,24 @@ export default function HostProfileFormFields({
   setForm,
   selectedServices,
   toggleService,
-  photoPreview,
-  onPhotoChange,
+  coverUrl,
+  galleryUrls,
+  onPhotosChange,
 }: HostProfileFormFieldsProps) {
   return (
     <>
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-24 h-24 rounded-full border-4 border-primary/20 overflow-hidden bg-muted flex items-center justify-center">
-          {photoPreview ? (
-            <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
-          ) : (
-            <Upload className="w-8 h-8 text-muted-foreground" />
-          )}
-        </div>
-        <label className="cursor-pointer text-sm font-medium text-primary hover:underline">
-          Upload Profile Photo
-          <input type="file" accept="image/*" className="hidden" onChange={onPhotoChange} />
-        </label>
+      <div className="flex flex-col gap-2">
+        <Label>Photos</Label>
+        <p className="text-xs text-muted-foreground">
+          Upload one or more photos. The cover photo appears first on your listing.
+        </p>
+        <GalleryImageUpload
+          coverUrl={coverUrl}
+          galleryUrls={galleryUrls}
+          onChange={onPhotosChange}
+          category="hosts"
+          label="Upload Photos"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

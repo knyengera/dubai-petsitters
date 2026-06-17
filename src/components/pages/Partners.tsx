@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import PaymentModal from "@/components/payment/PaymentModal";
-import ImageUpload from "@/components/common/ImageUpload";
+import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import PartnerTypeFields from "@/components/partners/PartnerTypeFields";
 import { createPartnerAdvertisingPayment } from "@/lib/monetisation/actions";
 import { getActiveAdvertisingPlans } from "@/lib/partners/actions";
@@ -70,6 +70,7 @@ const emptyForm = {
   city: "",
   website: "",
   image_url: "",
+  gallery: [] as string[],
   plan: "",
 };
 
@@ -182,6 +183,7 @@ export default function Partners({ initialBusinessType = null }: PartnersProps) 
         city: form.city,
         website: form.website || null,
         image_url: form.image_url,
+        gallery: form.gallery,
         plan: form.plan,
         message: `Advertising plan signup for ${selectedPlan.name}`,
         business_details: validation.data,
@@ -449,16 +451,16 @@ export default function Partners({ initialBusinessType = null }: PartnersProps) 
                 />
               </div>
               <div className="sm:col-span-2 flex flex-col">
-                <Label className="mb-2">Business Photo *</Label>
+                <Label className="mb-2">Business Photos *</Label>
                 <p className="text-xs text-muted-foreground mb-2">
-                  This image appears on your partner listing, similar to clinic photos on vet profiles.
+                  Upload one or more photos of your business. The cover photo appears first on your partner listing, similar to clinic photos on vet profiles.
                 </p>
-                <ImageUpload
-                  value={form.image_url}
-                  onChange={(url) => setForm((f) => ({ ...f, image_url: url }))}
+                <GalleryImageUpload
+                  coverUrl={form.image_url}
+                  galleryUrls={form.gallery}
+                  onChange={(cover, gallery) => setForm((f) => ({ ...f, image_url: cover, gallery }))}
                   category="partners"
-                  label="Upload Business Photo"
-                  variant="wide"
+                  label="Upload Business Photos"
                   className="w-full"
                 />
               </div>

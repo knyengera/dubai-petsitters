@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import {
   AdminRecordEditDialog,
   AdminRecordViewDialog,
@@ -21,6 +22,8 @@ const EMPTY = {
   description: "",
   partner_name: "",
   discount: "",
+  image_url: "",
+  gallery: [] as string[],
   link_url: "",
   is_active: true,
 };
@@ -29,7 +32,7 @@ const FIELDS: AdminRecordField[] = [
   { key: "description", label: "Description", type: "textarea", className: "col-span-2" },
   { key: "partner_name", label: "Partner" },
   { key: "discount", label: "Discount" },
-  { key: "image_url", label: "Image", type: "image", hideInView: true, uploadCategory: "partners" },
+  { key: "gallery", label: "Images", type: "gallery", coverKey: "image_url", galleryKey: "gallery", hideInView: true, uploadCategory: "partners" },
   { key: "link_url", label: "Link URL" },
   { key: "is_active", label: "Active", type: "checkbox" },
 ];
@@ -106,6 +109,16 @@ export default function AdminPartners() {
             <div><Label>Title *</Label><Input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="rounded-xl mt-1" /></div>
             <div><Label>Partner</Label><Input value={form.partner_name} onChange={(e) => setForm((f) => ({ ...f, partner_name: e.target.value }))} className="rounded-xl mt-1" /></div>
             <div><Label>Discount</Label><Input value={form.discount} onChange={(e) => setForm((f) => ({ ...f, discount: e.target.value }))} className="rounded-xl mt-1" placeholder="e.g. 20% off" /></div>
+            <div>
+              <Label className="mb-2 block">Images</Label>
+              <GalleryImageUpload
+                coverUrl={form.image_url}
+                galleryUrls={form.gallery}
+                onChange={(cover, gallery) => setForm((f) => ({ ...f, image_url: cover, gallery }))}
+                category="partners"
+                label="Upload Deal Photos"
+              />
+            </div>
             <div><Label>Link URL</Label><Input value={form.link_url} onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))} className="rounded-xl mt-1" /></div>
             <Button type="submit" disabled={saving} className="w-full rounded-xl">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Deal"}

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth-context";
-import { uploadAppFile } from "@/lib/storage/upload";
 import { useHostProfile } from "@/lib/hosting/use-host-profile";
 import HostProfileFormFields from "@/components/host/HostProfileFormFields";
 import { emptyHostProfileForm, hostFormToPayload } from "@/lib/hosting/host-profile-form";
@@ -36,8 +35,8 @@ export default function BecomeHost() {
   const { isHost, isLoading: isLoadingHost } = useHostProfile();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState("");
+  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [form, setForm] = useState(emptyHostProfileForm());
 
@@ -51,13 +50,6 @@ export default function BecomeHost() {
     setSelectedServices((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
-  };
-
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPhotoFile(file);
-    setPhotoPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,11 +68,7 @@ export default function BecomeHost() {
     }
     setLoading(true);
     try {
-      let photo_url: string | null = null;
-      if (photoFile) {
-        photo_url = await uploadAppFile("public-uploads", photoFile, user.id, "hosts", "profile");
-      }
-      const payload = hostFormToPayload(form, selectedServices, photo_url);
+      const payload = hostFormToPayload(form, selectedServices, coverUrl || null, galleryUrls);
       await entities.PetHost.create({
         ...payload,
         is_available: true,
@@ -179,8 +167,12 @@ export default function BecomeHost() {
               setForm={setForm}
               selectedServices={selectedServices}
               toggleService={toggleService}
-              photoPreview={photoPreview}
-              onPhotoChange={handlePhotoChange}
+              coverUrl={coverUrl}
+              galleryUrls={galleryUrls}
+              onPhotosChange={(cover, gallery) => {
+                setCoverUrl(cover);
+                setGalleryUrls(gallery);
+              }}
             />
 
             <Button

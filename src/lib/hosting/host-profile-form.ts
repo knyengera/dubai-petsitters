@@ -58,11 +58,13 @@ export function hostRecordToForm(record: Record<string, unknown>): HostProfileFo
 export function hostFormToPayload(
   form: HostProfileFormState,
   selectedServices: string[],
-  photoUrl?: string | null
+  photoUrl?: string | null,
+  galleryUrls: string[] = []
 ) {
   return {
     ...form,
     photo_url: photoUrl,
+    gallery: galleryUrls,
     services: selectedServices,
     price_per_night: parseFloat(form.price_per_night) || null,
     price_per_day: parseFloat(form.price_per_day) || null,

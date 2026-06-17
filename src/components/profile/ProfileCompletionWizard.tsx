@@ -118,8 +118,8 @@ export default function ProfileCompletionWizard() {
     useState<SignupAccountType>("client");
   const [hostForm, setHostForm] = useState(emptyHostProfileForm());
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [hostPhotoFile, setHostPhotoFile] = useState<File | null>(null);
-  const [hostPhotoPreview, setHostPhotoPreview] = useState<string | null>(null);
+  const [hostCoverUrl, setHostCoverUrl] = useState("");
+  const [hostGalleryUrls, setHostGalleryUrls] = useState<string[]>([]);
 
   const steps = useMemo(() => {
     if (signupAccountType === "host") {
@@ -537,13 +537,6 @@ export default function ProfileCompletionWizard() {
     );
   };
 
-  const handleHostPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setHostPhotoFile(file);
-    setHostPhotoPreview(URL.createObjectURL(file));
-  };
-
   useEffect(() => {
     if (step !== "host") return;
     setHostForm((f) => ({
@@ -551,7 +544,7 @@ export default function ProfileCompletionWizard() {
       full_name: f.full_name || form.full_name,
       city: f.city || form.city,
     }));
-    setHostPhotoPreview((prev) => prev ?? form.avatar_url ?? avatarPreview);
+    setHostCoverUrl((prev) => prev || form.avatar_url || avatarPreview || "");
   }, [step, form.full_name, form.city, form.avatar_url, avatarPreview]);
 
   const handleHostSubmit = async (e: React.FormEvent) => {
@@ -566,17 +559,12 @@ export default function ProfileCompletionWizard() {
     }
     setLoading(true);
     try {
-      let photo_url: string | null = hostPhotoPreview;
-      if (hostPhotoFile) {
-        photo_url = await uploadAppFile(
-          "public-uploads",
-          hostPhotoFile,
-          user.id,
-          "hosts",
-          "profile"
-        );
-      }
-      const payload = hostFormToPayload(hostForm, selectedServices, photo_url);
+      const payload = hostFormToPayload(
+        hostForm,
+        selectedServices,
+        hostCoverUrl || null,
+        hostGalleryUrls
+      );
       await entities.PetHost.create({
         ...payload,
         is_available: true,
@@ -1021,8 +1009,12 @@ export default function ProfileCompletionWizard() {
             setForm={setHostForm}
             selectedServices={selectedServices}
             toggleService={toggleService}
-            photoPreview={hostPhotoPreview}
-            onPhotoChange={handleHostPhotoChange}
+            coverUrl={hostCoverUrl}
+            galleryUrls={hostGalleryUrls}
+            onPhotosChange={(cover, gallery) => {
+              setHostCoverUrl(cover);
+              setHostGalleryUrls(gallery);
+            }}
           />
           <Button
             type="submit"

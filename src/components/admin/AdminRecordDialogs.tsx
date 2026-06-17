@@ -10,13 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/common/ImageUpload";
+import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import type { Row } from "@/lib/admin/tables";
 import type { UploadBucket, UploadCategory } from "@/lib/storage/upload";
 
 export type AdminRecordField = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "integer" | "select" | "checkbox" | "image" | "list" | "date";
+  type?: "text" | "textarea" | "number" | "integer" | "select" | "checkbox" | "image" | "gallery" | "list" | "date";
   options?: string[];
   required?: boolean;
   viewOnly?: boolean;
@@ -25,7 +26,11 @@ export type AdminRecordField = {
   className?: string;
   uploadCategory?: UploadCategory;
   uploadBucket?: UploadBucket;
+  coverKey?: string;
+  galleryKey?: string;
 };
+
+type FieldFormValue = string | boolean | string[];
 
 type AdminRecordViewDialogProps = {
   row: Row | null;
@@ -80,6 +85,8 @@ export function AdminRecordViewDialog({
                 className="h-48 w-full rounded-2xl object-cover"
               />
             ) : null}
+
+            <GalleryStrip fields={fields} row={row} />
 
             {actions ? <div className="flex flex-wrap gap-2">{actions(row)}</div> : null}
 
@@ -156,14 +163,35 @@ function AdminRecordEditForm({
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4 pt-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {editableFields.map((field) => (
-            <FieldInput
-              key={field.key}
-              field={field}
-              value={form[field.key]}
-              onChange={(value) => setForm((current) => ({ ...current, [field.key]: value }))}
-            />
-          ))}
+          {editableFields.map((field) => {
+            if (field.type === "gallery") {
+              const coverKey = field.coverKey ?? "image_url";
+              const galleryKey = field.galleryKey ?? field.key;
+              const galleryValue = form[galleryKey];
+              return (
+                <div key={field.key} className="col-span-2">
+                  <Label className="mb-2 block">{field.label}</Label>
+                  <GalleryImageUpload
+                    coverUrl={String(form[coverKey] ?? "")}
+                    galleryUrls={Array.isArray(galleryValue) ? galleryValue : []}
+                    onChange={(cover, gallery) =>
+                      setForm((current) => ({ ...current, [coverKey]: cover, [galleryKey]: gallery }))
+                    }
+                    category={field.uploadCategory ?? "partners"}
+                    bucket={field.uploadBucket ?? "public-uploads"}
+                  />
+                </div>
+              );
+            }
+            return (
+              <FieldInput
+                key={field.key}
+                field={field}
+                value={form[field.key] as string | boolean}
+                onChange={(value) => setForm((current) => ({ ...current, [field.key]: value }))}
+              />
+            );
+          })}
         </div>
         <div className="flex gap-3 pt-1">
           <Button type="button" variant="outline" onClick={onCancel} className="flex-1 rounded-xl">
@@ -267,6 +295,27 @@ function FieldInput({
   );
 }
 
+function GalleryStrip({ fields, row }: { fields: AdminRecordField[]; row: Row }) {
+  const galleryField = fields.find((field) => field.type === "gallery");
+  if (!galleryField) return null;
+  const galleryKey = galleryField.galleryKey ?? galleryField.key;
+  const images = arrayFromValue(row[galleryKey]);
+  if (images.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+      {images.map((url) => (
+        <img
+          key={url}
+          src={url}
+          alt="Gallery"
+          className="aspect-square w-full rounded-lg object-cover"
+        />
+      ))}
+    </div>
+  );
+}
+
 function DetailItem({ label, value, className }: { label: string; value: unknown; className?: string }) {
   return (
     <div className={`rounded-xl border border-border bg-muted/20 p-3 ${className ?? ""}`}>
@@ -277,15 +326,30 @@ function DetailItem({ label, value, className }: { label: string; value: unknown
 }
 
 function fieldsToForm(row: Row, fields: AdminRecordField[]) {
-  return fields.reduce<Record<string, string | boolean>>((acc, field) => {
+  return fields.reduce<Record<string, FieldFormValue>>((acc, field) => {
+    if (field.type === "gallery") {
+      const coverKey = field.coverKey ?? "image_url";
+      const galleryKey = field.galleryKey ?? field.key;
+      acc[coverKey] = valueToInput(row[coverKey]);
+      acc[galleryKey] = arrayFromValue(row[galleryKey]);
+      return acc;
+    }
     const value = row[field.key];
     acc[field.key] = field.type === "checkbox" ? Boolean(value) : valueToInput(value);
     return acc;
   }, {});
 }
 
-function formToPayload(form: Record<string, string | boolean>, fields: AdminRecordField[]): Row {
+function formToPayload(form: Record<string, FieldFormValue>, fields: AdminRecordField[]): Row {
   return fields.reduce<Row>((payload, field) => {
+    if (field.type === "gallery") {
+      const coverKey = field.coverKey ?? "image_url";
+      const galleryKey = field.galleryKey ?? field.key;
+      const galleryValue = form[galleryKey];
+      payload[coverKey] = optionalText(String(form[coverKey] ?? ""));
+      payload[galleryKey] = Array.isArray(galleryValue) ? galleryValue : [];
+      return payload;
+    }
     const value = form[field.key];
     if (field.type === "checkbox") {
       payload[field.key] = Boolean(value);
@@ -300,6 +364,11 @@ function formToPayload(form: Record<string, string | boolean>, fields: AdminReco
     }
     return payload;
   }, {});
+}
+
+function arrayFromValue(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  return [];
 }
 
 function valueToInput(value: unknown) {

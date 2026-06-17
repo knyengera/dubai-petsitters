@@ -10,7 +10,6 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Shield, Clock, Heart, CheckCircle, Star, Users, Search, Loader2 } from 'lucide-react';
 import HostCard from '@/components/hosts/HostCard';
-import HostBookingModal from '@/components/hosting/HostBookingModal';
 
 const benefits = [
   { icon: Shield, text: 'Verified & Trusted Sitters' },
@@ -22,7 +21,6 @@ const benefits = [
 export default function Hosting() {
   const [search, setSearch] = useState('');
   const [cityFilter, setCityFilter] = useState('all');
-  const [selectedHost, setSelectedHost] = useState(null);
 
   const { data: hosts = [], isLoading } = useQuery({
     queryKey: ['pet-hosts-hosting'],
@@ -76,9 +74,7 @@ export default function Hosting() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-14">
             {filtered.map((host, i) => (
               <motion.div key={host.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                <div onClick={() => setSelectedHost(host)} className="cursor-pointer h-full">
-                  <HostCard host={host} />
-                </div>
+                <HostCard host={host} />
               </motion.div>
             ))}
           </div>
@@ -95,8 +91,6 @@ export default function Hosting() {
         </div>
 
       </div>
-
-      <HostBookingModal host={selectedHost} open={!!selectedHost} onClose={() => setSelectedHost(null)} />
     </div>
   );
 }

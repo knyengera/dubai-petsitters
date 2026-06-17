@@ -26,7 +26,7 @@ const FIELDS: AdminRecordField[] = [
   { key: "phone", label: "Phone" },
   { key: "city", label: "City" },
   { key: "website", label: "Website" },
-  { key: "image_url", label: "Business Photo", type: "image", hideInView: true, uploadCategory: "partners" },
+  { key: "gallery", label: "Business Photos", type: "gallery", coverKey: "image_url", galleryKey: "gallery", hideInView: true, uploadCategory: "partners" },
   { key: "plan", label: "Plan" },
   { key: "message", label: "Message", type: "textarea", className: "col-span-2" },
   { key: "status", label: "Status", type: "select", options: STATUSES },
