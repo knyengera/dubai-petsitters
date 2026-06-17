@@ -19,6 +19,13 @@ function toStripeAmount(amount: number, currency: string): number {
   return zeroDecimal ? Math.round(amount) : Math.round(amount * 100);
 }
 
+function fromStripeAmount(amount: number, currency: string): number {
+  const zeroDecimal = ["jpy", "krw", "vnd"].includes(currency.toLowerCase());
+  return zeroDecimal ? amount : amount / 100;
+}
+
+export { toStripeAmount, fromStripeAmount };
+
 function successPath(payment: PaymentRecord): string {
   if (payment.payment_type === "booking_escrow") {
     return `/payments/booking/success?paymentId=${payment.id}`;
@@ -119,4 +126,74 @@ export function extractStripePaymentId(event: Stripe.Event): {
   }
 
   return { paymentId, providerPaymentId: null };
+}
+
+export function extractStripePaymentMethodLabel(
+  providerPayload: Record<string, unknown> | null | undefined
+): string | null {
+  if (!providerPayload) return null;
+
+  const data = providerPayload.data as { object?: Record<string, unknown> } | undefined;
+  const obj = data?.object ?? providerPayload;
+
+  const paymentMethodTypes = obj.payment_method_types as string[] | undefined;
+  if (paymentMethodTypes?.includes("card")) {
+    const charges = obj.charges as { data?: Array<{ payment_method_details?: { card?: { brand?: string; last4?: string } } }> } | undefined;
+    const card = charges?.data?.[0]?.payment_method_details?.card;
+    if (card?.brand) {
+      const brand = card.brand.charAt(0).toUpperCase() + card.brand.slice(1);
+      return card.last4 ? `${brand} •••• ${card.last4}` : brand;
+    }
+    return "Card";
+  }
+
+  if (paymentMethodTypes?.length) {
+    return paymentMethodTypes[0].replace(/_/g, " ");
+  }
+
+  const session = obj as Stripe.Checkout.Session;
+  if (session.payment_method_types?.length) {
+    return session.payment_method_types[0].replace(/_/g, " ");
+  }
+
+  return null;
+}
+
+export function extractStripeRefundDetails(event: Stripe.Event): {
+  providerRefundId: string | null;
+  providerPaymentId: string | null;
+  amount: number | null;
+  currency: string | null;
+  status: string | null;
+} {
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object as Stripe.Charge;
+    const refund = charge.refunds?.data?.[0];
+    return {
+      providerRefundId: refund?.id ?? null,
+      providerPaymentId:
+        typeof charge.payment_intent === "string"
+          ? charge.payment_intent
+          : charge.payment_intent?.id ?? null,
+      amount: refund?.amount != null ? fromStripeAmount(refund.amount, charge.currency) : null,
+      currency: charge.currency?.toUpperCase() ?? null,
+      status: "succeeded",
+    };
+  }
+
+  if (event.type === "refund.updated" || event.type === "refund.created") {
+    const refund = event.data.object as Stripe.Refund;
+    return {
+      providerRefundId: refund.id,
+      providerPaymentId:
+        typeof refund.payment_intent === "string"
+          ? refund.payment_intent
+          : refund.payment_intent?.id ?? null,
+      amount: refund.amount != null ? fromStripeAmount(refund.amount, refund.currency) : null,
+      currency: refund.currency?.toUpperCase() ?? null,
+      status: refund.status ?? null,
+    };
+  }
+
+  return { providerRefundId: null, providerPaymentId: null, amount: null, currency: null, status: null };
 }

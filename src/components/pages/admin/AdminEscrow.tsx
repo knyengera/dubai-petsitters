@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
+import AdminEscrowRefundDialog from "@/components/pages/admin/AdminEscrowRefundDialog";
 import { adminListEscrowAccounts, releaseEscrow, markBookingCompleted } from "@/lib/monetisation/actions";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,6 +17,7 @@ export default function AdminEscrow() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
+  const [refundRow, setRefundRow] = useState<Row | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -52,11 +54,16 @@ export default function AdminEscrow() {
     load();
   };
 
+  const handleRefundSuccess = () => {
+    toast({ title: "Refund processed" });
+    load();
+  };
+
   return (
     <div className="pb-10">
       <AdminPageHeader
         title="Escrow"
-        description="Review held funds and release host earnings after service completion."
+        description="Review held funds, release host earnings, and process refunds."
       />
       {loading ? (
         <div className="flex justify-center py-20">
@@ -84,6 +91,15 @@ export default function AdminEscrow() {
             },
             { key: "host_name", label: "Host" },
             {
+              key: "payment_method_label",
+              label: "Payment",
+              render: (row) => (
+                <Badge variant="outline" className="capitalize text-[10px]">
+                  {String(row.payment_method_label ?? row.payment_provider ?? "—")}
+                </Badge>
+              ),
+            },
+            {
               key: "gross_amount",
               label: "Gross",
               render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.gross_amount}`,
@@ -92,6 +108,16 @@ export default function AdminEscrow() {
               key: "host_earnings",
               label: "Host earns",
               render: (row) => `${row.currency ?? DEFAULT_CURRENCY} ${row.host_earnings}`,
+            },
+            {
+              key: "refunded_amount",
+              label: "Refunded",
+              render: (row) => {
+                const currency = row.currency ?? DEFAULT_CURRENCY;
+                const refunded = Number(row.refunded_amount ?? 0);
+                const gross = Number(row.gross_amount ?? 0);
+                return `${currency} ${refunded.toFixed(2)} / ${gross.toFixed(2)}`;
+              },
             },
             {
               key: "status",
@@ -126,10 +152,29 @@ export default function AdminEscrow() {
                   Release funds
                 </Button>
               )}
+              {row.can_refund === true && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="h-8 rounded-lg text-xs"
+                  disabled={acting === String(row.booking_id)}
+                  onClick={() => setRefundRow(row)}
+                >
+                  Refund
+                </Button>
+              )}
             </div>
           )}
         />
       )}
+
+      <AdminEscrowRefundDialog
+        row={refundRow}
+        onOpenChange={(open) => {
+          if (!open) setRefundRow(null);
+        }}
+        onSuccess={handleRefundSuccess}
+      />
     </div>
   );
 }

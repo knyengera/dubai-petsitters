@@ -194,3 +194,68 @@ export function extractPayPalPaymentId(event: Record<string, unknown>): {
 
   return { paymentId: null, providerPaymentId: null, orderId: null };
 }
+
+export async function refundPayPalCapture(
+  captureId: string,
+  amount: number | null,
+  currency: string
+): Promise<{ refundId: string }> {
+  if (!isPayPalConfigured()) {
+    throw new Error("PayPal is not configured");
+  }
+
+  const token = await getPayPalAccessToken();
+  const body: Record<string, unknown> = {};
+  if (amount != null) {
+    body.amount = {
+      currency_code: currency,
+      value: amount.toFixed(2),
+    };
+  }
+
+  const res = await fetch(`${getPayPalApiBase()}/v2/payments/captures/${captureId}/refund`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`PayPal refund failed: ${text}`);
+  }
+
+  const result = (await res.json()) as { id?: string };
+  if (!result.id) {
+    throw new Error("PayPal did not return a refund ID");
+  }
+
+  return { refundId: result.id };
+}
+
+export function extractPayPalRefundDetails(event: Record<string, unknown>): {
+  providerRefundId: string | null;
+  providerPaymentId: string | null;
+  amount: number | null;
+  currency: string | null;
+} {
+  const eventType = String(event.event_type ?? "");
+  if (eventType !== "PAYMENT.CAPTURE.REFUNDED") {
+    return { providerRefundId: null, providerPaymentId: null, amount: null, currency: null };
+  }
+
+  const resource = event.resource as Record<string, unknown> | undefined;
+  const amountObj = resource?.amount as { value?: string; currency_code?: string } | undefined;
+  const links = resource?.links as Array<{ rel?: string; href?: string }> | undefined;
+  const captureLink = links?.find((l) => l.rel === "up");
+  const captureId = captureLink?.href?.split("/").pop() ?? null;
+
+  return {
+    providerRefundId: (resource?.id as string | undefined) ?? null,
+    providerPaymentId: captureId,
+    amount: amountObj?.value ? parseFloat(amountObj.value) : null,
+    currency: amountObj?.currency_code?.toUpperCase() ?? null,
+  };
+}

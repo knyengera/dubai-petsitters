@@ -31,6 +31,19 @@ export type PaymentRecord = {
   payer_name?: string | null;
   payer_email: string;
   provider_checkout_id?: string | null;
+  provider_payment_id?: string | null;
+  refunded_amount?: number;
+  provider_payload?: Record<string, unknown> | null;
+};
+
+export type GatewayRefundResult = {
+  providerRefundId: string;
+  provider: string;
+};
+
+export type PaymentMethodInfo = {
+  provider: string;
+  label: string;
 };
 
 export type CheckoutRequest = {

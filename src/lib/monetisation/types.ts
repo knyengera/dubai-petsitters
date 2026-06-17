@@ -99,6 +99,40 @@ export type MonetisationActionResult<T = unknown> =
   | { ok: true; data: T }
   | { ok: false; error: string };
 
+export type PaymentRefund = {
+  id: string;
+  payment_id: string;
+  booking_id: string;
+  escrow_id: string;
+  amount: number;
+  currency: string;
+  provider: string;
+  provider_refund_id: string | null;
+  reason: string | null;
+  status: "pending" | "succeeded" | "failed";
+  host_clawback_amount: number;
+  actor_email: string | null;
+  created_at: string;
+};
+
+export type EscrowAccountRow = {
+  id: string;
+  booking_id: string;
+  host_id: string;
+  host_name?: string;
+  currency: string;
+  gross_amount: number;
+  host_earnings: number;
+  refunded_amount: number;
+  refundable_amount: number;
+  status: EscrowStatus;
+  payment_id: string | null;
+  payment_provider: string | null;
+  payment_method_label: string | null;
+  payer_email: string | null;
+  can_refund: boolean;
+};
+
 export function monetisationError(result: MonetisationActionResult<unknown>): string {
   if (result.ok === false) return result.error;
   return "Unknown error";

@@ -6,6 +6,8 @@ import { requireAdmin, getSessionUser } from "@/lib/admin/auth";
 import { getHostPayoutSettings } from "@/lib/hosting/payout-settings";
 import { isSupportedPaymentProvider, DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { parseBookingQuote } from "@/lib/monetisation/pricing";
+import { createGatewayRefund, getPaymentMethodInfo } from "@/lib/payments/refund";
+import { parsePaymentRecord } from "@/lib/payments/refund-reconcile";
 import type {
   BookingQuote,
   CreateBookingInput,
@@ -234,6 +236,97 @@ export async function markBookingCompleted(
     });
     if (error) return { ok: false, error: error.message };
     revalidatePath("/admin/bookings");
+    revalidatePath("/host-calendar");
+    revalidatePath("/host-earnings");
+    revalidatePath("/dashboard");
+    return { ok: true, data: parseRow(data) };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
+}
+
+const REFUNDABLE_ESCROW_STATUSES = new Set(["held", "release_pending", "released"]);
+
+export async function refundEscrowPayment(input: {
+  bookingId: string;
+  amount?: number;
+  reason?: string;
+}): Promise<MonetisationActionResult<Record<string, unknown>>> {
+  try {
+    await requireAdmin();
+    const supabase = await createClient();
+
+    const { data: escrowRow, error: escrowError } = await supabase
+      .from("escrow_accounts")
+      .select("*")
+      .eq("booking_id", input.bookingId)
+      .maybeSingle();
+
+    if (escrowError || !escrowRow) {
+      return { ok: false, error: escrowError?.message ?? "Escrow account not found" };
+    }
+
+    const escrow = escrowRow as Record<string, unknown>;
+    const escrowStatus = String(escrow.status);
+    if (!REFUNDABLE_ESCROW_STATUSES.has(escrowStatus)) {
+      return { ok: false, error: "Escrow is not refundable in its current state" };
+    }
+
+    const grossAmount = Number(escrow.gross_amount ?? 0);
+    const refundedAmount = Number(escrow.refunded_amount ?? 0);
+    const refundableAmount = Math.max(0, grossAmount - refundedAmount);
+    if (refundableAmount <= 0) {
+      return { ok: false, error: "No refundable balance remaining" };
+    }
+
+    const refundAmount = input.amount ?? refundableAmount;
+    if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
+      return { ok: false, error: "Invalid refund amount" };
+    }
+    if (refundAmount > refundableAmount + 0.001) {
+      return { ok: false, error: `Refund amount cannot exceed ${refundableAmount.toFixed(2)}` };
+    }
+
+    const paymentId = escrow.payment_id ? String(escrow.payment_id) : null;
+    if (!paymentId) {
+      return { ok: false, error: "No payment linked to escrow" };
+    }
+
+    const { data: paymentRow, error: paymentError } = await supabase
+      .from("payments")
+      .select("*")
+      .eq("id", paymentId)
+      .maybeSingle();
+
+    if (paymentError || !paymentRow) {
+      return { ok: false, error: paymentError?.message ?? "Payment not found" };
+    }
+
+    const payment = parsePaymentRecord(paymentRow as Record<string, unknown>);
+    const idempotencyKey = `refund:${input.bookingId}:${refundAmount.toFixed(2)}:${Date.now()}`;
+
+    let gatewayResult;
+    try {
+      gatewayResult = await createGatewayRefund(payment, refundAmount, idempotencyKey);
+    } catch (e) {
+      return { ok: false, error: toError(e) };
+    }
+
+    const { data, error } = await callRpc(supabase, "monetisation_record_escrow_refund", {
+      p_booking_id: input.bookingId,
+      p_amount: refundAmount,
+      p_provider_refund_id: gatewayResult.providerRefundId,
+      p_reason: input.reason ?? null,
+      p_metadata: { provider: gatewayResult.provider, source: "admin" },
+    });
+
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin/escrow");
+    revalidatePath("/admin/ledger");
     revalidatePath("/host-calendar");
     revalidatePath("/host-earnings");
     revalidatePath("/dashboard");
@@ -473,27 +566,57 @@ export async function adminListEscrowAccounts(): Promise<MonetisationActionResul
 
     const accounts = (data ?? []) as Record<string, unknown>[];
     const hostIds = [...new Set(accounts.map((row) => String(row.host_id)).filter(Boolean))];
-    if (hostIds.length === 0) {
-      return { ok: true, data: accounts };
+    const paymentIds = [...new Set(accounts.map((row) => String(row.payment_id)).filter(Boolean))];
+
+    const hostNameById = new Map<string, string>();
+    if (hostIds.length > 0) {
+      const { data: hostRows, error: hostError } = await supabase
+        .from("pet_hosts")
+        .select("id, full_name")
+        .in("id", hostIds);
+      if (hostError) return { ok: false, error: hostError.message };
+      for (const row of hostRows ?? []) {
+        const host = row as Record<string, unknown>;
+        hostNameById.set(String(host.id), String(host.full_name ?? ""));
+      }
     }
 
-    const { data: hostRows, error: hostError } = await supabase
-      .from("pet_hosts")
-      .select("id, full_name")
-      .in("id", hostIds);
-    if (hostError) return { ok: false, error: hostError.message };
+    const paymentById = new Map<string, Record<string, unknown>>();
+    if (paymentIds.length > 0) {
+      const { data: paymentRows, error: paymentError } = await supabase
+        .from("payments")
+        .select("id, payment_provider, gateway, provider_payment_id, refunded_amount, payer_email, provider_payload")
+        .in("id", paymentIds);
+      if (paymentError) return { ok: false, error: paymentError.message };
+      for (const row of paymentRows ?? []) {
+        const payment = row as Record<string, unknown>;
+        paymentById.set(String(payment.id), payment);
+      }
+    }
 
-    const hostNameById = new Map(
-      (hostRows ?? []).map((row) => [
-        String((row as Record<string, unknown>).id),
-        String((row as Record<string, unknown>).full_name ?? ""),
-      ])
-    );
+    const enriched = accounts.map((row) => {
+      const grossAmount = Number(row.gross_amount ?? 0);
+      const escrowRefunded = Number(row.refunded_amount ?? 0);
+      const payment = row.payment_id ? paymentById.get(String(row.payment_id)) : undefined;
+      const paymentRefunded = payment ? Number(payment.refunded_amount ?? 0) : escrowRefunded;
+      const refundedAmount = Math.max(escrowRefunded, paymentRefunded);
+      const refundableAmount = Math.max(0, grossAmount - refundedAmount);
+      const status = String(row.status);
+      const paymentRecord = payment ? parsePaymentRecord({ ...payment, amount: grossAmount, currency: row.currency, payment_type: "booking_escrow", status: "captured", payer_email: payment.payer_email ?? "" }) : null;
+      const methodInfo = paymentRecord ? getPaymentMethodInfo(paymentRecord) : null;
 
-    const enriched = accounts.map((row) => ({
-      ...row,
-      host_name: hostNameById.get(String(row.host_id)) || "Unknown host",
-    }));
+      return {
+        ...row,
+        host_name: hostNameById.get(String(row.host_id)) || "Unknown host",
+        refunded_amount: refundedAmount,
+        refundable_amount: refundableAmount,
+        payment_provider: payment ? String(payment.payment_provider ?? payment.gateway ?? "") : null,
+        provider_payment_id: payment?.provider_payment_id ? String(payment.provider_payment_id) : null,
+        payer_email: payment?.payer_email ? String(payment.payer_email) : null,
+        payment_method_label: methodInfo?.label ?? null,
+        can_refund: REFUNDABLE_ESCROW_STATUSES.has(status) && refundableAmount > 0,
+      };
+    });
 
     return { ok: true, data: enriched };
   } catch (e) {

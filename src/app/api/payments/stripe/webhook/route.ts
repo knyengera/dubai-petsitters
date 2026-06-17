@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { capturePaymentFromWebhook } from "@/lib/payments/capture";
-import { extractStripePaymentId, verifyStripeWebhook } from "@/lib/payments/stripe";
+import { recordRefundFromWebhook } from "@/lib/payments/refund-reconcile";
+import {
+  extractStripePaymentId,
+  extractStripeRefundDetails,
+  verifyStripeWebhook,
+} from "@/lib/payments/stripe";
 
 export const runtime = "nodejs";
 
@@ -14,6 +19,35 @@ export async function POST(request: Request) {
 
   try {
     const event = verifyStripeWebhook(rawBody, signature);
+
+    if (event.type === "charge.refunded" || event.type === "refund.updated" || event.type === "refund.created") {
+      const refundDetails = extractStripeRefundDetails(event);
+      if (
+        !refundDetails.providerRefundId ||
+        !refundDetails.providerPaymentId ||
+        refundDetails.amount == null
+      ) {
+        return NextResponse.json({ received: true });
+      }
+
+      if (event.type !== "charge.refunded" && refundDetails.status && refundDetails.status !== "succeeded") {
+        return NextResponse.json({ received: true });
+      }
+
+      const result = await recordRefundFromWebhook({
+        providerPaymentId: refundDetails.providerPaymentId,
+        providerRefundId: refundDetails.providerRefundId,
+        amount: refundDetails.amount,
+        metadata: { event_type: event.type, currency: refundDetails.currency },
+      });
+
+      if (result.ok === false) {
+        console.error("Stripe refund reconciliation failed:", result.error);
+        return NextResponse.json({ error: result.error }, { status: 500 });
+      }
+
+      return NextResponse.json({ received: true });
+    }
 
     if (
       event.type !== "checkout.session.completed" &&
