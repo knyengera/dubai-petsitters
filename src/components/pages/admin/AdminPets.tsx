@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,15 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
-import {
-  AdminRecordEditDialog,
-  AdminRecordViewDialog,
-  type AdminRecordField,
-} from "@/components/admin/AdminRecordDialogs";
+import { AdminRecordEditDialog } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import ImageUpload from "@/components/common/ImageUpload";
 import { useAuth } from "@/lib/auth-context";
+import { PET_FIELDS, PET_STATUSES } from "@/components/pages/admin/pet-fields";
 
 const EMPTY = {
   name: "",
@@ -34,26 +32,12 @@ const EMPTY = {
   created_by: "",
 };
 
-const STATUSES = ["available", "pending_review", "pending", "adopted"];
-const SPECIES = ["dog", "cat", "bird", "rabbit", "fish", "reptile", "other"];
-const FIELDS: AdminRecordField[] = [
-  { key: "name", label: "Name", required: true },
-  { key: "species", label: "Species", type: "select", options: SPECIES, required: true },
-  { key: "breed", label: "Breed" },
-  { key: "age", label: "Age" },
-  { key: "gender", label: "Gender", type: "select", options: ["male", "female"] },
-  { key: "size", label: "Size", type: "select", options: ["small", "medium", "large"] },
-  { key: "description", label: "Description", type: "textarea", className: "col-span-2" },
-  { key: "image_url", label: "Photo", type: "image", hideInView: true, uploadCategory: "pets" },
-  { key: "location", label: "Location" },
-  { key: "vaccinated", label: "Vaccinated", type: "checkbox" },
-  { key: "neutered", label: "Neutered", type: "checkbox" },
-  { key: "status", label: "Status", type: "select", options: STATUSES },
-  { key: "created_by", label: "Listed By" },
-];
+const STATUSES = PET_STATUSES;
+const FIELDS = PET_FIELDS;
 
 export default function AdminPets() {
   const { user } = useAuth();
+  const router = useRouter();
   const { data: pets = [], isLoading, updateRow, deleteRow, createRow } = useAdminList(
     ADMIN_TABLES.pets,
     "admin-pets"
@@ -61,7 +45,6 @@ export default function AdminPets() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
-  const [viewingPet, setViewingPet] = useState<Row | null>(null);
   const [editingPet, setEditingPet] = useState<Row | null>(null);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -120,7 +103,7 @@ export default function AdminPets() {
             ),
           },
         ]}
-        onView={setViewingPet}
+        onView={(row) => router.push(`/admin/pets/${row.id}`)}
         onEdit={setEditingPet}
         rowActions={(row) => (
           <Select
@@ -198,19 +181,6 @@ export default function AdminPets() {
         </DialogContent>
       </Dialog>
 
-      <AdminRecordViewDialog
-        row={viewingPet}
-        title="Adoption Pet"
-        titleKey="name"
-        fields={FIELDS}
-        imageKey="image_url"
-        badges={(row) => (
-          <Badge variant="secondary" className="capitalize text-[10px]">
-            {String(row.status ?? "available")}
-          </Badge>
-        )}
-        onOpenChange={(open) => !open && setViewingPet(null)}
-      />
       <AdminRecordEditDialog
         row={editingPet}
         title="Edit Adoption Pet"
