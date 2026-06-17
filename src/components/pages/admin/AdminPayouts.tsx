@@ -54,12 +54,18 @@ export default function AdminPayouts() {
         <AdminDataList
           rows={rows}
           isLoading={false}
+          layout="table"
+          getRowKey={(row) => String(row.id)}
           columns={[
             { key: "requested_by_email", label: "Host email" },
             {
               key: "payment_provider",
               label: "Method",
-              render: (row) => String(row.payment_provider ?? "—").replace("_", " "),
+              render: (row) => (
+                <Badge variant="outline" className="capitalize text-[10px]">
+                  {String(row.payment_provider ?? "—").replace("_", " ")}
+                </Badge>
+              ),
             },
             {
               key: "payout_destination",
@@ -92,21 +98,23 @@ export default function AdminPayouts() {
             },
           ]}
           rowActions={(row) => (
-            <Select
-              value={String(row.status ?? "pending")}
-              onValueChange={(v) => updateStatus(String(row.id), v)}
-            >
-              <SelectTrigger className="w-32 h-8 rounded-lg text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s} className="capitalize">
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                value={String(row.status ?? "pending")}
+                onValueChange={(v) => updateStatus(String(row.id), v)}
+              >
+                <SelectTrigger className="w-32 h-8 rounded-lg text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUSES.map((s) => (
+                    <SelectItem key={s} value={s} className="capitalize">
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           )}
         />
       )}
