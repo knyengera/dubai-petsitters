@@ -6,6 +6,7 @@ import {
   isGuestOnlyPath,
   isOnboardingExemptPath,
   isProtectedPath,
+  isUserDashboardPath,
 } from "@/lib/auth/routes";
 import {
   isBaseOnboardingComplete,
@@ -132,6 +133,14 @@ export async function updateSession(request: NextRequest) {
   if (isAdminPath(pathname) && user && !isAdminRole(user.app_metadata)) {
     const redirectResponse = NextResponse.redirect(
       new URL("/dashboard", request.url)
+    );
+    copyCookies(supabaseResponse, redirectResponse);
+    return redirectResponse;
+  }
+
+  if (user && isAdminRole(user.app_metadata) && isUserDashboardPath(pathname)) {
+    const redirectResponse = NextResponse.redirect(
+      new URL("/admin", request.url)
     );
     copyCookies(supabaseResponse, redirectResponse);
     return redirectResponse;

@@ -1,5 +1,9 @@
 import type { User } from "@supabase/supabase-js";
-import { getSafeNextPath } from "@/lib/auth/routes";
+import {
+  getDefaultHomePath,
+  getSafeNextPath,
+  isAdminRole,
+} from "@/lib/auth/routes";
 import type { SignupAccountType } from "@/lib/auth/constants";
 import { LEGAL_DOCUMENTS_VERSION } from "@/lib/legal/constants";
 
@@ -109,15 +113,17 @@ export function resolvePostAuthRedirect(
   next: string | null | undefined,
   options?: { hasHostProfile?: boolean }
 ): string {
+  const isAdmin = isAdminRole(user?.app_metadata);
+  const defaultHome = getDefaultHomePath(isAdmin);
   const onboardingRedirect = getOnboardingRedirect(user, profile, options);
   if (onboardingRedirect) {
-    const safeNext = getSafeNextPath(next);
-    if (safeNext !== "/dashboard") {
+    const safeNext = getSafeNextPath(next, { isAdmin });
+    if (safeNext !== defaultHome) {
       return `${onboardingRedirect}?next=${encodeURIComponent(safeNext)}`;
     }
     return onboardingRedirect;
   }
-  return getSafeNextPath(next);
+  return getSafeNextPath(next, { isAdmin });
 }
 
 export function maskIdNumber(idNumber: string | null | undefined): string {

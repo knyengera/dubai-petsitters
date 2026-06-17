@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/language-context';
 import { useAuth } from '@/lib/auth-context';
+import { getDefaultHomePath } from '@/lib/auth/routes';
 import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
 import { Stethoscope, MapPin, Clock, ChevronLeft, ChevronRight, Star, Users, BadgeCheck } from 'lucide-react';
@@ -180,8 +181,9 @@ function FeaturedVetsSection({ t }) {
 
 export default function Home() {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const isAuthenticated = !!user;
+  const homePath = isAuthenticated ? getDefaultHomePath(isAdmin) : '/login';
 
   const { data: pets = [] } = useQuery({
     queryKey: ['featured-pets'],
@@ -297,15 +299,23 @@ export default function Home() {
             {t('Join thousands of Saudi pet owners trusting Saudi Petsitters', 'انضم لآلاف أصحاب الحيوانات الأليفة الذين يثقون بـ سعودي بيتسيترز')}
           </p>
           <Link
-            href={isAuthenticated ? '/dashboard' : '/login'}
+            href={homePath}
             className={cn(
               buttonVariants({ size: "lg" }),
               "bg-white text-primary hover:bg-white/90 font-bold rounded-2xl px-10"
             )}
           >
             {t(
-              isAuthenticated ? 'Go to Dashboard' : 'Create Free Account',
-              isAuthenticated ? 'لوحة التحكم' : 'إنشاء حساب مجاني'
+              isAuthenticated
+                ? isAdmin
+                  ? 'Go to Admin Console'
+                  : 'Go to Dashboard'
+                : 'Create Free Account',
+              isAuthenticated
+                ? isAdmin
+                  ? 'لوحة الإدارة'
+                  : 'لوحة التحكم'
+                : 'إنشاء حساب مجاني'
             )}
           </Link>
         </div>

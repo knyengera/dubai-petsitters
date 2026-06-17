@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Heart,
   MapPin,
+  ShieldCheck,
 } from "lucide-react";
 import { isProtectedPath } from "@/lib/auth/routes";
 
@@ -39,8 +40,12 @@ export const ADMIN_NAV_LINK: NavLinkItem = {
   path: "/admin",
 };
 
-export function getHeaderNavLinks(isAuthenticated: boolean): NavLinkItem[] {
+export function getHeaderNavLinks(
+  isAuthenticated: boolean,
+  isAdmin = false
+): NavLinkItem[] {
   if (!isAuthenticated) return [...PUBLIC_NAV_LINKS];
+  if (isAdmin) return [...PUBLIC_NAV_LINKS, ADMIN_NAV_LINK];
   return [...PUBLIC_NAV_LINKS, ...PROTECTED_NAV_LINKS];
 }
 
@@ -56,8 +61,26 @@ const PROTECTED_BOTTOM_TABS: BottomTabItem[] = [
   { labelEn: "My Pets", labelAr: "حيواناتي", path: "/pets", icon: PawPrint },
 ];
 
-export function getBottomTabs(isAuthenticated: boolean): BottomTabItem[] {
+const ADMIN_BOTTOM_TAB: BottomTabItem = {
+  labelEn: "Admin",
+  labelAr: "الإدارة",
+  path: "/admin",
+  icon: ShieldCheck,
+};
+
+export function getBottomTabs(
+  isAuthenticated: boolean,
+  isAdmin = false
+): BottomTabItem[] {
   if (!isAuthenticated) return [...PUBLIC_BOTTOM_TABS];
+  if (isAdmin) {
+    return [
+      PUBLIC_BOTTOM_TABS[0],
+      PUBLIC_BOTTOM_TABS[1],
+      ADMIN_BOTTOM_TAB,
+      PROTECTED_BOTTOM_TABS[1],
+    ];
+  }
   return [
     PUBLIC_BOTTOM_TABS[0],
     PUBLIC_BOTTOM_TABS[1],
@@ -66,8 +89,11 @@ export function getBottomTabs(isAuthenticated: boolean): BottomTabItem[] {
 }
 
 /** Paths that use the main shell header (no sub-page top bar on mobile). */
-export function getMainTabPaths(isAuthenticated: boolean): string[] {
-  return getBottomTabs(isAuthenticated).map((tab) => tab.path);
+export function getMainTabPaths(
+  isAuthenticated: boolean,
+  isAdmin = false
+): string[] {
+  return getBottomTabs(isAuthenticated, isAdmin).map((tab) => tab.path);
 }
 
 export function isNavPathVisible(path: string, isAuthenticated: boolean): boolean {

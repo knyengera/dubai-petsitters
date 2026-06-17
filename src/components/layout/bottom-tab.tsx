@@ -9,8 +9,8 @@ import { getBottomTabs } from "@/lib/auth/navigation";
 export default function BottomTab() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const { user } = useAuth();
-  const tabs = getBottomTabs(!!user);
+  const { user, isAdmin } = useAuth();
+  const tabs = getBottomTabs(!!user, isAdmin);
 
   return (
     <nav

@@ -41,8 +41,8 @@ const PATTERN_TITLES = [
 export default function TopHeader() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
-  const mainTabPaths = getMainTabPaths(!!user);
+  const { user, signOut, isAdmin } = useAuth();
+  const mainTabPaths = getMainTabPaths(!!user, isAdmin);
 
   if (mainTabPaths.includes(pathname)) return null;
 

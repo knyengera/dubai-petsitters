@@ -7,7 +7,6 @@ import { useLanguage } from "@/lib/language-context";
 import { useAuth } from "@/lib/auth-context";
 import {
   getHeaderNavLinks,
-  ADMIN_NAV_LINK,
 } from "@/lib/auth/navigation";
 import NotificationBell from "@/components/layout/NotificationBell";
 
@@ -16,7 +15,7 @@ export default function Navbar() {
   const router = useRouter();
   const { t, lang, toggleLang } = useLanguage();
   const { user, signOut, isLoadingAuth, isAdmin } = useAuth();
-  const navLinks = getHeaderNavLinks(!!user);
+  const navLinks = getHeaderNavLinks(!!user, isAdmin);
 
   const handleLogout = async () => {
     await signOut();
@@ -45,7 +44,8 @@ export default function Navbar() {
                 key={link.path}
                 href={link.path}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  pathname === link.path
+                  pathname === link.path ||
+                  (link.path === "/admin" && pathname.startsWith("/admin"))
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
@@ -56,18 +56,6 @@ export default function Navbar() {
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
-            {user && isAdmin && (
-              <Link
-                href={ADMIN_NAV_LINK.path}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  pathname.startsWith("/admin")
-                    ? "bg-success/10 text-success"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {t(ADMIN_NAV_LINK.labelEn, ADMIN_NAV_LINK.labelAr)}
-              </Link>
-            )}
             {user && <NotificationBell />}
             <button
               type="button"

@@ -52,10 +52,29 @@ export function isAdminRole(
   return appMetadata?.role === "admin";
 }
 
+export function getDefaultHomePath(isAdmin = false): string {
+  return isAdmin ? "/admin" : "/dashboard";
+}
+
+export function isUserDashboardPath(pathname: string): boolean {
+  return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+}
+
 /** Safe relative post-login path (blocks open redirects). */
-export function getSafeNextPath(next: string | null | undefined): string {
+export function getSafeNextPath(
+  next: string | null | undefined,
+  options?: { isAdmin?: boolean }
+): string {
+  const isAdmin = options?.isAdmin ?? false;
+  const defaultPath = getDefaultHomePath(isAdmin);
+
   if (!next || !next.startsWith("/") || next.startsWith("//")) {
-    return "/dashboard";
+    return defaultPath;
   }
+
+  if (isAdmin && isUserDashboardPath(next.split("?")[0] ?? next)) {
+    return "/admin";
+  }
+
   return next;
 }

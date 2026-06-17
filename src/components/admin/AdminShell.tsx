@@ -28,11 +28,11 @@ export default function AdminShell({ children }: AdminShellProps) {
                     Admin Console
                   </p>
                   <Link
-                    href="/dashboard"
+                    href="/"
                     className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1"
                   >
                     <ChevronLeft className="w-3 h-3" />
-                    Back to app
+                    View site
                   </Link>
                 </div>
               </div>
