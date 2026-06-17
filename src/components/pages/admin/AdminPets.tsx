@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Eye, Pencil, Trash2, PawPrint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import AdminDataList from "@/components/admin/AdminDataList";
 import { AdminRecordEditDialog } from "@/components/admin/AdminRecordDialogs";
 import { useAdminList } from "@/components/admin/useAdminList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
@@ -34,6 +33,25 @@ const EMPTY = {
 
 const STATUSES = PET_STATUSES;
 const FIELDS = PET_FIELDS;
+
+const STATUS_GROUPS: { value: string; label: string }[] = [
+  { value: "pending_review", label: "Pending Review" },
+  { value: "available", label: "Available" },
+  { value: "pending", label: "Pending" },
+  { value: "adopted", label: "Adopted" },
+];
+
+const STATUS_BADGE: Record<string, "success" | "warning" | "secondary" | "outline"> = {
+  available: "success",
+  pending_review: "warning",
+  pending: "outline",
+  adopted: "secondary",
+};
+
+function cap(value: unknown): string {
+  const s = String(value ?? "").trim();
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+}
 
 export default function AdminPets() {
   const { user } = useAuth();
@@ -65,65 +83,63 @@ export default function AdminPets() {
   const handleEditSave = (id: string, payload: Row) =>
     updateRow(id, payload, "Pet updated");
 
+  const groups = useMemo(() => {
+    const known = new Set(STATUS_GROUPS.map((g) => g.value));
+    const base = STATUS_GROUPS.map((g) => ({
+      ...g,
+      rows: pets.filter((p) => String(p.status ?? "available") === g.value),
+    }));
+    const otherRows = pets.filter((p) => !known.has(String(p.status ?? "available")));
+    if (otherRows.length > 0) base.push({ value: "other", label: "Other", rows: otherRows });
+    return base.filter((g) => g.rows.length > 0);
+  }, [pets]);
+
+  const availableCount = pets.filter((p) => String(p.status ?? "available") === "available").length;
+  const reviewCount = pets.filter((p) => String(p.status ?? "") === "pending_review").length;
+
   return (
     <div className="pb-10">
       <AdminPageHeader
         title="Adoption Pets"
-        description="Manage pets listed for adoption."
+        description={`${availableCount} available · ${reviewCount} pending review`}
         actions={
           <Button onClick={() => setShowForm(true)} className="rounded-xl gap-2">
             <Plus className="w-4 h-4" /> Add Pet
           </Button>
         }
       />
-      <AdminDataList
-        rows={pets}
-        isLoading={isLoading}
-        columns={[
-          { key: "name", label: "Name" },
-          { key: "species", label: "Species" },
-          { key: "breed", label: "Breed" },
-          { key: "location", label: "Location" },
-          {
-            key: "created_by",
-            label: "Listed By",
-            render: (row) => (
-              <span className="text-xs text-muted-foreground">
-                {String(row.created_by ?? "—")}
-              </span>
-            ),
-          },
-          {
-            key: "status",
-            label: "Status",
-            render: (row) => (
-              <Badge variant="secondary" className="capitalize text-[10px]">
-                {String(row.status)}
-              </Badge>
-            ),
-          },
-        ]}
-        onView={(row) => router.push(`/admin/pets/${row.id}`)}
-        onEdit={setEditingPet}
-        rowActions={(row) => (
-          <Select
-            value={String(row.status ?? "available")}
-            onValueChange={(v) => updateRow(String(row.id), { status: v }, "Status updated")}
-          >
-            <SelectTrigger className="w-28 h-8 rounded-lg text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUSES.map((s) => (
-                <SelectItem key={s} value={s} className="capitalize">
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        onDelete={(row) => deleteRow(String(row.id), `Delete ${row.name}?`)}
-      />
+
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : pets.length === 0 ? (
+        <div className="text-center py-16 text-sm text-muted-foreground border border-dashed border-border rounded-2xl">
+          No pets listed for adoption yet.
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {groups.map((group) => (
+            <section key={group.value}>
+              <h2 className="font-heading text-lg font-bold text-foreground mb-4">
+                {group.label} ({group.rows.length})
+              </h2>
+              <div className="space-y-3">
+                {group.rows.map((pet) => (
+                  <PetRow
+                    key={String(pet.id)}
+                    pet={pet}
+                    onView={() => router.push(`/admin/pets/${pet.id}`)}
+                    onEdit={() => setEditingPet(pet)}
+                    onStatus={(v) => updateRow(String(pet.id), { status: v }, "Status updated")}
+                    onDelete={() => deleteRow(String(pet.id), `Delete ${pet.name}?`)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">
@@ -156,7 +172,7 @@ export default function AdminPets() {
                   <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {STATUSES.map((s) => (
-                      <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                      <SelectItem key={s} value={s} className="capitalize">{s.replace("_", " ")}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -188,6 +204,69 @@ export default function AdminPets() {
         onSave={handleEditSave}
         onOpenChange={(open) => !open && setEditingPet(null)}
       />
+    </div>
+  );
+}
+
+function PetRow({
+  pet,
+  onView,
+  onEdit,
+  onStatus,
+  onDelete,
+}: {
+  pet: Row;
+  onView: () => void;
+  onEdit: () => void;
+  onStatus: (value: string) => void;
+  onDelete: () => void;
+}) {
+  const status = String(pet.status ?? "available");
+  const meta = [cap(pet.breed), pet.age ? String(pet.age) : "", cap(pet.location)].filter(Boolean).join(" · ");
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+      {pet.image_url ? (
+        <img src={String(pet.image_url)} alt={String(pet.name)} className="w-12 h-12 rounded-xl object-cover shrink-0" />
+      ) : (
+        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <PawPrint className="w-6 h-6 text-primary" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-foreground text-sm flex items-center gap-2 flex-wrap">
+          {String(pet.name)}
+          {pet.species ? <Badge variant="outline" className="text-[10px] capitalize">{String(pet.species)}</Badge> : null}
+          <Badge variant={STATUS_BADGE[status] ?? "secondary"} className="text-[10px] capitalize">
+            {status.replace("_", " ")}
+          </Badge>
+        </p>
+        <p className="text-xs text-muted-foreground truncate">{meta || "No details"}</p>
+        <p className="text-xs text-muted-foreground truncate">Listed by {String(pet.created_by ?? "—")}</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <Select value={status} onValueChange={onStatus}>
+          <SelectTrigger className="w-32 h-8 rounded-lg text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUSES.map((s) => (
+              <SelectItem key={s} value={s} className="capitalize">
+                {s.replace("_", " ")}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <button type="button" onClick={onView} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="View pet">
+          <Eye className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={onEdit} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit pet">
+          <Pencil className="w-5 h-5" />
+        </button>
+        <button type="button" onClick={onDelete} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10" aria-label="Delete pet">
+          <Trash2 className="w-5 h-5" />
+        </button>
+      </div>
     </div>
   );
 }
