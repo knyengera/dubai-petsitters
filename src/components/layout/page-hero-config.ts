@@ -88,6 +88,12 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
       "Discover trusted pet shops, groomers, trainers, breeders, and more across Saudi Arabia.",
     imageAlt: DEFAULT_ALT,
   },
+  "/deals": {
+    title: "Deals & Discounts",
+    subtitle:
+      "Exclusive offers and promo codes from our trusted partner network. Sign in to reveal member codes.",
+    imageAlt: DEFAULT_ALT,
+  },
   "/become-partner": {
     title: "Grow Your Pet Business",
     subtitle:
