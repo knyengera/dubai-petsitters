@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Hosts from "@/components/pages/Hosts";
-import CityLandingIntro from "@/components/seo/CityLandingIntro";
 import { SEO_CITIES, getCityBySlug } from "@/lib/seo/cities";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getPublicHostsByCity } from "@/lib/seo/queries";
@@ -73,7 +72,6 @@ export default async function Page({ params }: PageProps) {
             : []),
         ]}
       />
-      <CityLandingIntro kind="hosts" city={city} />
       <Hosts defaultCity={city.name} />
     </>
   );

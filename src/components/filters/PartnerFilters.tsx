@@ -18,6 +18,14 @@ import { NON_VET_PARTNER_TYPES } from "@/lib/partners/queries";
 
 const CITIES = SAUDI_CITIES.filter((c) => c !== "Other");
 const BUSINESS_TYPES = NON_VET_PARTNER_TYPES.map((t) => t.label);
+const CITY_OPTIONS = [
+  { value: "all", label: "All Cities" },
+  ...CITIES.map((c) => ({ value: c, label: c })),
+];
+const BUSINESS_TYPE_OPTIONS = [
+  { value: "all", label: "All Types" },
+  ...BUSINESS_TYPES.map((t) => ({ value: t, label: t })),
+];
 
 const SORT_OPTIONS = [
   { value: "rating_desc", label: "Highest Rated" },
@@ -111,7 +119,7 @@ export default function PartnerFilters({
             className="pl-10 rounded-xl"
           />
         </div>
-        <Select value={filters.sortBy} onValueChange={(v) => set("sortBy", v)}>
+        <Select items={SORT_OPTIONS} value={filters.sortBy} onValueChange={(v) => set("sortBy", v)}>
           <SelectTrigger className="w-48 rounded-xl shrink-0">
             <SelectValue />
           </SelectTrigger>
@@ -145,6 +153,7 @@ export default function PartnerFilters({
               Business Type
             </Label>
             <Select
+              items={BUSINESS_TYPE_OPTIONS}
               value={filters.businessType}
               onValueChange={(v) => set("businessType", v)}
             >
@@ -166,7 +175,7 @@ export default function PartnerFilters({
             <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 block">
               City
             </Label>
-            <Select value={filters.city} onValueChange={(v) => set("city", v)}>
+            <Select items={CITY_OPTIONS} value={filters.city} onValueChange={(v) => set("city", v)}>
               <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="All Cities" />
               </SelectTrigger>

@@ -12,6 +12,7 @@ import { Search, SlidersHorizontal, X, Star, RotateCcw } from 'lucide-react';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
 const CITIES = ['Riyadh', 'Jeddah', 'Dammam', 'Makkah', 'Madinah', 'Khobar', 'Tabuk', 'Abha'];
+const CITY_OPTIONS = [{ value: 'all', label: 'All Cities' }, ...CITIES.map(c => ({ value: c, label: c }))];
 const SERVICE_TAGS = ['boarding', 'daycare', 'home_sitting', 'dog_walking'];
 const SERVICE_LABELS = { boarding: 'Boarding', daycare: 'Daycare', home_sitting: 'Home Sitting', dog_walking: 'Dog Walking' };
 const PET_TYPES = ['dog', 'cat', 'bird', 'rabbit', 'reptile', 'other'];
@@ -86,7 +87,7 @@ export default function HostFilters({ filters, onChange }) {
             className="pl-10 rounded-xl"
           />
         </div>
-        <Select value={filters.sortBy} onValueChange={v => set('sortBy', v)}>
+        <Select items={SORT_OPTIONS} value={filters.sortBy} onValueChange={v => set('sortBy', v)}>
           <SelectTrigger className="w-48 rounded-xl shrink-0"><SelectValue /></SelectTrigger>
           <SelectContent>{SORT_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
         </Select>
@@ -106,7 +107,7 @@ export default function HostFilters({ filters, onChange }) {
           {/* City */}
           <div>
             <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 block">City</Label>
-            <Select value={filters.city} onValueChange={v => set('city', v)}>
+            <Select items={CITY_OPTIONS} value={filters.city} onValueChange={v => set('city', v)}>
               <SelectTrigger className="rounded-xl"><SelectValue placeholder="All Cities" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Cities</SelectItem>

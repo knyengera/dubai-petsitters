@@ -90,7 +90,17 @@ export default function BlogFilterBar({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
-          <Select value={filters.category} onValueChange={(v) => update({ category: v })}>
+          <Select
+            items={[
+              { value: "all", label: s.allCategories },
+              ...BLOG_CATEGORIES.map((cat) => ({
+                value: cat.value,
+                label: getCategoryLabel(cat.value),
+              })),
+            ]}
+            value={filters.category}
+            onValueChange={(v) => update({ category: v })}
+          >
             <SelectTrigger className="w-full rounded-xl h-10">
               <SelectValue placeholder={s.category} />
             </SelectTrigger>
@@ -104,7 +114,14 @@ export default function BlogFilterBar({
             </SelectContent>
           </Select>
 
-          <Select value={filters.tag} onValueChange={(v) => update({ tag: v })}>
+          <Select
+            items={[
+              { value: "all", label: s.allTags },
+              ...tags.map((t) => ({ value: t, label: `#${t}` })),
+            ]}
+            value={filters.tag}
+            onValueChange={(v) => update({ tag: v })}
+          >
             <SelectTrigger className="w-full rounded-xl h-10">
               <SelectValue placeholder={s.tag} />
             </SelectTrigger>
@@ -118,7 +135,14 @@ export default function BlogFilterBar({
             </SelectContent>
           </Select>
 
-          <Select value={filters.author} onValueChange={(v) => update({ author: v })}>
+          <Select
+            items={[
+              { value: "all", label: s.allAuthors },
+              ...authors.map((a) => ({ value: a, label: a })),
+            ]}
+            value={filters.author}
+            onValueChange={(v) => update({ author: v })}
+          >
             <SelectTrigger className="w-full rounded-xl h-10">
               <SelectValue placeholder={s.author} />
             </SelectTrigger>
@@ -133,6 +157,7 @@ export default function BlogFilterBar({
           </Select>
 
           <Select
+            items={sortOptions}
             value={filters.sort}
             onValueChange={(v) => update({ sort: v as BlogSortOption })}
           >

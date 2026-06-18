@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Vets from "@/components/pages/Vets";
-import CityLandingIntro from "@/components/seo/CityLandingIntro";
 import { SEO_CITIES, getCityBySlug } from "@/lib/seo/cities";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getPublicVetsByCity } from "@/lib/seo/queries";
@@ -72,7 +71,6 @@ export default async function Page({ params }: PageProps) {
             : []),
         ]}
       />
-      <CityLandingIntro kind="vets" city={city} />
       <Vets defaultCity={city.name} />
     </>
   );

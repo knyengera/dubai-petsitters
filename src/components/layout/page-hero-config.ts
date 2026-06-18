@@ -1,3 +1,5 @@
+import { getCityBySlug } from "@/lib/seo/cities";
+
 export const DEFAULT_PAGE_HERO_IMAGE =
   "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1400&q=80";
 
@@ -300,10 +302,42 @@ const PAGE_HERO_PATTERNS: {
 /** Routes that keep their own full-page hero (no shared banner). */
 export const PAGE_HERO_EXCLUDED_PATHS = new Set(["/", "/forum"]);
 
+/** Resolves city landing routes (e.g. /vets/city/riyadh) to a city-specific hero. */
+function getCityPageHeroConfig(pathname: string): PageHeroConfig | null {
+  const vetsMatch = pathname.match(/^\/vets\/city\/([^/]+)$/);
+  if (vetsMatch) {
+    const city = getCityBySlug(vetsMatch[1]);
+    if (city) {
+      return {
+        title: `Veterinary Clinics in ${city.name}`,
+        subtitle: `Find a vet in ${city.name} (${city.nameAr}). Browse clinics for vaccinations, surgery, dental, and 24/7 emergency care for dogs, cats, and exotic pets. Compare ratings and book online.`,
+        imageAlt: DEFAULT_ALT,
+      };
+    }
+  }
+
+  const hostsMatch = pathname.match(/^\/hosts\/city\/([^/]+)$/);
+  if (hostsMatch) {
+    const city = getCityBySlug(hostsMatch[1]);
+    if (city) {
+      return {
+        title: `Pet Sitters in ${city.name}`,
+        subtitle: `Find trusted pet sitters in ${city.name} (${city.nameAr}) for boarding, daycare, dog walking, and in-home pet care. Compare verified hosts, reviews, and prices.`,
+        imageAlt: DEFAULT_ALT,
+      };
+    }
+  }
+
+  return null;
+}
+
 export function getPageHeroConfig(pathname: string): PageHeroConfig | null {
   if (PAGE_HERO_EXCLUDED_PATHS.has(pathname)) return null;
   // Forum board pages render their own hero with board-specific content.
   if (/^\/forum\/[^/]+$/.test(pathname)) return null;
+
+  const cityHero = getCityPageHeroConfig(pathname);
+  if (cityHero) return cityHero;
 
   const exact = PAGE_HERO_BY_PATH[pathname];
   if (exact) return exact;
