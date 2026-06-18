@@ -5,6 +5,8 @@ import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
@@ -22,11 +24,17 @@ import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 
 const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.partner_deals);
 
+const PARTNER_TYPE_OPTIONS = ["vet_clinic", "pet_shop", "grooming", "insurance", "food", "other"];
+
 const EMPTY = {
   title: "",
   description: "",
   partner_name: "",
+  partner_type: "other",
   discount: "",
+  discount_label: "",
+  discount_code: "",
+  city: "",
   image_url: "",
   gallery: [] as string[],
   link_url: "",
@@ -36,7 +44,11 @@ const FIELDS: AdminRecordField[] = [
   { key: "title", label: "Title", required: true },
   { key: "description", label: "Description", type: "textarea", className: "col-span-2" },
   { key: "partner_name", label: "Partner" },
+  { key: "partner_type", label: "Partner Type", type: "select", options: PARTNER_TYPE_OPTIONS },
   { key: "discount", label: "Discount" },
+  { key: "discount_label", label: "Discount Label", placeholder: "e.g. 20% OFF" },
+  { key: "discount_code", label: "Promo Code", placeholder: "e.g. PETSITTER20" },
+  { key: "city", label: "City" },
   { key: "gallery", label: "Images", type: "gallery", coverKey: "image_url", galleryKey: "gallery", hideInView: true, uploadCategory: "partners" },
   { key: "link_url", label: "Link URL" },
   { key: "is_active", label: "Active", type: "checkbox" },
@@ -112,6 +124,7 @@ export default function AdminPartnerDeals() {
           { key: "title", label: "Title" },
           { key: "partner_name", label: "Partner" },
           { key: "discount", label: "Discount" },
+          { key: "discount_code", label: "Promo Code" },
           { key: "is_active", label: "Active" },
         ]}
         onView={setViewingDeal}
@@ -141,8 +154,23 @@ export default function AdminPartnerDeals() {
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4">
             <div><Label>Title *</Label><Input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="rounded-xl mt-1" /></div>
+            <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="rounded-xl mt-1" /></div>
             <div><Label>Partner</Label><Input value={form.partner_name} onChange={(e) => setForm((f) => ({ ...f, partner_name: e.target.value }))} className="rounded-xl mt-1" /></div>
+            <div>
+              <Label className="mb-1 block">Partner Type</Label>
+              <Select value={form.partner_type} onValueChange={(v) => setForm((f) => ({ ...f, partner_type: v }))}>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PARTNER_TYPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt} className="capitalize">{opt.replace("_", " ")}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div><Label>Discount</Label><Input value={form.discount} onChange={(e) => setForm((f) => ({ ...f, discount: e.target.value }))} className="rounded-xl mt-1" placeholder="e.g. 20% off" /></div>
+            <div><Label>Discount Label</Label><Input value={form.discount_label} onChange={(e) => setForm((f) => ({ ...f, discount_label: e.target.value }))} className="rounded-xl mt-1" placeholder="e.g. 20% OFF" /></div>
+            <div><Label>Promo Code</Label><Input value={form.discount_code} onChange={(e) => setForm((f) => ({ ...f, discount_code: e.target.value }))} className="rounded-xl mt-1" placeholder="e.g. PETSITTER20" /></div>
+            <div><Label>City</Label><Input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} className="rounded-xl mt-1" /></div>
             <div>
               <Label className="mb-2 block">Images</Label>
               <GalleryImageUpload

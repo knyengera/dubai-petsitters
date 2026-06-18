@@ -166,6 +166,22 @@ export const PAGE_SEO: Record<string, PageSeo> = {
       "pet insurance Saudi Arabia",
     ],
   },
+  "/deals": {
+    path: "/deals",
+    title: "Pet Deals & Discounts in Saudi Arabia | Member Offers",
+    description:
+      "Exclusive deals and discount codes from trusted pet partners across " +
+      CITIES +
+      ". Save on pet shops, grooming, vet care, food, and insurance. Sign in to reveal member promo codes.",
+    keywords: [
+      "pet deals Saudi Arabia",
+      "pet discounts Riyadh",
+      "pet shop offers Jeddah",
+      "grooming discount Saudi Arabia",
+      "pet promo codes",
+      "عروض الحيوانات الأليفة",
+    ],
+  },
   "/become-partner": {
     path: "/become-partner",
     title: "Advertise Your Pet Business in Saudi Arabia",
