@@ -6,6 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getSpeciesFallback } from '@/components/adopt/pet-images';
+
+function FeaturedPetImage({ pet }) {
+  const fallback = getSpeciesFallback(pet);
+  const [src, setSrc] = React.useState(
+    pet.image_url && String(pet.image_url).trim().length > 0
+      ? String(pet.image_url).trim()
+      : fallback
+  );
+  return (
+    <img
+      src={src}
+      alt={pet.name}
+      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      onError={() => {
+        if (src !== fallback) setSrc(fallback);
+      }}
+    />
+  );
+}
 
 export default function FeaturedPets({ pets }) {
   if (!pets || pets.length === 0) return null;
@@ -43,16 +63,10 @@ export default function FeaturedPets({ pets }) {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
-              <Link href={`/adopt?pet=${pet.id}`} className="group block">
+              <Link href={`/adopt/${pet.id}`} className="group block">
                 <div className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300">
                   <div className="aspect-[4/3] relative overflow-hidden">
-                    {pet.image_url ? (
-                      <img src={pet.image_url} alt={pet.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
-                        No Image
-                      </div>
-                    )}
+                    <FeaturedPetImage pet={pet} />
                     <Badge className="absolute top-3 left-3 bg-primary/90 text-primary-foreground capitalize">
                       {pet.species}
                     </Badge>

@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { createHostingBookingWithEscrow } from '@/lib/monetisation/actions';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 import { quoteToSummary } from '@/lib/monetisation/pricing';
+import { FALLBACK_IMAGE } from '@/lib/images';
 import { useHostingBookingQuote } from '@/lib/monetisation/use-booking-quote';
 import PaymentModal from '@/components/payment/PaymentModal';
 import BookingDatePicker from '@/components/hosting/BookingDatePicker';
@@ -108,13 +109,16 @@ export default function HostDetailModal({ host, open, onClose }) {
         {step === 'profile' ? (
           <>
             <div className="aspect-[16/7] -mx-6 -mt-6 mb-6 overflow-hidden rounded-t-xl">
-              {host.photo_url ? (
-                <img src={host.photo_url} alt={host.full_name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center text-6xl font-bold text-muted-foreground/20">
-                  {host.full_name?.[0]}
-                </div>
-              )}
+              <img
+                src={host.photo_url || FALLBACK_IMAGE}
+                alt={host.full_name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  if (!e.currentTarget.src.endsWith(FALLBACK_IMAGE)) {
+                    e.currentTarget.src = FALLBACK_IMAGE;
+                  }
+                }}
+              />
             </div>
 
             <DialogHeader>

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Clock, CheckCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
+import { FALLBACK_IMAGE } from '@/lib/images';
 
 const serviceLabels = {
   boarding: 'Boarding',
@@ -19,13 +20,16 @@ export default function HostCard({ host, onSelect }) {
   const inner = (
     <div className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer h-full" onClick={() => !isRealHost && onSelect && onSelect(host)}>
       <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-        {host.photo_url ? (
-          <img src={host.photo_url} alt={host.full_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-muted-foreground/30">
-            {host.full_name?.[0]}
-          </div>
-        )}
+        <img
+          src={host.photo_url || FALLBACK_IMAGE}
+          alt={host.full_name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            if (!e.currentTarget.src.endsWith(FALLBACK_IMAGE)) {
+              e.currentTarget.src = FALLBACK_IMAGE;
+            }
+          }}
+        />
         {host.is_featured && (
           <div className="absolute top-3 left-3 bg-warning text-warning-foreground text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> Featured

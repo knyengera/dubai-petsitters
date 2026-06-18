@@ -16,15 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StartChatButton from "@/components/messaging/StartChatButton";
-
-const VET_IMAGES = [
-  "https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&q=80",
-  "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&q=80",
-  "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&q=80",
-  "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&q=80",
-  "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=600&q=80",
-  "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=600&q=80",
-];
+import { FALLBACK_IMAGE } from "@/lib/images";
 
 type VetClinicCard = {
   id: string;
@@ -52,7 +44,7 @@ export default function VetCard({
   variant?: "default" | "trusted";
 }) {
   const router = useRouter();
-  const bgImage = clinic.image_url || VET_IMAGES[index % VET_IMAGES.length];
+  const bgImage = clinic.image_url || FALLBACK_IMAGE;
 
   const goToDetail = () => router.push(`/vets/${clinic.id}`);
 

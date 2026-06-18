@@ -12,13 +12,7 @@ import { Star, MapPin, Phone, Globe, Clock, AlertCircle, ArrowLeft, CheckCircle,
 import PhotoGallery from '@/components/common/PhotoGallery';
 import ReviewsList from '@/components/reviews/ReviewsList';
 import AppointmentBookingModal from '@/components/vets/AppointmentBookingModal';
-
-const VET_IMAGES = [
-  'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=1200&q=85',
-  'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=1200&q=85',
-  'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=1200&q=85',
-  'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200&q=85',
-];
+import { FALLBACK_IMAGE } from '@/lib/images';
 
 export default function VetDetail() {
   const { id } = useParams();
@@ -52,7 +46,7 @@ export default function VetDetail() {
   }
 
   const galleryPhotos = [clinic.image_url, ...(clinic.gallery || [])].filter(Boolean);
-  const fallbackPhotos = galleryPhotos.length > 0 ? galleryPhotos : VET_IMAGES.slice(0, 4);
+  const fallbackPhotos = galleryPhotos.length > 0 ? galleryPhotos : [FALLBACK_IMAGE];
   const mapQuery = encodeURIComponent([clinic.name, clinic.address, clinic.city, 'Saudi Arabia'].filter(Boolean).join(', '));
 
   return (

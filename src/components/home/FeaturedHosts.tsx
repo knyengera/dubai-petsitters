@@ -9,6 +9,7 @@ import { Star, MapPin, CheckCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HostDetailModal from '../hosts/HostDetailModal';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
+import { FALLBACK_IMAGE } from '@/lib/images';
 
 const serviceLabels = {
   boarding: 'Boarding',
@@ -24,13 +25,16 @@ function HostPreviewCard({ host, onSelect }) {
       className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
     >
       <div className="aspect-[3/2] relative overflow-hidden bg-muted">
-        {host.photo_url ? (
-          <img src={host.photo_url} alt={host.full_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-muted-foreground/20">
-            {host.full_name?.[0]}
-          </div>
-        )}
+        <img
+          src={host.photo_url || FALLBACK_IMAGE}
+          alt={host.full_name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            if (!e.currentTarget.src.endsWith(FALLBACK_IMAGE)) {
+              e.currentTarget.src = FALLBACK_IMAGE;
+            }
+          }}
+        />
         <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm text-foreground text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow">
           <Star className="w-3 h-3 fill-rating text-rating" />
           {host.rating ?? '—'} {host.review_count ? `(${host.review_count})` : ''}

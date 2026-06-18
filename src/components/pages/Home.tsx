@@ -14,18 +14,7 @@ import HeroSlider from '@/components/home/HeroSlider';
 import PartnerDealsSection from '@/components/home/PartnerDealsSection';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-const PET_FALLBACKS = {
-  dog: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&q=90',
-  cat: 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=800&q=90',
-  bird: 'https://images.unsplash.com/photo-1520808663317-647b476a81b9?w=800&q=90',
-  rabbit: 'https://images.unsplash.com/photo-1612847172978-84bef5cb3038?w=800&q=90',
-  fish: 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=800&q=90',
-  reptile: 'https://images.unsplash.com/photo-1504450874802-0ba2bcd9b5ae?w=800&q=90',
-  other: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=800&q=90',
-};
-
-type PetFallbackSpecies = keyof typeof PET_FALLBACKS;
+import { FALLBACK_IMAGE } from '@/lib/images';
 
 type FeaturedPet = {
   id: string;
@@ -78,11 +67,22 @@ function toFeaturedVetClinic(vet: Record<string, unknown>): FeaturedVetClinic {
 }
 
 function getPetImageUrl(pet: FeaturedPet) {
-  const fallbackSpecies = pet.species in PET_FALLBACKS
-    ? (pet.species as PetFallbackSpecies)
-    : 'other';
+  return pet.image_url || FALLBACK_IMAGE;
+}
 
-  return pet.image_url || PET_FALLBACKS[fallbackSpecies];
+function HomePetImage({ pet }: { pet: FeaturedPet }) {
+  const fallback = FALLBACK_IMAGE;
+  const [src, setSrc] = React.useState(getPetImageUrl(pet));
+  return (
+    <img
+      src={src}
+      alt={pet.name}
+      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+      onError={() => {
+        if (src !== fallback) setSrc(fallback);
+      }}
+    />
+  );
 }
 
 const trustStats = [
@@ -261,14 +261,10 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
             {pets.slice(0, 6).map((pet) => (
-              <Link key={pet.id} href="/adopt">
+              <Link key={pet.id} href={`/adopt/${pet.id}`}>
                 <div className="bg-primary border border-primary rounded-xl overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
                   <div className="aspect-[4/3] bg-muted overflow-hidden">
-                    <img
-                      src={getPetImageUrl(pet)}
-                      alt={pet.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                    <HomePetImage pet={pet} />
                   </div>
                   <div className="p-2">
                     <p className="font-semibold text-primary-foreground text-xs truncate">{pet.name}</p>
