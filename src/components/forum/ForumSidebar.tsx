@@ -2,12 +2,8 @@
 
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Bookmark, Bell, Loader2, LogIn, MessageSquare, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Bookmark, Bell, Loader2, MessageSquare, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/lib/auth-context";
 import { FORUM_STATS_CARD_CLASS, FORUM_STATS_LABEL_CLASS } from "@/lib/forum/config";
 import { useForumI18n } from "@/lib/i18n/use-forum-i18n";
 import type { ForumStats } from "@/lib/forum/types";
@@ -45,55 +41,10 @@ export default function ForumSidebar({
   recentReplies = [],
   loading,
 }: ForumSidebarProps) {
-  const { user, navigateToLogin } = useAuth();
   const { s } = useForumI18n();
 
   return (
     <aside className="space-y-6">
-      <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
-        <h3 className="font-heading font-semibold mb-4">{s.memberLogin}</h3>
-        {user ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user.user_metadata?.avatar_url as string | undefined} />
-                <AvatarFallback>{initials(user.email ?? "U")}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-semibold">
-                  {(user.user_metadata?.full_name as string) || user.email?.split("@")[0]}
-                </p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-              </div>
-            </div>
-            <Link
-              href="/settings"
-              className="inline-flex items-center justify-center w-full rounded-xl border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
-            >
-              {s.accountSettings}
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div>
-              <Label htmlFor="forum-login-email" className="text-xs">
-                {s.email}
-              </Label>
-              <Input
-                id="forum-login-email"
-                placeholder="you@example.com"
-                className="rounded-xl mt-1"
-                disabled
-              />
-            </div>
-            <Button className="w-full rounded-xl gap-2" onClick={navigateToLogin}>
-              <LogIn className="w-4 h-4" />
-              {s.signInParticipate}
-            </Button>
-          </div>
-        )}
-      </div>
-
       <div className={`${FORUM_STATS_CARD_CLASS} rounded-2xl p-5 shadow-sm`}>
         <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
           <Users className="w-4 h-4" />
