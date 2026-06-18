@@ -270,7 +270,10 @@ INSERT INTO pets (
   vaccinated,
   neutered,
   status,
-  created_by
+  created_by,
+  poster_name,
+  poster_email,
+  poster_phone
 ) VALUES
   (
     '33333333-3333-4333-8333-111111111111',
@@ -286,7 +289,10 @@ INSERT INTO pets (
     true,
     true,
     'available',
-    'seed@saudipetsitters.com'
+    'seed@saudipetsitters.com',
+    'Layla Al-Harbi',
+    'layla@example.com',
+    '+966-55-440-1188'
   ),
   (
     '33333333-3333-4333-8333-222222222222',
@@ -302,7 +308,10 @@ INSERT INTO pets (
     true,
     true,
     'available',
-    'seed@saudipetsitters.com'
+    'seed@saudipetsitters.com',
+    'Omar Khalid',
+    'omar@example.com',
+    '+966-56-220-7744'
   ),
   (
     '33333333-3333-4333-8333-333333333333',
@@ -318,7 +327,10 @@ INSERT INTO pets (
     true,
     false,
     'available',
-    'seed@saudipetsitters.com'
+    'seed@saudipetsitters.com',
+    'Sara Mansour',
+    'sara@example.com',
+    '+966-50-913-2266'
   ),
   (
     '33333333-3333-4333-8333-444444444444',
@@ -334,7 +346,10 @@ INSERT INTO pets (
     false,
     false,
     'available',
-    'seed@saudipetsitters.com'
+    'seed@saudipetsitters.com',
+    'Fahad Al-Otaibi',
+    'fahad@example.com',
+    '+966-53-771-9050'
   ),
   (
     '33333333-3333-4333-8333-555555555555',
@@ -350,7 +365,10 @@ INSERT INTO pets (
     true,
     true,
     'available',
-    'seed@saudipetsitters.com'
+    'seed@saudipetsitters.com',
+    'Noura Saad',
+    'noura@example.com',
+    '+966-54-308-6611'
   ),
   (
     '33333333-3333-4333-8333-666666666666',
@@ -366,7 +384,10 @@ INSERT INTO pets (
     true,
     false,
     'available',
-    'seed@saudipetsitters.com'
+    'seed@saudipetsitters.com',
+    'Huda Zayed',
+    'huda@example.com',
+    '+966-58-122-4477'
   )
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
@@ -381,6 +402,9 @@ ON CONFLICT (id) DO UPDATE SET
   vaccinated = EXCLUDED.vaccinated,
   neutered = EXCLUDED.neutered,
   status = EXCLUDED.status,
+  poster_name = EXCLUDED.poster_name,
+  poster_email = EXCLUDED.poster_email,
+  poster_phone = EXCLUDED.poster_phone,
   updated_at = now();
 
 INSERT INTO partner_deals (
@@ -755,9 +779,6 @@ INSERT INTO lost_pets (
   image_url,
   last_seen_location,
   last_seen_date,
-  contact_name,
-  contact_phone,
-  contact_email,
   city,
   color,
   gender,
@@ -778,9 +799,6 @@ INSERT INTO lost_pets (
     'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=800&q=85',
     'Near Al Nakheel Mall',
     current_date - INTERVAL '2 days',
-    'Abeer',
-    '+966-55-111-2233',
-    'abeer@example.com',
     'Riyadh',
     'White and ginger',
     'male',
@@ -801,9 +819,6 @@ INSERT INTO lost_pets (
     'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&q=85',
     'Corniche walkway',
     current_date - INTERVAL '1 day',
-    'Yousef',
-    '+966-56-222-3344',
-    'yousef@example.com',
     'Jeddah',
     'Brown, black, and white',
     'male',
@@ -824,9 +839,6 @@ INSERT INTO lost_pets (
     'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=800&q=85',
     'Al Rakah',
     current_date - INTERVAL '3 days',
-    'Dana',
-    '+966-57-333-4455',
-    'dana@example.com',
     'Khobar',
     'Orange',
     'female',
@@ -846,9 +858,6 @@ ON CONFLICT (id) DO UPDATE SET
   image_url = EXCLUDED.image_url,
   last_seen_location = EXCLUDED.last_seen_location,
   last_seen_date = EXCLUDED.last_seen_date,
-  contact_name = EXCLUDED.contact_name,
-  contact_phone = EXCLUDED.contact_phone,
-  contact_email = EXCLUDED.contact_email,
   city = EXCLUDED.city,
   color = EXCLUDED.color,
   gender = EXCLUDED.gender,

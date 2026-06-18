@@ -121,7 +121,7 @@ function LostPetRow({
   onDelete: () => void;
 }) {
   const status = String(report.status ?? "lost");
-  const contact = [report.contact_name, report.contact_phone].filter(Boolean).map(String).join(" · ");
+  const contact = [report.owner_name, report.owner_phone].filter(Boolean).map(String).join(" · ");
 
   return (
     <div className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +34,9 @@ const EMPTY = {
   location: "",
   vaccinated: false,
   neutered: false,
+  poster_name: "",
+  poster_email: "",
+  poster_phone: "",
 };
 
 export default function ListPetDialog({
@@ -49,6 +52,19 @@ export default function ListPetDialog({
   const { toast } = useToast();
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open || !user) return;
+    setForm((f) => ({
+      ...f,
+      poster_name:
+        f.poster_name ||
+        (user.user_metadata?.full_name as string | undefined) ||
+        "",
+      poster_email: f.poster_email || user.email || "",
+      poster_phone: f.poster_phone || user.phone || "",
+    }));
+  }, [open, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,6 +174,26 @@ export default function ListPetDialog({
             <div className="flex items-center gap-2">
               <Checkbox checked={form.neutered} onCheckedChange={(v) => setForm((f) => ({ ...f, neutered: Boolean(v) }))} />
               <Label>Neutered</Label>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border p-4 space-y-3">
+            <p className="text-sm font-medium text-foreground">Your contact details</p>
+            <p className="text-xs text-muted-foreground">
+              Shown to adopters so they can reach you directly.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <Label>Name</Label>
+                <Input value={form.poster_name} onChange={(e) => setForm((f) => ({ ...f, poster_name: e.target.value }))} className="rounded-xl mt-1" />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input type="email" value={form.poster_email} onChange={(e) => setForm((f) => ({ ...f, poster_email: e.target.value }))} className="rounded-xl mt-1" />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input value={form.poster_phone} onChange={(e) => setForm((f) => ({ ...f, poster_phone: e.target.value }))} className="rounded-xl mt-1" />
+              </div>
             </div>
           </div>
           <Button type="submit" disabled={saving} className="w-full rounded-xl bg-primary hover:bg-primary/90">

@@ -17,9 +17,9 @@ export const LOST_PET_FIELDS: AdminRecordField[] = [
     type: "number",
     placeholder: "Optional",
   },
-  { key: "contact_name", label: "Contact Name" },
-  { key: "contact_phone", label: "Contact Phone" },
-  { key: "contact_email", label: "Contact Email" },
+  { key: "owner_name", label: "Owner Name" },
+  { key: "owner_phone", label: "Owner Phone" },
+  { key: "owner_email", label: "Owner Email" },
   { key: "status", label: "Status", type: "select", options: LOST_PET_STATUSES },
   { key: "created_by", label: "Created By", viewOnly: true },
 ];

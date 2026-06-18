@@ -219,9 +219,9 @@ export default function AdminLostPetDetail({ reportId }: { reportId: string }) {
               <h2 className="font-heading text-sm font-semibold text-foreground">Contact</h2>
             </div>
             <div className="px-5 py-4 space-y-5">
-              <Fact icon={User} label="Name" value={report.contact_name} />
-              <Fact icon={Phone} label="Phone" value={report.contact_phone} />
-              <Fact icon={Mail} label="Email" value={report.contact_email} />
+              <Fact icon={User} label="Name" value={report.owner_name} />
+              <Fact icon={Phone} label="Phone" value={report.owner_phone} />
+              <Fact icon={Mail} label="Email" value={report.owner_email} />
             </div>
           </div>
         </div>

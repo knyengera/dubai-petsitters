@@ -2,30 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Calendar, Eye } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { lostPetStatus } from "@/lib/ui/status-styles";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
-
-const petImageFallbacks: Record<string, string[]> = {
-  dog: [
-    "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&h=450&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600&h=450&fit=crop&q=80",
-  ],
-  cat: [
-    "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=600&h=450&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=600&h=450&fit=crop&q=80",
-  ],
-  bird: [
-    "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=600&h=450&fit=crop&q=80",
-  ],
-  rabbit: [
-    "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=600&h=450&fit=crop&q=80",
-  ],
-  other: [
-    "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=600&h=450&fit=crop&q=80",
-  ],
-};
+import { getSpeciesFallback, getStoredImageUrl, type LostPet } from "@/components/lost-pets/pet-images";
 
 const STATUS_LABELS: Record<
   string,
@@ -36,39 +18,13 @@ const STATUS_LABELS: Record<
   reunited: { en: "Reunited", ar: "عاد" },
 };
 
-type LostPet = {
-  id: string;
-  pet_name?: string;
-  species?: string;
-  breed?: string;
-  image_url?: string | null;
-  status?: string;
-  city?: string;
-  last_seen_location?: string;
-  last_seen_date?: string;
-  description?: string;
-  owner_phone?: string;
-  reward_offered?: number | string | null;
-};
-
-function getSpeciesFallback(pet: LostPet) {
-  const species = pet.species ?? "other";
-  const fallbacks = petImageFallbacks[species] ?? petImageFallbacks.other;
-  const index =
-    Math.abs(
-      String(pet.id)
-        .split("")
-        .reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    ) % fallbacks.length;
-  return fallbacks[index];
-}
-
-function getStoredImageUrl(pet: LostPet) {
-  const url = pet.image_url;
-  return typeof url === "string" && url.trim().length > 0 ? url.trim() : null;
-}
-
-export default function LostPetCard({ pet }: { pet: LostPet }) {
+export default function LostPetCard({
+  pet,
+  onView,
+}: {
+  pet: LostPet;
+  onView?: (pet: LostPet) => void;
+}) {
   const { t } = useLanguage();
   const storedUrl = useMemo(() => getStoredImageUrl(pet), [pet.image_url]);
   const speciesFallback = useMemo(() => getSpeciesFallback(pet), [pet]);
@@ -154,15 +110,14 @@ export default function LostPetCard({ pet }: { pet: LostPet }) {
           <div className="flex-1" />
         )}
 
-        {pet.owner_phone ? (
-          <a
-            href={`tel:${pet.owner_phone}`}
-            className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-2.5 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90"
-          >
-            <Phone className="w-4 h-4 me-2" />
-            {t("Contact Owner", "تواصل مع المالك")}
-          </a>
-        ) : null}
+        <Button
+          variant="outline"
+          onClick={() => onView?.(pet)}
+          className="w-full rounded-xl gap-1.5"
+        >
+          <Eye className="w-4 h-4" />
+          {t("View details", "عرض التفاصيل")}
+        </Button>
       </div>
     </div>
   );

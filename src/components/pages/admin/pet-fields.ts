@@ -16,5 +16,8 @@ export const PET_FIELDS: AdminRecordField[] = [
   { key: "vaccinated", label: "Vaccinated", type: "checkbox" },
   { key: "neutered", label: "Neutered", type: "checkbox" },
   { key: "status", label: "Status", type: "select", options: PET_STATUSES },
+  { key: "poster_name", label: "Poster Name" },
+  { key: "poster_phone", label: "Poster Phone" },
+  { key: "poster_email", label: "Poster Email" },
   { key: "created_by", label: "Listed By" },
 ];

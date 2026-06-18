@@ -106,7 +106,7 @@ export const ADMIN_LIST_CONFIG: Partial<Record<AdminTable, AdminListConfig>> = {
     ],
   },
   [ADMIN_TABLES.lost_pets]: {
-    searchColumns: ["pet_name", "breed", "last_seen_location", "contact_name"],
+    searchColumns: ["pet_name", "breed", "last_seen_location", "owner_name"],
     filters: [
       {
         key: "status",
