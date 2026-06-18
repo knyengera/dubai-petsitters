@@ -7,10 +7,13 @@ import { entities } from '@/lib/data/entities';
 import { useQuery } from '@tanstack/react-query';
 import VetCard from '@/components/vets/VetCard';
 import VetFilters, { DEFAULT_VET_FILTERS, applyVetFilters } from '@/components/filters/VetFilters';
+import CityLinksBar from '@/components/seo/CityLinksBar';
 import { Stethoscope, Loader2, Megaphone } from 'lucide-react';
 
-export default function Vets() {
-  const [filters, setFilters] = useState(DEFAULT_VET_FILTERS);
+export default function Vets({ defaultCity }: { defaultCity?: string } = {}) {
+  const [filters, setFilters] = useState(
+    defaultCity ? { ...DEFAULT_VET_FILTERS, city: defaultCity } : DEFAULT_VET_FILTERS
+  );
 
   const { data: clinics = [], isLoading } = useQuery({
     queryKey: ['vet-clinics'],
@@ -27,6 +30,7 @@ export default function Vets() {
             <Megaphone className="w-4 h-4" /> Advertise Your Clinic
           </Button>
         </Link>
+        <CityLinksBar kind="vets" activeCity={defaultCity} />
         <VetFilters filters={filters} onChange={setFilters} />
         {!isLoading && (
           <p className="text-sm text-muted-foreground mb-6">{filtered.length} clinic{filtered.length !== 1 ? 's' : ''} found</p>

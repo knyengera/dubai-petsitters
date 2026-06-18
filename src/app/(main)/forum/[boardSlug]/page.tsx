@@ -1,45 +1,73 @@
-"use client";
-
-import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
-import { getForumBoardBySlug, getForumTopicById } from "@/lib/forum/actions";
-import ForumBoardPage from "@/components/pages/ForumBoardPage";
+import type { Metadata } from "next";
+import { getForumBoardBySlug } from "@/lib/forum/actions";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { JsonLd, breadcrumbSchema } from "@/lib/seo/json-ld";
+import ForumBoardRouteClient from "./ForumBoardRouteClient";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export default function ForumBoardRoute() {
-  const params = useParams();
-  const router = useRouter();
-  const boardSlug = String(params.boardSlug ?? "");
+type PageProps = {
+  params: Promise<{ boardSlug: string }>;
+};
 
-  useEffect(() => {
-    if (!boardSlug) return;
-    if (UUID_RE.test(boardSlug)) {
-      getForumTopicById(boardSlug).then((result) => {
-        if (result.ok && result.data?.board?.slug && result.data.slug) {
-          router.replace(`/forum/${result.data.board.slug}/${result.data.slug}`);
-        } else {
-          router.replace("/forum");
-        }
-      });
-      return;
-    }
-    getForumBoardBySlug(boardSlug).then((result) => {
-      if (result.ok && !result.data) {
-        router.replace("/forum");
-      }
-    });
-  }, [boardSlug, router]);
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { boardSlug } = await params;
 
   if (UUID_RE.test(boardSlug)) {
-    return (
-      <div className="flex justify-center py-40">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return buildPageMetadata({
+      title: "Community Forum",
+      description: "Saudi Petsitters pet owner community forum.",
+      path: "/forum",
+      noIndex: true,
+    });
   }
 
-  return <ForumBoardPage />;
+  const result = await getForumBoardBySlug(boardSlug);
+  const board = result.ok ? result.data : null;
+
+  if (!board) {
+    return buildPageMetadata({
+      title: "Forum Board",
+      description: "Browse discussions in the Saudi Petsitters community forum.",
+      path: `/forum/${boardSlug}`,
+      noIndex: true,
+    });
+  }
+
+  return buildPageMetadata({
+    title: `${board.title} — Pet Forum`,
+    description:
+      board.description ||
+      `Discussions about ${board.title} from pet owners across Saudi Arabia. Ask questions and share advice.`,
+    path: `/forum/${board.slug}`,
+    keywords: [
+      `${board.title} pet forum`,
+      "pet owners community Saudi Arabia",
+    ],
+  });
+}
+
+export default async function Page({ params }: PageProps) {
+  const { boardSlug } = await params;
+  const isUuid = UUID_RE.test(boardSlug);
+  const result = isUuid ? null : await getForumBoardBySlug(boardSlug);
+  const board = result?.ok ? result.data : null;
+
+  return (
+    <>
+      {board && (
+        <JsonLd
+          data={breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Forum", path: "/forum" },
+            { name: board.title, path: `/forum/${board.slug}` },
+          ])}
+        />
+      )}
+      <ForumBoardRouteClient />
+    </>
+  );
 }

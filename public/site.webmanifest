@@ -1,6 +1,8 @@
 {
   "name": "Saudi Petsitters",
   "short_name": "Petsitters",
+  "description": "Saudi Arabia's trusted pet care community — pet sitting, boarding, vets, and adoption.",
+  "start_url": "/",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

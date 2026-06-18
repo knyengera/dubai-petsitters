@@ -9,11 +9,14 @@ import HostDetailModal from '@/components/hosts/HostDetailModal';
 import { Home, Loader2 } from 'lucide-react';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import HostFilters, { DEFAULT_HOST_FILTERS, applyHostFilters } from '@/components/filters/HostFilters';
+import CityLinksBar from '@/components/seo/CityLinksBar';
 
 
 
-export default function Hosts() {
-  const [filters, setFilters] = useState(DEFAULT_HOST_FILTERS);
+export default function Hosts({ defaultCity }: { defaultCity?: string } = {}) {
+  const [filters, setFilters] = useState(
+    defaultCity ? { ...DEFAULT_HOST_FILTERS, city: defaultCity } : DEFAULT_HOST_FILTERS
+  );
   const [selectedHost, setSelectedHost] = useState(null);
 
   const { data: hosts = [], isLoading, refetch } = useQuery({
@@ -27,6 +30,7 @@ export default function Hosts() {
     <div className="min-h-screen bg-background">
       <PullToRefresh onRefresh={refetch}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <CityLinksBar kind="hosts" activeCity={defaultCity} />
         <HostFilters filters={filters} onChange={setFilters} />
 
         {!isLoading && (
