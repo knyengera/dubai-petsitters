@@ -23,6 +23,7 @@ import { adminGet, adminUpdate, adminDelete } from "@/lib/admin/actions";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { useToast } from "@/components/ui/use-toast";
 import { LOST_PET_FIELDS, LOST_PET_STATUSES } from "@/components/pages/admin/lost-pet-fields";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 const STATUS_VARIANTS: Record<string, string> = {
   lost: "bg-destructive/10 text-destructive ring-destructive/20",
@@ -201,6 +202,14 @@ export default function AdminLostPetDetail({ reportId }: { reportId: string }) {
           <div className="px-1 grid grid-cols-2 gap-x-8 gap-y-5">
             <Fact icon={MapPin} label="Last seen location" value={report.last_seen_location} />
             <Fact icon={CalendarDays} label="Last seen date" value={report.last_seen_date} />
+            <Fact
+              label="Reward"
+              value={
+                report.reward_offered
+                  ? `${DEFAULT_CURRENCY} ${report.reward_offered}`
+                  : null
+              }
+            />
           </div>
         </div>
 

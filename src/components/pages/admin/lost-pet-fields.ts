@@ -1,4 +1,5 @@
 import type { AdminRecordField } from "@/components/admin/AdminRecordDialogs";
+import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 export const LOST_PET_STATUSES = ["lost", "found", "reunited"];
 
@@ -10,6 +11,12 @@ export const LOST_PET_FIELDS: AdminRecordField[] = [
   { key: "image_url", label: "Photo", type: "image", hideInView: true, uploadCategory: "lost-pets" },
   { key: "last_seen_location", label: "Last Seen Location" },
   { key: "last_seen_date", label: "Last Seen Date", type: "date" },
+  {
+    key: "reward_offered",
+    label: `Reward (${DEFAULT_CURRENCY})`,
+    type: "number",
+    placeholder: "Optional",
+  },
   { key: "contact_name", label: "Contact Name" },
   { key: "contact_phone", label: "Contact Phone" },
   { key: "contact_email", label: "Contact Email" },
