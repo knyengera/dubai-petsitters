@@ -21,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
           "/host-earnings",
           "/host-profile/",
           "/become-host",
+          "/become-partner",
           "/ai-chat",
           "/payments/",
           "/login",

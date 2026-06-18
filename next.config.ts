@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   redirects: async () => [
     {
       source: "/vet-advertise",
-      destination: "/partners?type=vet-clinics",
+      destination: "/become-partner?type=vet-clinics",
       permanent: true,
     },
   ],

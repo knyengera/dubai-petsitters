@@ -17,7 +17,8 @@ const EXACT_TITLES: Record<string, string> = {
   "/travel": "Travel Compliance",
   "/lost-pets": "Lost Pets",
   "/become-host": "Become a Host",
-  "/partners": "Partners & Advertise",
+  "/become-partner": "Become a Partner",
+  "/partners": "Partners",
   "/messages": "Messages",
   "/notifications": "Notifications",
   "/host-calendar": "Host Calendar",
@@ -34,6 +35,7 @@ const PATTERN_TITLES = [
   { pattern: /^\/blog\/.+/, title: "Article" },
   { pattern: /^\/hosts\/.+/, title: "Host Profile" },
   { pattern: /^\/vets\/.+/, title: "Vet Profile" },
+  { pattern: /^\/partners\/.+/, title: "Partner Profile" },
   { pattern: /^\/forum\/.+/, title: "Forum Thread" },
   { pattern: /^\/pets\/.+\/health/, title: "Pet Health" },
 ];

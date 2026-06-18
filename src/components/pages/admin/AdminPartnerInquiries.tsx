@@ -81,7 +81,7 @@ export default function AdminPartnerInquiries() {
     <div className="pb-10">
       <AdminPageHeader
         title="Partner Inquiries"
-        description="Review partnership and advertising inquiries from /partners."
+        description="Review partnership and advertising inquiries from /become-partner."
       />
       <AdminFilterBar
         search={search}

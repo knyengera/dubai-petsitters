@@ -7,8 +7,8 @@ export default function PartnerPaymentSuccessPageClient() {
     <PaymentSuccessPage
       title="Payment submitted"
       description="Thank you! Your advertising plan will be activated once payment is confirmed."
-      backHref="/partners"
-      backLabel="Back to partners"
+      backHref="/become-partner"
+      backLabel="Back to advertising"
     />
   );
 }

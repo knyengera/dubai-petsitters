@@ -24,6 +24,17 @@ export type VetSeo = {
   updated_at: string | null;
 };
 
+export type PartnerSeo = {
+  id: string;
+  name: string | null;
+  city: string | null;
+  address: string | null;
+  business_type: string | null;
+  image_url: string | null;
+  rating: number | null;
+  updated_at: string | null;
+};
+
 export type PetSeo = {
   id: string;
   name: string | null;
@@ -211,6 +222,33 @@ export async function getPublicVetForSeo(id: string): Promise<VetSeo | null> {
         typeof row.emergency_available === "boolean"
           ? row.emergency_available
           : null,
+      updated_at: asString(row.updated_at),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getPublicPartnerForSeo(
+  id: string
+): Promise<PartnerSeo | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("vet_clinics")
+      .select("id, name, city, address, business_type, image_url, rating, updated_at")
+      .eq("id", id)
+      .maybeSingle();
+    if (error || !data) return null;
+    const row = data as Record<string, unknown>;
+    return {
+      id: String(row.id),
+      name: asString(row.name),
+      city: asString(row.city),
+      address: asString(row.address),
+      business_type: asString(row.business_type),
+      image_url: asString(row.image_url),
+      rating: asNumber(row.rating),
       updated_at: asString(row.updated_at),
     };
   } catch {

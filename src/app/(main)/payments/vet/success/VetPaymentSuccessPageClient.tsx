@@ -7,7 +7,7 @@ export default function VetPaymentSuccessPageClient() {
     <PaymentSuccessPage
       title="Subscription payment confirmed"
       description="Your vet clinic subscription will be activated shortly."
-      backHref="/partners?type=vet-clinics"
+      backHref="/become-partner?type=vet-clinics"
       backLabel="Back to vet advertising"
     />
   );

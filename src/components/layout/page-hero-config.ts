@@ -81,6 +81,12 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
     imageAlt: DEFAULT_ALT,
   },
   "/partners": {
+    title: "Our Partners",
+    subtitle:
+      "Discover trusted pet shops, groomers, trainers, breeders, and more across Saudi Arabia.",
+    imageAlt: DEFAULT_ALT,
+  },
+  "/become-partner": {
     title: "Grow Your Pet Business",
     subtitle:
       "Advertise to Saudi Arabia's most engaged community of pet owners.",

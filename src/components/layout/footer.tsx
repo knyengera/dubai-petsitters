@@ -7,7 +7,10 @@ import { useLanguage } from "@/lib/language-context";
 
 const serviceLinks: NavLinkItem[] = [
   ...PUBLIC_NAV_LINKS.filter(
-    (link) => link.path !== "/blog" && link.path !== "/forum"
+    (link) =>
+      link.path !== "/blog" &&
+      link.path !== "/forum" &&
+      link.path !== "/partners"
   ),
   { labelEn: "Lost Pets", labelAr: "الحيوانات المفقودة", path: "/lost-pets" },
   { labelEn: "Travel Care", labelAr: "رعاية السفر", path: "/travel" },
@@ -15,7 +18,7 @@ const serviceLinks: NavLinkItem[] = [
 
 const companyLinks: NavLinkItem[] = [
   { labelEn: "About Us", labelAr: "من نحن", path: "/about" },
-  { labelEn: "Partners", labelAr: "الشركاء", path: "/partners" },
+  { labelEn: "Become a Partner", labelAr: "كن شريكاً", path: "/become-partner" },
   { labelEn: "Blog", labelAr: "المدونة", path: "/blog" },
   { labelEn: "Forum", labelAr: "المنتدى", path: "/forum" },
 ];

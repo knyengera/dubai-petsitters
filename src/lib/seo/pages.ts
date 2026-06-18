@@ -155,6 +155,19 @@ export const PAGE_SEO: Record<string, PageSeo> = {
   },
   "/partners": {
     path: "/partners",
+    title: "Pet Business Partners in Saudi Arabia | Shops, Groomers & More",
+    description:
+      "Discover trusted pet businesses across Saudi Arabia — pet shops, groomers, trainers, breeders, insurance, and more. Browse partners by city and service.",
+    keywords: [
+      "pet business directory Saudi Arabia",
+      "pet shop Riyadh",
+      "pet groomer Jeddah",
+      "dog trainer Saudi Arabia",
+      "pet insurance Saudi Arabia",
+    ],
+  },
+  "/become-partner": {
+    path: "/become-partner",
     title: "Advertise Your Pet Business in Saudi Arabia",
     description:
       "Reach Saudi Arabia's most engaged community of pet owners. Advertise your vet clinic, pet shop, grooming, training, or boarding business with Saudi Petsitters.",

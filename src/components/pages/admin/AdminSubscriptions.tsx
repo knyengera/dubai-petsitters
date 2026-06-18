@@ -60,7 +60,7 @@ export default function AdminSubscriptions() {
     <div className="pb-10">
       <AdminPageHeader
         title="Vet Subscriptions"
-        description="Legacy vet advertising subscriptions. New vet clinic sign-ups come through /partners."
+        description="Legacy vet advertising subscriptions. New vet clinic sign-ups come through /become-partner."
       />
       <AdminFilterBar
         search={search}

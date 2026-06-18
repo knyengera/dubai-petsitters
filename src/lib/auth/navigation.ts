@@ -25,6 +25,7 @@ export const PUBLIC_NAV_LINKS: NavLinkItem[] = [
   { labelEn: "Find a Vet", labelAr: "ابحث عن طبيب", path: "/vets" },
   { labelEn: "Adopt", labelAr: "تبني", path: "/adopt" },
   { labelEn: "Pet Hosting", labelAr: "استضافة", path: "/hosting" },
+  { labelEn: "Partners", labelAr: "الشركاء", path: "/partners" },
   { labelEn: "Blog", labelAr: "المدونة", path: "/blog" },
   { labelEn: "Forum", labelAr: "المنتدى", path: "/forum" },
 ];

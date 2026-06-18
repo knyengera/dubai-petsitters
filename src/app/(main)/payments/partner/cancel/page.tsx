@@ -4,8 +4,8 @@ export default function PartnerPaymentCancelPage() {
   return (
     <PaymentCancelPage
       title="Payment cancelled"
-      backHref="/partners"
-      backLabel="Back to partners"
+      backHref="/become-partner"
+      backLabel="Back to advertising"
     />
   );
 }
