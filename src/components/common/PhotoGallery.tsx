@@ -1,27 +1,75 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import { X, ChevronLeft, ChevronRight, Grid2x2, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+const AUTOPLAY_MS = 5000;
+
+function usePrefersReducedMotion() {
+  const subscribe = React.useCallback((callback) => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    media.addEventListener('change', callback);
+    return () => media.removeEventListener('change', callback);
+  }, []);
+
+  const getSnapshot = React.useCallback(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    []
+  );
+
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
+}
 
 export default function PhotoGallery({ photos = [], name = '' }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const overlayRef = useRef(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
-  if (!photos || photos.length === 0) return null;
+  const photoCount = photos?.length ?? 0;
 
-  const main = photos[0];
-  const thumbs = photos.slice(1, 5);
-
-  const openAt = (i) => { setCurrentIndex(i); setLightboxOpen(true); };
-  const prev = () => setCurrentIndex(i => (i - 1 + photos.length) % photos.length);
-  const next = () => setCurrentIndex(i => (i + 1) % photos.length);
+  const openAt = (i) => { setCurrentIndex(i); setIsPaused(false); setLightboxOpen(true); };
+  const prev = () => { setIsPaused(true); setCurrentIndex(i => (i - 1 + photoCount) % photoCount); };
+  const next = () => { setIsPaused(true); setCurrentIndex(i => (i + 1) % photoCount); };
+  const selectThumb = (i) => { setIsPaused(true); setCurrentIndex(i); };
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowLeft') prev();
     if (e.key === 'ArrowRight') next();
     if (e.key === 'Escape') setLightboxOpen(false);
   };
+
+  // Lock body scroll and focus the overlay for keyboard navigation while open.
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    overlayRef.current?.focus();
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [lightboxOpen]);
+
+  // Auto-advance once through all photos, then stop on the last image.
+  const canAutoplay =
+    lightboxOpen &&
+    !isPaused &&
+    !prefersReducedMotion &&
+    photoCount > 1 &&
+    currentIndex < photoCount - 1;
+
+  useEffect(() => {
+    if (!canAutoplay) return;
+    const timer = window.setInterval(() => {
+      setCurrentIndex(i => Math.min(i + 1, photoCount - 1));
+    }, AUTOPLAY_MS);
+    return () => window.clearInterval(timer);
+  }, [canAutoplay, photoCount]);
+
+  if (!photos || photos.length === 0) return null;
+
+  const main = photos[0];
+  const thumbs = photos.slice(1, 5);
 
   return (
     <>
@@ -73,10 +121,12 @@ export default function PhotoGallery({ photos = [], name = '' }) {
       {/* Lightbox */}
       {lightboxOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 flex flex-col"
+          ref={overlayRef}
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col outline-none"
           tabIndex={0}
           onKeyDown={handleKeyDown}
-          autoFocus
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
         >
           {/* Top bar */}
           <div className="flex items-center justify-between px-5 py-4">
@@ -88,19 +138,33 @@ export default function PhotoGallery({ photos = [], name = '' }) {
           </div>
 
           {/* Main image */}
-          <div className="flex-1 flex items-center justify-center px-4 relative">
-            <button onClick={prev} className="absolute left-4 bg-white/10 hover:bg-white/25 text-white rounded-full p-2 transition-colors">
-              <ChevronLeft className="w-6 h-6" />
-            </button>
+          <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center px-16 relative">
             <img
               src={photos[currentIndex]}
               alt={`${name} ${currentIndex + 1}`}
-              className="max-h-full max-w-full object-contain rounded-xl"
+              className="max-h-full max-w-full object-contain"
             />
-            <button onClick={next} className="absolute right-4 bg-white/10 hover:bg-white/25 text-white rounded-full p-2 transition-colors">
-              <ChevronRight className="w-6 h-6" />
-            </button>
           </div>
+
+          {/* Navigation — fixed to viewport center, always visible */}
+          {photos.length > 1 && (
+            <>
+              <button
+                onClick={prev}
+                aria-label="Previous photo"
+                className="fixed left-4 top-1/2 -translate-y-1/2 z-[60] bg-black/50 hover:bg-black/70 text-white rounded-full p-3 backdrop-blur-sm transition-colors"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={next}
+                aria-label="Next photo"
+                className="fixed right-4 top-1/2 -translate-y-1/2 z-[60] bg-black/50 hover:bg-black/70 text-white rounded-full p-3 backdrop-blur-sm transition-colors"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
 
           {/* Thumbnails strip */}
           {photos.length > 1 && (
@@ -108,7 +172,7 @@ export default function PhotoGallery({ photos = [], name = '' }) {
               {photos.map((img, i) => (
                 <div
                   key={i}
-                  onClick={() => setCurrentIndex(i)}
+                  onClick={() => selectThumb(i)}
                   className={`w-16 h-12 shrink-0 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${i === currentIndex ? 'border-white' : 'border-transparent opacity-60 hover:opacity-90'}`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
