@@ -148,13 +148,13 @@ export default function AdminPartnerDeals() {
       <AdminPagination page={page} total={total} pageSize={pageSize} onPageChange={setPage} />
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-lg rounded-2xl">
+        <DialogContent className="w-[min(820px,calc(100vw-2rem))] max-w-none sm:max-w-none rounded-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Partner Deal</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSave} className="space-y-4">
-            <div><Label>Title *</Label><Input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="rounded-xl mt-1" /></div>
-            <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="rounded-xl mt-1" /></div>
+          <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2"><Label>Title *</Label><Input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="rounded-xl mt-1" /></div>
+            <div className="sm:col-span-2"><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="rounded-xl mt-1" /></div>
             <div><Label>Partner</Label><Input value={form.partner_name} onChange={(e) => setForm((f) => ({ ...f, partner_name: e.target.value }))} className="rounded-xl mt-1" /></div>
             <div>
               <Label className="mb-1 block">Partner Type</Label>
@@ -171,7 +171,8 @@ export default function AdminPartnerDeals() {
             <div><Label>Discount Label</Label><Input value={form.discount_label} onChange={(e) => setForm((f) => ({ ...f, discount_label: e.target.value }))} className="rounded-xl mt-1" placeholder="e.g. 20% OFF" /></div>
             <div><Label>Promo Code</Label><Input value={form.discount_code} onChange={(e) => setForm((f) => ({ ...f, discount_code: e.target.value }))} className="rounded-xl mt-1" placeholder="e.g. PETSITTER20" /></div>
             <div><Label>City</Label><Input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} className="rounded-xl mt-1" /></div>
-            <div>
+            <div className="sm:col-span-2"><Label>Link URL</Label><Input value={form.link_url} onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))} className="rounded-xl mt-1" /></div>
+            <div className="sm:col-span-2">
               <Label className="mb-2 block">Images</Label>
               <GalleryImageUpload
                 coverUrl={form.image_url}
@@ -181,8 +182,7 @@ export default function AdminPartnerDeals() {
                 label="Upload Deal Photos"
               />
             </div>
-            <div><Label>Link URL</Label><Input value={form.link_url} onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))} className="rounded-xl mt-1" /></div>
-            <Button type="submit" disabled={saving} className="w-full rounded-xl">
+            <Button type="submit" disabled={saving} className="sm:col-span-2 w-full rounded-xl">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Deal"}
             </Button>
           </form>
