@@ -32,7 +32,7 @@ const emptyForm = {
   color: "",
   gender: "unknown",
   age: "",
-  photo_url: "",
+  image_url: "",
   last_seen_location: "",
   last_seen_date: "",
   city: "",
@@ -198,9 +198,9 @@ export default function LostPets() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex justify-center">
                   <ImageUpload
-                    value={form.photo_url}
+                    value={form.image_url}
                     onChange={(url) =>
-                      setForm((f) => ({ ...f, photo_url: url }))
+                      setForm((f) => ({ ...f, image_url: url }))
                     }
                     category="lost-pets"
                     label="Upload Pet Photo"

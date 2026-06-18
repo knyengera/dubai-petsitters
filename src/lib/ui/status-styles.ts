@@ -38,7 +38,7 @@ export const bookingStatus = {
 } as const;
 
 export const lostPetStatus = {
-  lost: statusBadge.destructive,
+  lost: statusBadge.success,
   found: statusBadge.success,
   reunited: statusBadge.info,
 } as const;

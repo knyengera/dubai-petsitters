@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Calendar } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
@@ -8,18 +9,18 @@ import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 
 const petImageFallbacks: Record<string, string[]> = {
   dog: [
-    "https://images.unsplash.com/photo-1534227572793-a440d8a6d3ca?w=600&h=450&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1577720643272-265f434f0c41?w=600&h=450&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&h=450&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600&h=450&fit=crop&q=80",
   ],
   cat: [
-    "https://images.unsplash.com/photo-1513360371669-4a0eb3e4fedd?w=600&h=450&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=600&h=450&fit=crop&q=80",
     "https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=600&h=450&fit=crop&q=80",
   ],
   bird: [
     "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=600&h=450&fit=crop&q=80",
   ],
   rabbit: [
-    "https://images.unsplash.com/photo-1585110396000-c9ffd4d4b3f0?w=600&h=450&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=600&h=450&fit=crop&q=80",
   ],
   other: [
     "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=600&h=450&fit=crop&q=80",
@@ -40,7 +41,6 @@ type LostPet = {
   pet_name?: string;
   species?: string;
   breed?: string;
-  photo_url?: string | null;
   image_url?: string | null;
   status?: string;
   city?: string;
@@ -51,9 +51,7 @@ type LostPet = {
   reward_offered?: number | string | null;
 };
 
-function getImageUrl(pet: LostPet) {
-  if (pet.photo_url) return pet.photo_url;
-  if (pet.image_url) return pet.image_url;
+function getSpeciesFallback(pet: LostPet) {
   const species = pet.species ?? "other";
   const fallbacks = petImageFallbacks[species] ?? petImageFallbacks.other;
   const index =
@@ -65,9 +63,26 @@ function getImageUrl(pet: LostPet) {
   return fallbacks[index];
 }
 
+function getStoredImageUrl(pet: LostPet) {
+  const url = pet.image_url;
+  return typeof url === "string" && url.trim().length > 0 ? url.trim() : null;
+}
+
 export default function LostPetCard({ pet }: { pet: LostPet }) {
   const { t } = useLanguage();
-  const imageUrl = getImageUrl(pet);
+  const storedUrl = useMemo(() => getStoredImageUrl(pet), [pet.image_url]);
+  const speciesFallback = useMemo(() => getSpeciesFallback(pet), [pet]);
+  const [imageUrl, setImageUrl] = useState(storedUrl ?? speciesFallback);
+
+  useEffect(() => {
+    setImageUrl(storedUrl ?? speciesFallback);
+  }, [pet.id, storedUrl, speciesFallback]);
+
+  const handleImageError = () => {
+    if (imageUrl !== speciesFallback) {
+      setImageUrl(speciesFallback);
+    }
+  };
   const status = pet.status ?? "lost";
   const statusClass =
     lostPetStatus[status as keyof typeof lostPetStatus] ?? lostPetStatus.lost;
@@ -79,6 +94,7 @@ export default function LostPetCard({ pet }: { pet: LostPet }) {
           src={imageUrl}
           alt={pet.pet_name ?? "Lost pet"}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={handleImageError}
         />
         <Badge className="absolute top-3 left-3 bg-primary/90 text-primary-foreground capitalize">
           {pet.species ?? t("Pet", "حيوان")}
@@ -99,9 +115,9 @@ export default function LostPetCard({ pet }: { pet: LostPet }) {
             {pet.pet_name}
           </h3>
           {pet.reward_offered ? (
-            <span className="text-xs font-semibold text-warning shrink-0">
-              {DEFAULT_CURRENCY} {pet.reward_offered}
-            </span>
+            <Badge variant="warning" className="shrink-0">
+              {t("Reward", "مكافأة")} · {DEFAULT_CURRENCY} {pet.reward_offered}
+            </Badge>
           ) : null}
         </div>
 
