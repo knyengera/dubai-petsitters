@@ -6,10 +6,21 @@ export const metadata: Metadata = {
   title: "Saudi Petsitters",
   description:
     "Saudi Arabia's trusted pet care community — adoption, hosting, and veterinary resources.",
+  manifest: "/site.webmanifest",
   icons: {
-    icon: [{ url: "/logo-icon.png", type: "image/png" }],
-    shortcut: ["/logo-icon.png"],
-    apple: [{ url: "/logo-icon.png", type: "image/png" }],
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: [
+      {
+        url: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
   },
   openGraph: {
     title: "Saudi Petsitters",
