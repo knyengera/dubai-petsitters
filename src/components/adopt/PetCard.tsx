@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { MapPin, Heart, Shield, Eye } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
+import { MapPin, Heart, Shield } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { getSpeciesFallback } from '@/components/adopt/pet-images';
 
-export default function PetCard({ pet, onAdopt, onView }) {
+export default function PetCard({ pet }) {
   const speciesFallback = useMemo(() => getSpeciesFallback(pet), [pet]);
   const storedUrl =
     pet.image_url && String(pet.image_url).trim().length > 0
@@ -21,7 +23,10 @@ export default function PetCard({ pet, onAdopt, onView }) {
   const available = pet.status === 'available';
 
   return (
-    <div className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 group h-full flex flex-col">
+    <Link
+      href={`/adopt/${pet.id}`}
+      className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 group h-full flex flex-col"
+    >
       <div className="aspect-[4/3] relative overflow-hidden bg-muted">
         <img
           src={imageUrl}
@@ -69,24 +74,17 @@ export default function PetCard({ pet, onAdopt, onView }) {
         ) : (
           <div className="flex-1" />
         )}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => onView?.(pet)}
-            className="flex-1 rounded-xl gap-1.5"
-          >
-            <Eye className="w-4 h-4" /> Details
-          </Button>
-          <Button
-            onClick={() => onAdopt(pet)}
-            className="flex-1 rounded-xl bg-primary hover:bg-primary/90"
-            disabled={!available}
-          >
-            <Heart className="w-4 h-4 mr-1.5" />
-            {available ? 'Adopt' : 'N/A'}
-          </Button>
-        </div>
+        <span
+          className={cn(
+            buttonVariants({ variant: 'default' }),
+            'w-full rounded-xl',
+            !available && 'opacity-50'
+          )}
+        >
+          <Heart className="w-4 h-4 mr-1.5" />
+          {available ? 'View & adopt' : 'Not available'}
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { MapPin, Calendar, Eye } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/language-context";
 import { lostPetStatus } from "@/lib/ui/status-styles";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
@@ -18,13 +20,7 @@ const STATUS_LABELS: Record<
   reunited: { en: "Reunited", ar: "عاد" },
 };
 
-export default function LostPetCard({
-  pet,
-  onView,
-}: {
-  pet: LostPet;
-  onView?: (pet: LostPet) => void;
-}) {
+export default function LostPetCard({ pet }: { pet: LostPet }) {
   const { t } = useLanguage();
   const storedUrl = useMemo(() => getStoredImageUrl(pet), [pet.image_url]);
   const speciesFallback = useMemo(() => getSpeciesFallback(pet), [pet]);
@@ -44,7 +40,10 @@ export default function LostPetCard({
     lostPetStatus[status as keyof typeof lostPetStatus] ?? lostPetStatus.lost;
 
   return (
-    <div className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 group h-full flex flex-col">
+    <Link
+      href={`/lost-pets/${pet.id}`}
+      className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 group h-full flex flex-col"
+    >
       <div className="aspect-[4/3] relative overflow-hidden bg-muted">
         <img
           src={imageUrl}
@@ -110,15 +109,11 @@ export default function LostPetCard({
           <div className="flex-1" />
         )}
 
-        <Button
-          variant="outline"
-          onClick={() => onView?.(pet)}
-          className="w-full rounded-xl gap-1.5"
-        >
+        <span className={cn(buttonVariants({ variant: "outline" }), "w-full rounded-xl gap-1.5")}>
           <Eye className="w-4 h-4" />
           {t("View details", "عرض التفاصيل")}
-        </Button>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }

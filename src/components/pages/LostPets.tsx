@@ -11,8 +11,6 @@ import LostPetFilters, {
   type LostPetFiltersState,
 } from "@/components/lost-pets/LostPetFilters";
 import LostPetCard from "@/components/lost-pets/LostPetCard";
-import LostPetDetailModal from "@/components/lost-pets/LostPetDetailModal";
-import type { LostPet } from "@/components/lost-pets/pet-images";
 import PullToRefresh from "@/components/common/PullToRefresh";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
 import { Button } from "@/components/ui/button";
@@ -50,7 +48,6 @@ export default function LostPets() {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
-  const [detailPet, setDetailPet] = useState<LostPet | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<LostPetFiltersState>({
@@ -160,7 +157,7 @@ export default function LostPets() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
                     >
-                      <LostPetCard pet={pet} onView={setDetailPet} />
+                      <LostPetCard pet={pet} />
                     </motion.div>
                   ))}
                 </div>
@@ -169,12 +166,6 @@ export default function LostPets() {
           </div>
         </div>
       </PullToRefresh>
-
-      <LostPetDetailModal
-        pet={detailPet}
-        open={!!detailPet}
-        onClose={() => setDetailPet(null)}
-      />
 
       <AnimatePresence>
         {showForm && (

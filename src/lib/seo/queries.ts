@@ -24,6 +24,32 @@ export type VetSeo = {
   updated_at: string | null;
 };
 
+export type PetSeo = {
+  id: string;
+  name: string | null;
+  species: string | null;
+  breed: string | null;
+  description: string | null;
+  city: string | null;
+  location: string | null;
+  image_url: string | null;
+  status: string | null;
+  updated_at: string | null;
+};
+
+export type LostPetSeo = {
+  id: string;
+  pet_name: string | null;
+  species: string | null;
+  breed: string | null;
+  description: string | null;
+  city: string | null;
+  last_seen_location: string | null;
+  image_url: string | null;
+  status: string | null;
+  updated_at: string | null;
+};
+
 export type SitemapRow = { id: string; updated_at: string | null };
 
 export type ForumTopicUrl = {
@@ -185,6 +211,66 @@ export async function getPublicVetForSeo(id: string): Promise<VetSeo | null> {
         typeof row.emergency_available === "boolean"
           ? row.emergency_available
           : null,
+      updated_at: asString(row.updated_at),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getPublicPetForSeo(id: string): Promise<PetSeo | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("pets")
+      .select(
+        "id, name, species, breed, description, location, image_url, status, updated_at"
+      )
+      .eq("id", id)
+      .maybeSingle();
+    if (error || !data) return null;
+    const row = data as Record<string, unknown>;
+    return {
+      id: String(row.id),
+      name: asString(row.name),
+      species: asString(row.species),
+      breed: asString(row.breed),
+      description: asString(row.description),
+      city: asString(row.location),
+      location: asString(row.location),
+      image_url: asString(row.image_url),
+      status: asString(row.status),
+      updated_at: asString(row.updated_at),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getPublicLostPetForSeo(
+  id: string
+): Promise<LostPetSeo | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("lost_pets")
+      .select(
+        "id, pet_name, species, breed, description, city, last_seen_location, image_url, status, updated_at"
+      )
+      .eq("id", id)
+      .maybeSingle();
+    if (error || !data) return null;
+    const row = data as Record<string, unknown>;
+    return {
+      id: String(row.id),
+      pet_name: asString(row.pet_name),
+      species: asString(row.species),
+      breed: asString(row.breed),
+      description: asString(row.description),
+      city: asString(row.city),
+      last_seen_location: asString(row.last_seen_location),
+      image_url: asString(row.image_url),
+      status: asString(row.status),
       updated_at: asString(row.updated_at),
     };
   } catch {

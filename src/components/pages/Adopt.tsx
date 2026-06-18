@@ -6,8 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import PetFilters from '@/components/adopt/PetFilters';
 import PetCard from '@/components/adopt/PetCard';
-import AdoptionModal from '@/components/adopt/AdoptionModal';
-import AdoptPetDetailModal from '@/components/adopt/AdoptPetDetailModal';
 import ListPetDialog from '@/components/adopt/ListPetDialog';
 import { PawPrint, Loader2, Plus } from 'lucide-react';
 import PullToRefresh from '@/components/common/PullToRefresh';
@@ -16,8 +14,6 @@ import { useAuth } from '@/lib/auth-context';
 
 export default function Adopt() {
   const [filters, setFilters] = useState({ search: '', species: 'all', gender: 'all', size: 'all' });
-  const [selectedPet, setSelectedPet] = useState(null);
-  const [detailPet, setDetailPet] = useState(null);
   const [showListDialog, setShowListDialog] = useState(false);
   const { user, navigateToLogin } = useAuth();
 
@@ -79,7 +75,7 @@ export default function Adopt() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <PetCard pet={pet} onAdopt={setSelectedPet} onView={setDetailPet} />
+                    <PetCard pet={pet} />
                   </motion.div>
                 ))}
               </div>
@@ -89,20 +85,6 @@ export default function Adopt() {
       </div>
 
       </PullToRefresh>
-      <AdoptPetDetailModal
-        pet={detailPet}
-        open={!!detailPet}
-        onClose={() => setDetailPet(null)}
-        onApply={(pet) => {
-          setDetailPet(null);
-          setSelectedPet(pet);
-        }}
-      />
-      <AdoptionModal
-        pet={selectedPet}
-        open={!!selectedPet}
-        onClose={() => setSelectedPet(null)}
-      />
       <ListPetDialog
         open={showListDialog}
         onClose={() => setShowListDialog(false)}

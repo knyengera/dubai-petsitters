@@ -249,6 +249,23 @@ const PAGE_HERO_PATTERNS: {
     },
   },
   {
+    pattern: /^\/adopt\/[^/]+$/,
+    config: {
+      title: "Adopt a Pet",
+      subtitle:
+        "Give a loving home to one of our animals. Browse available pets and submit an adoption application.",
+      imageAlt: DEFAULT_ALT,
+    },
+  },
+  {
+    pattern: /^\/lost-pets\/[^/]+$/,
+    config: {
+      title: "Lost & Found Pets",
+      subtitle: "Report & find missing pets in Saudi Arabia",
+      imageAlt: DEFAULT_ALT,
+    },
+  },
+  {
     pattern: /^\/blog\/[^/]+$/,
     config: {
       title: "Blog Article",
