@@ -12,8 +12,8 @@ const serviceLinks: NavLinkItem[] = [
       link.path !== "/forum" &&
       link.path !== "/partners"
   ),
+  { labelEn: "Deals", labelAr: "العروض", path: "/deals" },
   { labelEn: "Lost Pets", labelAr: "الحيوانات المفقودة", path: "/lost-pets" },
-  { labelEn: "Travel Care", labelAr: "رعاية السفر", path: "/travel" },
 ];
 
 const companyLinks: NavLinkItem[] = [
@@ -21,6 +21,7 @@ const companyLinks: NavLinkItem[] = [
   { labelEn: "Become a Partner", labelAr: "كن شريكاً", path: "/become-partner" },
   { labelEn: "Blog", labelAr: "المدونة", path: "/blog" },
   { labelEn: "Forum", labelAr: "المنتدى", path: "/forum" },
+  { labelEn: "Travel Care", labelAr: "رعاية السفر", path: "/travel" },
 ];
 
 const footerLinkClass =
