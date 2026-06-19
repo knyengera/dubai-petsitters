@@ -281,13 +281,18 @@ export default function HeroSlider() {
                 aria-selected={index === activeIndex}
                 aria-label={t(item.titleEn, item.titleAr)}
                 onClick={() => goTo(index)}
-                className={cn(
-                  "h-2.5 rounded-full transition-all duration-300",
-                  index === activeIndex
-                    ? "w-8 bg-primary"
-                    : "w-2.5 bg-white/40 hover:bg-white/60"
-                )}
-              />
+                className="group relative inline-flex min-h-0 min-w-0 items-center justify-center before:absolute before:-inset-3 before:content-['']"
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "block h-2.5 rounded-full transition-all duration-300",
+                    index === activeIndex
+                      ? "w-8 bg-primary"
+                      : "w-2.5 bg-white/40 group-hover:bg-white/60"
+                  )}
+                />
+              </button>
             ))}
           </div>
 
