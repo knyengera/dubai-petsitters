@@ -1,7 +1,6 @@
 import { getCityBySlug } from "@/lib/seo/cities";
 
-export const DEFAULT_PAGE_HERO_IMAGE =
-  "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1400&q=80";
+export const DEFAULT_PAGE_HERO_IMAGE = "/breadcrumb.webp";
 
 export type PageHeroConfig = {
   title: string;
