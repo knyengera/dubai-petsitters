@@ -43,7 +43,7 @@ type HeroSlide = {
 const heroSlides: HeroSlide[] = [
   {
     id: "hosting",
-    image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1600&q=80",
+    image: "/hosting.webp",
     imageAltEn: "Happy dog with pet sitter at home",
     imageAltAr: "كلب سعيد مع مربي حيوانات في المنزل",
     icon: Home,
@@ -57,7 +57,7 @@ const heroSlides: HeroSlide[] = [
   },
   {
     id: "vets",
-    image: "https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=1600&q=80",
+    image: "/vet.webp",
     imageAltEn: "Veterinarian caring for a pet",
     imageAltAr: "طبيب بيطري يعتني بحيوان أليف",
     icon: Stethoscope,
@@ -70,22 +70,8 @@ const heroSlides: HeroSlide[] = [
     href: "/vets",
   },
   {
-    id: "ai",
-    image: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=1600&q=80",
-    imageAltEn: "Pet owner using AI pet care assistant",
-    imageAltAr: "مالك حيوان أليف يستخدم مساعد الرعاية الذكي",
-    icon: Bot,
-    titleEn: "AI Pet Care Assistant",
-    titleAr: "مساعد رعاية الحيوانات الذكي",
-    descEn: "Feeding, travel, heat safety, and health guidance tailored for Saudi pet owners.",
-    descAr: "إرشادات التغذية والسفر والحرارة والصحة مصممة لأصحاب الحيوانات في المملكة.",
-    ctaEn: "Ask the Assistant",
-    ctaAr: "اسأل المساعد",
-    openAssistant: true,
-  },
-  {
     id: "adopt",
-    image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1600&q=80",
+    image: "/adoption.webp",
     imageAltEn: "Dogs playing together outdoors",
     imageAltAr: "كلاب تلعب معاً في الهواء الطلق",
     icon: Heart,
@@ -99,7 +85,7 @@ const heroSlides: HeroSlide[] = [
   },
   {
     id: "travel",
-    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&q=80",
+    image: "/travel.webp",
     imageAltEn: "Airplane window view for pet travel",
     imageAltAr: "منظر نافذة طائرة للسفر مع الحيوانات",
     icon: Plane,
@@ -113,7 +99,7 @@ const heroSlides: HeroSlide[] = [
   },
   {
     id: "lost-pets",
-    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=1600&q=80",
+    image: "/lost.webp",
     imageAltEn: "Cat looking for its owner",
     imageAltAr: "قطة تبحث عن مالكها",
     icon: MapPin,
