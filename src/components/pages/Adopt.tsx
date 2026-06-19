@@ -45,43 +45,44 @@ export default function Adopt() {
     <div className="min-h-screen bg-background">
       <PullToRefresh onRefresh={refetch}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex items-center justify-end mb-6">
+        <div className="flex flex-wrap gap-3 mb-8">
           <Button onClick={handleListClick} className="rounded-xl gap-2">
             <Plus className="w-4 h-4" /> List a Pet for Adoption
           </Button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <PetFilters filters={filters} setFilters={setFilters} />
-          </div>
 
-          <div>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : filteredPets.length === 0 ? (
-              <div className="text-center py-20">
-                <PawPrint className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No pets found</h3>
-                <p className="text-muted-foreground">Try adjusting your filters or check back later.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredPets.map((pet, i) => (
-                  <motion.div
-                    key={pet.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <PetCard pet={pet} />
-                  </motion.div>
-                ))}
-              </div>
-            )}
+        <PetFilters filters={filters} setFilters={setFilters} />
+
+        {!isLoading && (
+          <p className="text-sm text-muted-foreground mb-6">
+            {filteredPets.length} pet{filteredPets.length !== 1 ? 's' : ''} found
+          </p>
+        )}
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-        </div>
+        ) : filteredPets.length === 0 ? (
+          <div className="text-center py-20">
+            <PawPrint className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No pets found</h3>
+            <p className="text-muted-foreground">Try adjusting your filters or check back later.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredPets.map((pet, i) => (
+              <motion.div
+                key={pet.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <PetCard pet={pet} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       </PullToRefresh>

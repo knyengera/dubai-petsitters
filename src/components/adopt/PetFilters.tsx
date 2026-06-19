@@ -29,8 +29,8 @@ const sizeItems = {
 
 export default function PetFilters({ filters, setFilters }) {
   return (
-    <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
-      <div className="relative">
+    <div className="flex flex-col sm:flex-row gap-3 mb-8">
+      <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search pets..."
@@ -41,10 +41,10 @@ export default function PetFilters({ filters, setFilters }) {
       </div>
 
       <Select items={speciesItems} value={filters.species} onValueChange={(v) => setFilters(f => ({ ...f, species: v }))}>
-        <SelectTrigger className="h-11 w-full rounded-xl">
+        <SelectTrigger className="w-full sm:w-44 rounded-xl">
           <SelectValue placeholder="All Species" />
         </SelectTrigger>
-        <SelectContent align="start" alignItemWithTrigger={false} side="top" sideOffset={8}>
+        <SelectContent>
           <SelectItem value="all">All Species</SelectItem>
           <SelectItem value="dog">Dogs</SelectItem>
           <SelectItem value="cat">Cats</SelectItem>
@@ -57,10 +57,10 @@ export default function PetFilters({ filters, setFilters }) {
       </Select>
 
       <Select items={genderItems} value={filters.gender} onValueChange={(v) => setFilters(f => ({ ...f, gender: v }))}>
-        <SelectTrigger className="h-11 w-full rounded-xl">
+        <SelectTrigger className="w-full sm:w-44 rounded-xl">
           <SelectValue placeholder="Any Gender" />
         </SelectTrigger>
-        <SelectContent align="start" alignItemWithTrigger={false} side="top" sideOffset={8}>
+        <SelectContent>
           <SelectItem value="all">Any Gender</SelectItem>
           <SelectItem value="male">Male</SelectItem>
           <SelectItem value="female">Female</SelectItem>
@@ -68,10 +68,10 @@ export default function PetFilters({ filters, setFilters }) {
       </Select>
 
       <Select items={sizeItems} value={filters.size} onValueChange={(v) => setFilters(f => ({ ...f, size: v }))}>
-        <SelectTrigger className="h-11 w-full rounded-xl">
+        <SelectTrigger className="w-full sm:w-44 rounded-xl">
           <SelectValue placeholder="Any Size" />
         </SelectTrigger>
-        <SelectContent align="start" alignItemWithTrigger={false} side="top" sideOffset={8}>
+        <SelectContent>
           <SelectItem value="all">Any Size</SelectItem>
           <SelectItem value="small">Small</SelectItem>
           <SelectItem value="medium">Medium</SelectItem>
