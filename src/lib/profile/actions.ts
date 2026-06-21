@@ -21,7 +21,10 @@ export type ProfileDetailsInput = {
   id_document_path: string;
 };
 
-function validateProfileInput(input: ProfileDetailsInput): string | null {
+function validateProfileInput(
+  input: ProfileDetailsInput,
+  accountType: SignupAccountType
+): string | null {
   if (!input.full_name.trim()) return "Full name is required.";
   if (!input.city.trim()) return "City is required.";
   if (!input.date_of_birth) return "Date of birth is required.";
@@ -29,7 +32,10 @@ function validateProfileInput(input: ProfileDetailsInput): string | null {
   if (!input.id_type) return "ID type is required.";
   if (!input.id_number.trim()) return "ID number is required.";
   if (!input.avatar_url.trim()) return "Profile photo is required.";
-  if (!input.id_document_path.trim()) return "ID document upload is required.";
+  // Hosts verify their ID via Stripe Identity in a separate step.
+  if (accountType !== "host" && !input.id_document_path.trim()) {
+    return "ID document upload is required.";
+  }
 
   if (input.id_type === "national_id" && !validateNationalId(input.id_number)) {
     return "National ID must be exactly 10 digits.";
@@ -58,7 +64,7 @@ export async function getProfile(): Promise<ProfileRow | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version, signup_account_type"
+      "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, id_verification_status, id_verified_at, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version, signup_account_type"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -70,14 +76,23 @@ export async function getProfile(): Promise<ProfileRow | null> {
 export async function saveProfileDetails(
   input: ProfileDetailsInput
 ): Promise<{ success: true } | { success: false; error: string }> {
-  const validationError = validateProfileInput(input);
-  if (validationError) return { success: false, error: validationError };
-
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Not authenticated." };
+
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("signup_account_type")
+    .eq("id", user.id)
+    .maybeSingle();
+  const existingRow = existing as { signup_account_type: string | null } | null;
+  const accountType: SignupAccountType =
+    existingRow?.signup_account_type === "host" ? "host" : "client";
+
+  const validationError = validateProfileInput(input, accountType);
+  if (validationError) return { success: false, error: validationError };
 
   const profilePayload = {
     full_name: input.full_name.trim(),
@@ -93,6 +108,8 @@ export async function saveProfileDetails(
 
   const draftProfile: ProfileRow = {
     ...profilePayload,
+    id_verification_status: null,
+    id_verified_at: null,
     profile_completed_at: null,
     phone: null,
     phone_verified_at: null,
@@ -100,7 +117,7 @@ export async function saveProfileDetails(
     privacy_accepted_at: null,
     liability_waiver_accepted_at: null,
     legal_documents_version: null,
-    signup_account_type: null,
+    signup_account_type: accountType,
   };
 
   if (!hasProfileDetails(draftProfile)) {

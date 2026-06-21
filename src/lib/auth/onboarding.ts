@@ -16,6 +16,8 @@ export type ProfileRow = {
   id_number: string | null;
   avatar_url: string | null;
   id_document_path: string | null;
+  id_verification_status: string | null;
+  id_verified_at: string | null;
   profile_completed_at: string | null;
   phone_verified_at: string | null;
   phone: string | null;
@@ -46,16 +48,31 @@ export function isPhoneVerified(user: User | null): boolean {
 
 export function hasProfileDetails(profile: ProfileRow | null): boolean {
   if (!profile) return false;
-  return !!(
+  const baseDetailsComplete = !!(
     profile.full_name?.trim() &&
     profile.city?.trim() &&
     profile.date_of_birth &&
     profile.gender &&
     profile.id_type &&
     profile.id_number?.trim() &&
-    profile.avatar_url?.trim() &&
-    profile.id_document_path?.trim()
+    profile.avatar_url?.trim()
   );
+  if (!baseDetailsComplete) return false;
+
+  // Hosts verify their ID via Stripe Identity (separate step), so they don't
+  // upload a document here. Clients still provide an ID document file.
+  if (isHostSignup(profile)) return true;
+  return !!profile.id_document_path?.trim();
+}
+
+/** Hosts must pass Stripe Identity before their onboarding is considered done. */
+export function isIdentityVerified(profile: ProfileRow | null): boolean {
+  return profile?.id_verification_status === "verified";
+}
+
+/** Whether a host still needs to complete the identity verification step. */
+export function needsIdentityVerification(profile: ProfileRow | null): boolean {
+  return isHostSignup(profile) && !isIdentityVerified(profile);
 }
 
 export function isProfileComplete(profile: ProfileRow | null): boolean {
@@ -92,7 +109,7 @@ export function isOnboardingComplete(
 ): boolean {
   if (!isBaseOnboardingComplete(user, profile)) return false;
   if (isHostSignup(profile)) {
-    return options?.hasHostProfile === true;
+    return options?.hasHostProfile === true && isIdentityVerified(profile);
   }
   return true;
 }

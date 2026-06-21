@@ -10,6 +10,7 @@ import {
   Mail,
   Phone,
   Shield,
+  ShieldCheck,
   Upload,
   User,
 } from "lucide-react";
@@ -31,6 +32,7 @@ import {
   isHostSignup,
   isOnboardingComplete,
   isValidE164Phone,
+  needsIdentityVerification,
   resolvePostAuthRedirect,
   sanitizePhoneInput,
   toE164Phone,
@@ -55,13 +57,14 @@ import {
 import { uploadAppFile } from "@/lib/storage/upload";
 import { createClient } from "@/lib/supabase/client";
 import HostProfileFormFields from "@/components/host/HostProfileFormFields";
+import IdentityVerificationPanel from "@/components/profile/IdentityVerificationPanel";
 import {
   emptyHostProfileForm,
   hostFormToPayload,
 } from "@/lib/hosting/host-profile-form";
 import { entities } from "@/lib/data/entities";
 
-type Step = "legal" | "profile" | "email" | "phone" | "host";
+type Step = "legal" | "profile" | "identity" | "email" | "phone" | "host";
 
 const BASE_STEPS: { id: Step; label: string; icon: typeof User }[] = [
   { id: "legal", label: "Legal agreements", icon: FileText },
@@ -69,6 +72,12 @@ const BASE_STEPS: { id: Step; label: string; icon: typeof User }[] = [
   { id: "email", label: "Verify Email", icon: Mail },
   { id: "phone", label: "Verify Phone", icon: Phone },
 ];
+
+const IDENTITY_STEP: { id: Step; label: string; icon: typeof User } = {
+  id: "identity",
+  label: "Verify ID",
+  icon: ShieldCheck,
+};
 
 export default function ProfileCompletionWizard() {
   const router = useRouter();
@@ -124,7 +133,11 @@ export default function ProfileCompletionWizard() {
   const steps = useMemo(() => {
     if (signupAccountType === "host") {
       return [
-        ...BASE_STEPS,
+        BASE_STEPS[0],
+        BASE_STEPS[1],
+        IDENTITY_STEP,
+        BASE_STEPS[2],
+        BASE_STEPS[3],
         { id: "host" as const, label: "Host profile", icon: Home },
       ];
     }
@@ -292,7 +305,8 @@ export default function ProfileCompletionWizard() {
         const phoneVerified =
           !!activeUser.phone_confirmed_at ||
           !verificationSettings.phoneVerificationEnabled;
-        if (!emailVerified) setStep("email");
+        if (needsIdentityVerification(profile)) setStep("identity");
+        else if (!emailVerified) setStep("email");
         else if (!phoneVerified) setStep("phone");
         else if (isHostSignup(profile) && !hasHostProfile) setStep("host");
         else setStep("profile");
@@ -361,7 +375,8 @@ export default function ProfileCompletionWizard() {
       toast({ title: "Profile photo is required.", variant: "destructive" });
       return;
     }
-    if (!idDocFile && !form.id_document_path.trim()) {
+    const isHost = signupAccountType === "host";
+    if (!isHost && !idDocFile && !form.id_document_path.trim()) {
       toast({ title: "ID document upload is required.", variant: "destructive" });
       return;
     }
@@ -401,11 +416,15 @@ export default function ProfileCompletionWizard() {
       }
 
       toast({ title: "Profile details saved" });
-      setStep(
-        isEmailVerified || !verificationSettings.emailVerificationEnabled
-          ? "phone"
-          : "email"
-      );
+      if (isHost) {
+        setStep("identity");
+      } else {
+        setStep(
+          isEmailVerified || !verificationSettings.emailVerificationEnabled
+            ? "phone"
+            : "email"
+        );
+      }
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Failed to save profile",
@@ -415,6 +434,15 @@ export default function ProfileCompletionWizard() {
       setLoading(false);
     }
   };
+
+  const handleIdentityVerified = useCallback(() => {
+    toast({ title: "Identity verified" });
+    setStep(
+      isEmailVerified || !verificationSettings.emailVerificationEnabled
+        ? "phone"
+        : "email"
+    );
+  }, [isEmailVerified, verificationSettings.emailVerificationEnabled, toast]);
 
   const handleResendEmail = async () => {
     setResendingEmail(true);
@@ -789,22 +817,29 @@ export default function ProfileCompletionWizard() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="id_doc">ID document (photo or PDF) *</Label>
-            <Input
-              id="id_doc"
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={handleIdDocChange}
-              required={!form.id_document_path && !idDocFile}
-              className="rounded-xl"
-            />
-            {(idDocFile || form.id_document_path) && (
-              <p className="text-xs text-muted-foreground">
-                {idDocFile?.name ?? "Document uploaded"}
-              </p>
-            )}
-          </div>
+          {signupAccountType === "host" ? (
+            <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+              You&apos;ll verify your ID with a quick photo and selfie in the
+              next step.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="id_doc">ID document (photo or PDF) *</Label>
+              <Input
+                id="id_doc"
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={handleIdDocChange}
+                required={!form.id_document_path && !idDocFile}
+                className="rounded-xl"
+              />
+              {(idDocFile || form.id_document_path) && (
+                <p className="text-xs text-muted-foreground">
+                  {idDocFile?.name ?? "Document uploaded"}
+                </p>
+              )}
+            </div>
+          )}
 
           <Button type="submit" className="w-full rounded-xl" disabled={loading}>
             {loading ? (
@@ -817,6 +852,13 @@ export default function ProfileCompletionWizard() {
             )}
           </Button>
         </form>
+      )}
+
+      {step === "identity" && (
+        <IdentityVerificationPanel
+          userId={user.id}
+          onVerified={handleIdentityVerified}
+        />
       )}
 
       {step === "email" && (

@@ -57,17 +57,59 @@ export interface Database {
           id_type: "national_id" | "passport" | null;
           id_number: string | null;
           id_document_path: string | null;
+          id_verification_status:
+            | "pending"
+            | "processing"
+            | "requires_input"
+            | "verified"
+            | "canceled"
+            | null;
+          id_verified_at: string | null;
+          stripe_verification_session_id: string | null;
+          id_verification_error: string | null;
           profile_completed_at: string | null;
           phone_verified_at: string | null;
           terms_accepted_at: string | null;
           privacy_accepted_at: string | null;
           liability_waiver_accepted_at: string | null;
           legal_documents_version: string | null;
+          signup_account_type: "client" | "host" | null;
           created_at: string;
           updated_at: string;
         };
         Insert: Record<string, unknown>;
         Update: Record<string, unknown>;
+      };
+      identity_verification_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          token_hash: string;
+          stripe_session_id: string;
+          status:
+            | "pending"
+            | "processing"
+            | "requires_input"
+            | "verified"
+            | "canceled";
+          expires_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          token_hash: string;
+          stripe_session_id: string;
+          status?: string;
+          expires_at: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          status?: string;
+          updated_at?: string;
+        };
       };
       platform_fee_settings: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       platform_auth_settings: {

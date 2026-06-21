@@ -31,6 +31,7 @@ export function isGuestOnlyPath(pathname: string): boolean {
 export function isOnboardingExemptPath(pathname: string): boolean {
   if (pathname === "/login") return true;
   if (pathname.startsWith("/auth/callback")) return true;
+  if (pathname.startsWith("/verify/id")) return true;
   if (ONBOARDING_EXEMPT_EXACT.has(pathname)) return true;
   return false;
 }

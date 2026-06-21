@@ -227,6 +227,27 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
             <div className="px-5 py-4 space-y-5">
               <Fact icon={ShieldCheck} label="ID type" value={user.id_type} />
               <Fact icon={ShieldCheck} label="ID number" value={user.id_number} />
+              <div>
+                <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Verification status
+                </p>
+                <IdentityStatusBadge
+                  status={user.id_verification_status as string | null}
+                />
+              </div>
+              {user.id_verified_at ? (
+                <Fact
+                  icon={CalendarDays}
+                  label="Verified on"
+                  value={fmtDate(user.id_verified_at)}
+                />
+              ) : null}
+              {user.id_verification_error ? (
+                <p className="text-xs text-destructive">
+                  {String(user.id_verification_error)}
+                </p>
+              ) : null}
               {user.id_document_path ? (
                 <Button
                   type="button"
@@ -243,6 +264,10 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
                   )}
                   View ID document
                 </Button>
+              ) : user.id_verification_status === "verified" ? (
+                <p className="text-xs text-muted-foreground">
+                  Identity verified via Stripe Identity.
+                </p>
               ) : (
                 <p className="text-xs text-muted-foreground">No ID document on file.</p>
               )}
@@ -260,6 +285,26 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
       />
     </div>
   );
+}
+
+const IDENTITY_STATUS_STYLES: Record<string, { label: string; className: string }> = {
+  verified: { label: "Verified", className: "bg-success/10 text-success ring-success/20" },
+  processing: { label: "Processing", className: "bg-info/10 text-info ring-info/20" },
+  pending: { label: "Pending", className: "bg-muted text-muted-foreground ring-border" },
+  requires_input: { label: "Needs retry", className: "bg-destructive/10 text-destructive ring-destructive/20" },
+  canceled: { label: "Canceled", className: "bg-destructive/10 text-destructive ring-destructive/20" },
+};
+
+function IdentityStatusBadge({ status }: { status: string | null }) {
+  if (!status) {
+    return <span className="text-sm text-muted-foreground">Not started</span>;
+  }
+  const style =
+    IDENTITY_STATUS_STYLES[status] ?? {
+      label: status,
+      className: "bg-muted text-muted-foreground ring-border",
+    };
+  return <Pill label={style.label} className={style.className} />;
 }
 
 function Fact({
