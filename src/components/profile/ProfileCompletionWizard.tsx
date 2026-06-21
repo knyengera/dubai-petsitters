@@ -1040,6 +1040,7 @@ export default function ProfileCompletionWizard() {
               setHostCoverUrl(cover);
               setHostGalleryUrls(gallery);
             }}
+            hideFullName
           />
           <Button
             type="submit"

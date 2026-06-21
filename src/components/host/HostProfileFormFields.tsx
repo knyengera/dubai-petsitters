@@ -18,6 +18,8 @@ type HostProfileFormFieldsProps = {
   coverUrl: string;
   galleryUrls: string[];
   onPhotosChange: (cover: string, gallery: string[]) => void;
+  /** Hide the full name input when it's already captured upstream (e.g. Verify ID). */
+  hideFullName?: boolean;
 };
 
 export default function HostProfileFormFields({
@@ -28,6 +30,7 @@ export default function HostProfileFormFields({
   coverUrl,
   galleryUrls,
   onPhotosChange,
+  hideFullName = false,
 }: HostProfileFormFieldsProps) {
   return (
     <>
@@ -46,16 +49,18 @@ export default function HostProfileFormFields({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2">
-          <Label>Full Name *</Label>
-          <Input
-            required
-            value={form.full_name}
-            onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
-            className="rounded-xl mt-1"
-            placeholder="Your full name"
-          />
-        </div>
+        {!hideFullName && (
+          <div className="col-span-2">
+            <Label>Full Name *</Label>
+            <Input
+              required
+              value={form.full_name}
+              onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
+              className="rounded-xl mt-1"
+              placeholder="Your full name"
+            />
+          </div>
+        )}
         <div>
           <Label>City *</Label>
           <Input
