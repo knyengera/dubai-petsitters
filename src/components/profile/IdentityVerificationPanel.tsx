@@ -26,7 +26,7 @@ export default function IdentityVerificationPanel({ userId, onVerified }: Props)
   const startedRef = useRef(false);
   const verifiedHandledRef = useRef(false);
 
-  const { status, error } = useIdentityStatus(userId);
+  const { status, error, refresh } = useIdentityStatus(userId);
 
   const start = useCallback(async () => {
     setStarting(true);
@@ -37,10 +37,13 @@ export default function IdentityVerificationPanel({ userId, onVerified }: Props)
         return;
       }
       setVerifyUrl(result.status === "verified" ? "" : result.verifyUrl);
+      // Sync the tracked status to the fresh session so the retry screen
+      // immediately gives way to the new QR code instead of flashing back.
+      await refresh();
     } finally {
       setStarting(false);
     }
-  }, [toast]);
+  }, [toast, refresh]);
 
   useEffect(() => {
     if (startedRef.current) return;

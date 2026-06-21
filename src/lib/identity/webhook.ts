@@ -45,7 +45,15 @@ export async function applyVerificationSession(
   userId: string,
   session: Stripe.Identity.VerificationSession
 ): Promise<void> {
-  const status = mapStripeStatus(session.status);
+  let status = mapStripeStatus(session.status);
+
+  // A freshly created (or abandoned-mid-flow) session sits in `requires_input`
+  // with no `last_error` until the user submits documents. Only treat
+  // `requires_input` as a failure once Stripe attaches an error — otherwise
+  // we'd immediately flag every new session as "verification failed".
+  if (status === "requires_input" && !session.last_error) {
+    status = "pending";
+  }
 
   await setSessionStatusByStripeId(session.id, status);
 
