@@ -70,6 +70,11 @@ export async function setProfileVerificationStatus(
     stripeSessionId?: string;
     error?: string | null;
     verifiedAt?: string | null;
+    fullName?: string | null;
+    dateOfBirth?: string | null;
+    gender?: string | null;
+    idType?: string | null;
+    idNumber?: string | null;
   }
 ): Promise<void> {
   const supabase = createServiceClient();
@@ -82,6 +87,13 @@ export async function setProfileVerificationStatus(
   }
   if (fields.error !== undefined) update.id_verification_error = fields.error;
   if (fields.verifiedAt !== undefined) update.id_verified_at = fields.verifiedAt;
+  // Captured-from-document fields. Only written when Stripe extracted a value
+  // so we never overwrite existing profile data with null.
+  if (fields.fullName != null) update.full_name = fields.fullName;
+  if (fields.dateOfBirth != null) update.date_of_birth = fields.dateOfBirth;
+  if (fields.gender != null) update.gender = fields.gender;
+  if (fields.idType != null) update.id_type = fields.idType;
+  if (fields.idNumber != null) update.id_number = fields.idNumber;
 
   const { error } = await supabase
     .from("profiles")

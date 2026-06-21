@@ -115,6 +115,7 @@ export default function ProfileCompletionWizard() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [idDocFile, setIdDocFile] = useState<File | null>(null);
+  const [identityVerified, setIdentityVerified] = useState(false);
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [verificationSettings, setVerificationSettings] =
@@ -133,11 +134,11 @@ export default function ProfileCompletionWizard() {
   const steps = useMemo(() => {
     if (signupAccountType === "host") {
       return [
-        BASE_STEPS[0],
-        BASE_STEPS[1],
-        IDENTITY_STEP,
-        BASE_STEPS[2],
-        BASE_STEPS[3],
+        BASE_STEPS[0], // Legal
+        IDENTITY_STEP, // Verify ID
+        BASE_STEPS[1], // Profile & KYC
+        BASE_STEPS[2], // Email
+        BASE_STEPS[3], // Phone
         { id: "host" as const, label: "Host profile", icon: Home },
       ];
     }
@@ -174,6 +175,7 @@ export default function ProfileCompletionWizard() {
         if (profile.avatar_url) setAvatarPreview(profile.avatar_url);
         if (profile.phone) setPhone(profile.phone);
         setSignupAccountType(getSignupAccountType(profile));
+        setIdentityVerified(profile.id_verification_status === "verified");
       }
     } catch {
       // Profile may not exist yet for new users
@@ -294,25 +296,32 @@ export default function ProfileCompletionWizard() {
         );
         return;
       }
+      setIdentityVerified(profile?.id_verification_status === "verified");
+
       if (!hasLegalAcceptance(profile)) {
         setStep("legal");
         return;
       }
-      if (hasProfileDetails(profile)) {
-        const emailVerified =
-          !!activeUser.email_confirmed_at ||
-          !verificationSettings.emailVerificationEnabled;
-        const phoneVerified =
-          !!activeUser.phone_confirmed_at ||
-          !verificationSettings.phoneVerificationEnabled;
-        if (needsIdentityVerification(profile)) setStep("identity");
-        else if (!emailVerified) setStep("email");
-        else if (!phoneVerified) setStep("phone");
-        else if (isHostSignup(profile) && !hasHostProfile) setStep("host");
-        else setStep("profile");
-      } else {
-        setStep("profile");
+      // Hosts verify their ID before filling in KYC, so the captured details
+      // (DOB, gender, ID type/number) pre-fill the profile step.
+      if (needsIdentityVerification(profile)) {
+        setStep("identity");
+        return;
       }
+      if (!hasProfileDetails(profile)) {
+        setStep("profile");
+        return;
+      }
+      const emailVerified =
+        !!activeUser.email_confirmed_at ||
+        !verificationSettings.emailVerificationEnabled;
+      const phoneVerified =
+        !!activeUser.phone_confirmed_at ||
+        !verificationSettings.phoneVerificationEnabled;
+      if (!emailVerified) setStep("email");
+      else if (!phoneVerified) setStep("phone");
+      else if (isHostSignup(profile) && !hasHostProfile) setStep("host");
+      else setStep("profile");
     };
     checkComplete();
   }, [
@@ -343,7 +352,7 @@ export default function ProfileCompletionWizard() {
         return;
       }
       toast({ title: "Legal agreements accepted" });
-      setStep("profile");
+      setStep(signupAccountType === "host" ? "identity" : "profile");
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Failed to record acceptance",
@@ -416,15 +425,11 @@ export default function ProfileCompletionWizard() {
       }
 
       toast({ title: "Profile details saved" });
-      if (isHost) {
-        setStep("identity");
-      } else {
-        setStep(
-          isEmailVerified || !verificationSettings.emailVerificationEnabled
-            ? "phone"
-            : "email"
-        );
-      }
+      setStep(
+        isEmailVerified || !verificationSettings.emailVerificationEnabled
+          ? "phone"
+          : "email"
+      );
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Failed to save profile",
@@ -435,14 +440,25 @@ export default function ProfileCompletionWizard() {
     }
   };
 
-  const handleIdentityVerified = useCallback(() => {
+  const handleIdentityVerified = useCallback(async () => {
     toast({ title: "Identity verified" });
-    setStep(
-      isEmailVerified || !verificationSettings.emailVerificationEnabled
-        ? "phone"
-        : "email"
-    );
-  }, [isEmailVerified, verificationSettings.emailVerificationEnabled, toast]);
+    setIdentityVerified(true);
+    // Pull the details Stripe extracted from the document so the KYC step is
+    // pre-filled with verified data.
+    const profile = await getProfile();
+    if (profile) {
+      setForm((f) => ({
+        ...f,
+        full_name: profile.full_name?.trim() || f.full_name,
+        date_of_birth: profile.date_of_birth ?? f.date_of_birth,
+        gender: (profile.gender as ProfileDetailsInput["gender"]) || f.gender,
+        id_type:
+          (profile.id_type as ProfileDetailsInput["id_type"]) || f.id_type,
+        id_number: profile.id_number ?? f.id_number,
+      }));
+    }
+    setStep("profile");
+  }, [toast]);
 
   const handleResendEmail = async () => {
     setResendingEmail(true);
@@ -624,6 +640,14 @@ export default function ProfileCompletionWizard() {
     );
   }
 
+  // For verified hosts, fields captured from the ID document are locked when
+  // Stripe returned a value, and stay editable as a fallback when it didn't.
+  const isHostVerifiedKyc = signupAccountType === "host" && identityVerified;
+  const lockDob = isHostVerifiedKyc && !!form.date_of_birth;
+  const lockGender = isHostVerifiedKyc && !!form.gender;
+  const lockIdType = isHostVerifiedKyc && !!form.id_type;
+  const lockIdNumber = isHostVerifiedKyc && !!form.id_number.trim();
+
   return (
     <div className="mx-auto w-full max-w-3xl space-y-8">
       <div className="text-center">
@@ -757,7 +781,9 @@ export default function ProfileCompletionWizard() {
                   setForm((f) => ({ ...f, date_of_birth: e.target.value }))
                 }
                 required
-                className="rounded-xl"
+                readOnly={lockDob}
+                aria-readonly={lockDob}
+                className={`rounded-xl ${lockDob ? "bg-muted/60 text-muted-foreground" : ""}`}
               />
             </div>
             <div className="space-y-2">
@@ -772,7 +798,10 @@ export default function ProfileCompletionWizard() {
                   }))
                 }
                 required
-                className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm"
+                disabled={lockGender}
+                className={`flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ${
+                  lockGender ? "bg-muted/60 text-muted-foreground" : ""
+                }`}
               >
                 <option value="">Select</option>
                 <option value="male">Male</option>
@@ -790,12 +819,15 @@ export default function ProfileCompletionWizard() {
                 <button
                   key={type}
                   type="button"
-                  onClick={() => setForm((f) => ({ ...f, id_type: type }))}
+                  disabled={lockIdType}
+                  onClick={() =>
+                    !lockIdType && setForm((f) => ({ ...f, id_type: type }))
+                  }
                   className={`flex-1 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
                     form.id_type === type
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-muted-foreground"
-                  }`}
+                  } ${lockIdType ? "cursor-not-allowed opacity-70" : ""}`}
                 >
                   {type === "national_id" ? "National ID" : "Passport"}
                 </button>
@@ -812,15 +844,26 @@ export default function ProfileCompletionWizard() {
               value={form.id_number}
               onChange={(e) => setForm((f) => ({ ...f, id_number: e.target.value }))}
               required
+              readOnly={lockIdNumber}
+              aria-readonly={lockIdNumber}
               placeholder={form.id_type === "national_id" ? "10 digits" : "Passport number"}
-              className="rounded-xl"
+              className={`rounded-xl ${lockIdNumber ? "bg-muted/60 text-muted-foreground" : ""}`}
             />
           </div>
 
-          {signupAccountType === "host" ? (
+          {isHostVerifiedKyc ? (
+            <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span>
+                Date of birth, gender, ID type and ID number were captured from
+                your verified ID and can&apos;t be edited. Add your name, city
+                and a profile photo to continue.
+              </span>
+            </div>
+          ) : signupAccountType === "host" ? (
             <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-              You&apos;ll verify your ID with a quick photo and selfie in the
-              next step.
+              Verify your ID with a quick photo and selfie to auto-fill these
+              details.
             </div>
           ) : (
             <div className="space-y-2">

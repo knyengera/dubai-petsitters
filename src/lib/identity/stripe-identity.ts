@@ -41,6 +41,9 @@ export async function createVerificationSession(params: {
       document: {
         require_matching_selfie: true,
         require_live_capture: true,
+        // Our profiles schema only supports national_id + passport, so we
+        // disallow driving licenses up-front rather than failing later.
+        allowed_types: ["id_card", "passport"],
       },
     },
   });
@@ -51,6 +54,17 @@ export async function retrieveVerificationSession(
 ): Promise<Stripe.Identity.VerificationSession> {
   const stripe = getStripeClient();
   return stripe.identity.verificationSessions.retrieve(sessionId);
+}
+
+/**
+ * Retrieves a verification report, which carries the extracted document data
+ * (name, DOB, document type/number, sex) once a session is verified.
+ */
+export async function retrieveVerificationReport(
+  reportId: string
+): Promise<Stripe.Identity.VerificationReport> {
+  const stripe = getStripeClient();
+  return stripe.identity.verificationReports.retrieve(reportId);
 }
 
 export function verifyIdentityWebhook(

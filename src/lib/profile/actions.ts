@@ -23,7 +23,8 @@ export type ProfileDetailsInput = {
 
 function validateProfileInput(
   input: ProfileDetailsInput,
-  accountType: SignupAccountType
+  accountType: SignupAccountType,
+  options?: { skipIdFormat?: boolean }
 ): string | null {
   if (!input.full_name.trim()) return "Full name is required.";
   if (!input.city.trim()) return "City is required.";
@@ -37,11 +38,15 @@ function validateProfileInput(
     return "ID document upload is required.";
   }
 
-  if (input.id_type === "national_id" && !validateNationalId(input.id_number)) {
-    return "National ID must be exactly 10 digits.";
-  }
-  if (input.id_type === "passport" && !validatePassport(input.id_number)) {
-    return "Passport number must be 6–12 alphanumeric characters.";
+  // For verified hosts the ID number comes straight from the document Stripe
+  // verified, so we trust it rather than enforcing our manual-entry formats.
+  if (!options?.skipIdFormat) {
+    if (input.id_type === "national_id" && !validateNationalId(input.id_number)) {
+      return "National ID must be exactly 10 digits.";
+    }
+    if (input.id_type === "passport" && !validatePassport(input.id_number)) {
+      return "Passport number must be 6–12 alphanumeric characters.";
+    }
   }
 
   const dob = new Date(input.date_of_birth);
@@ -84,23 +89,56 @@ export async function saveProfileDetails(
 
   const { data: existing } = await supabase
     .from("profiles")
-    .select("signup_account_type")
+    .select(
+      "signup_account_type, id_verification_status, date_of_birth, gender, id_type, id_number"
+    )
     .eq("id", user.id)
     .maybeSingle();
-  const existingRow = existing as { signup_account_type: string | null } | null;
+  const existingRow = existing as {
+    signup_account_type: string | null;
+    id_verification_status: string | null;
+    date_of_birth: string | null;
+    gender: string | null;
+    id_type: string | null;
+    id_number: string | null;
+  } | null;
   const accountType: SignupAccountType =
     existingRow?.signup_account_type === "host" ? "host" : "client";
 
-  const validationError = validateProfileInput(input, accountType);
+  // Verified hosts have their ID details captured from Stripe Identity. We keep
+  // those as the source of truth instead of overwriting them with form input.
+  const isHostVerified =
+    accountType === "host" && existingRow?.id_verification_status === "verified";
+
+  const validationError = validateProfileInput(input, accountType, {
+    skipIdFormat: isHostVerified,
+  });
   if (validationError) return { success: false, error: validationError };
+
+  const dateOfBirth =
+    isHostVerified && existingRow?.date_of_birth
+      ? existingRow.date_of_birth
+      : input.date_of_birth;
+  const gender =
+    isHostVerified && existingRow?.gender
+      ? (existingRow.gender as ProfileDetailsInput["gender"])
+      : input.gender;
+  const idType =
+    isHostVerified && existingRow?.id_type
+      ? (existingRow.id_type as ProfileDetailsInput["id_type"])
+      : input.id_type;
+  const idNumber =
+    isHostVerified && existingRow?.id_number
+      ? existingRow.id_number
+      : input.id_number.trim();
 
   const profilePayload = {
     full_name: input.full_name.trim(),
     city: input.city.trim(),
-    date_of_birth: input.date_of_birth,
-    gender: input.gender,
-    id_type: input.id_type,
-    id_number: input.id_number.trim(),
+    date_of_birth: dateOfBirth,
+    gender,
+    id_type: idType,
+    id_number: idNumber,
     avatar_url: input.avatar_url.trim(),
     id_document_path: input.id_document_path.trim(),
     updated_at: new Date().toISOString(),
