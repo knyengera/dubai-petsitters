@@ -120,8 +120,15 @@ export async function startIdentityVerification(
     id_verification_status: IdentityVerificationStatus | null;
   } | null;
 
-  if (profile?.signup_account_type !== "host") {
-    return { success: false, error: "Identity verification is only required for hosts." };
+  // Identity verification applies to every account type (pet owners and hosts).
+  if (
+    profile?.signup_account_type !== "host" &&
+    profile?.signup_account_type !== "client"
+  ) {
+    return {
+      success: false,
+      error: "Identity verification isn't available for this account.",
+    };
   }
 
   // When re-verifying (force), skip the short-circuit so a brand-new session is

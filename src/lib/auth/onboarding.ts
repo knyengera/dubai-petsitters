@@ -48,7 +48,9 @@ export function isPhoneVerified(user: User | null): boolean {
 
 export function hasProfileDetails(profile: ProfileRow | null): boolean {
   if (!profile) return false;
-  const baseDetailsComplete = !!(
+  // Every account type now verifies their ID via Stripe Identity (separate
+  // step), so no manual ID document upload is required here.
+  return !!(
     profile.full_name?.trim() &&
     profile.city?.trim() &&
     profile.date_of_birth &&
@@ -57,22 +59,16 @@ export function hasProfileDetails(profile: ProfileRow | null): boolean {
     profile.id_number?.trim() &&
     profile.avatar_url?.trim()
   );
-  if (!baseDetailsComplete) return false;
-
-  // Hosts verify their ID via Stripe Identity (separate step), so they don't
-  // upload a document here. Clients still provide an ID document file.
-  if (isHostSignup(profile)) return true;
-  return !!profile.id_document_path?.trim();
 }
 
-/** Hosts must pass Stripe Identity before their onboarding is considered done. */
+/** All users must pass Stripe Identity before onboarding is considered done. */
 export function isIdentityVerified(profile: ProfileRow | null): boolean {
   return profile?.id_verification_status === "verified";
 }
 
-/** Whether a host still needs to complete the identity verification step. */
+/** Whether the user still needs to complete the identity verification step. */
 export function needsIdentityVerification(profile: ProfileRow | null): boolean {
-  return isHostSignup(profile) && !isIdentityVerified(profile);
+  return !isIdentityVerified(profile);
 }
 
 export function isProfileComplete(profile: ProfileRow | null): boolean {
@@ -108,8 +104,9 @@ export function isOnboardingComplete(
   options?: { hasHostProfile?: boolean }
 ): boolean {
   if (!isBaseOnboardingComplete(user, profile)) return false;
+  if (!isIdentityVerified(profile)) return false;
   if (isHostSignup(profile)) {
-    return options?.hasHostProfile === true && isIdentityVerified(profile);
+    return options?.hasHostProfile === true;
   }
   return true;
 }

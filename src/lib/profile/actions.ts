@@ -23,7 +23,6 @@ export type ProfileDetailsInput = {
 
 function validateProfileInput(
   input: ProfileDetailsInput,
-  accountType: SignupAccountType,
   options?: { skipIdFormat?: boolean }
 ): string | null {
   if (!input.full_name.trim()) return "Full name is required.";
@@ -33,12 +32,10 @@ function validateProfileInput(
   if (!input.id_type) return "ID type is required.";
   if (!input.id_number.trim()) return "ID number is required.";
   if (!input.avatar_url.trim()) return "Profile photo is required.";
-  // Hosts verify their ID via Stripe Identity in a separate step.
-  if (accountType !== "host" && !input.id_document_path.trim()) {
-    return "ID document upload is required.";
-  }
+  // Every account type verifies their ID via Stripe Identity, so no manual ID
+  // document upload is required here.
 
-  // For verified hosts the ID number comes straight from the document Stripe
+  // For verified users the ID number comes straight from the document Stripe
   // verified, so we trust it rather than enforcing our manual-entry formats.
   if (!options?.skipIdFormat) {
     if (input.id_type === "national_id" && !validateNationalId(input.id_number)) {
@@ -105,30 +102,30 @@ export async function saveProfileDetails(
   const accountType: SignupAccountType =
     existingRow?.signup_account_type === "host" ? "host" : "client";
 
-  // Verified hosts have their ID details captured from Stripe Identity. We keep
-  // those as the source of truth instead of overwriting them with form input.
-  const isHostVerified =
-    accountType === "host" && existingRow?.id_verification_status === "verified";
+  // Verified users (pet owners and hosts) have their ID details captured from
+  // Stripe Identity. We keep those as the source of truth instead of
+  // overwriting them with form input.
+  const isVerified = existingRow?.id_verification_status === "verified";
 
-  const validationError = validateProfileInput(input, accountType, {
-    skipIdFormat: isHostVerified,
+  const validationError = validateProfileInput(input, {
+    skipIdFormat: isVerified,
   });
   if (validationError) return { success: false, error: validationError };
 
   const dateOfBirth =
-    isHostVerified && existingRow?.date_of_birth
+    isVerified && existingRow?.date_of_birth
       ? existingRow.date_of_birth
       : input.date_of_birth;
   const gender =
-    isHostVerified && existingRow?.gender
+    isVerified && existingRow?.gender
       ? (existingRow.gender as ProfileDetailsInput["gender"])
       : input.gender;
   const idType =
-    isHostVerified && existingRow?.id_type
+    isVerified && existingRow?.id_type
       ? (existingRow.id_type as ProfileDetailsInput["id_type"])
       : input.id_type;
   const idNumber =
-    isHostVerified && existingRow?.id_number
+    isVerified && existingRow?.id_number
       ? existingRow.id_number
       : input.id_number.trim();
 

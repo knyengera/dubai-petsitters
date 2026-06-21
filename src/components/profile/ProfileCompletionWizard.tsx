@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   CheckCircle,
-  FileText,
   Home,
   Loader2,
   Phone,
@@ -36,7 +35,6 @@ import {
   sanitizePhoneInput,
   toE164Phone,
 } from "@/lib/auth/onboarding";
-import LegalAcceptanceCheckbox from "@/components/legal/LegalAcceptanceCheckbox";
 import { PENDING_LEGAL_ACCEPTANCE_KEY } from "@/lib/legal/constants";
 import { recordLegalAcceptance } from "@/lib/legal/actions";
 import {
@@ -63,18 +61,24 @@ import {
 } from "@/lib/hosting/host-profile-form";
 import { entities } from "@/lib/data/entities";
 
-type Step = "legal" | "profile" | "identity" | "phone" | "host";
-
-const BASE_STEPS: { id: Step; label: string; icon: typeof User }[] = [
-  { id: "legal", label: "Legal agreements", icon: FileText },
-  { id: "profile", label: "Profile & KYC", icon: User },
-  { id: "phone", label: "Verify Phone", icon: Phone },
-];
+type Step = "profile" | "identity" | "phone" | "host";
 
 const IDENTITY_STEP: { id: Step; label: string; icon: typeof User } = {
   id: "identity",
   label: "Verify ID",
   icon: ShieldCheck,
+};
+
+const PROFILE_STEP: { id: Step; label: string; icon: typeof User } = {
+  id: "profile",
+  label: "Profile & KYC",
+  icon: User,
+};
+
+const PHONE_STEP: { id: Step; label: string; icon: typeof User } = {
+  id: "phone",
+  label: "Verify Phone",
+  icon: Phone,
 };
 
 export default function ProfileCompletionWizard() {
@@ -92,9 +96,8 @@ export default function ProfileCompletionWizard() {
     verifyPhoneOtp,
   } = useAuth();
 
-  const [step, setStep] = useState<Step>("legal");
+  const [step, setStep] = useState<Step>("identity");
   const [loading, setLoading] = useState(false);
-  const [legalAccepted, setLegalAccepted] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [verifiedPhone, setVerifiedPhone] = useState("");
 
@@ -110,7 +113,6 @@ export default function ProfileCompletionWizard() {
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [idDocFile, setIdDocFile] = useState<File | null>(null);
   const [identityVerified, setIdentityVerified] = useState(false);
   // Tracks which KYC fields Stripe actually captured from the verified ID.
   // Only these are locked; anything Stripe couldn't read stays editable so the
@@ -139,14 +141,14 @@ export default function ProfileCompletionWizard() {
   const steps = useMemo(() => {
     if (signupAccountType === "host") {
       return [
-        BASE_STEPS[0], // Legal
         IDENTITY_STEP, // Verify ID
-        BASE_STEPS[1], // Profile & KYC
-        BASE_STEPS[2], // Phone
+        PROFILE_STEP, // Profile & KYC
+        PHONE_STEP, // Phone
         { id: "host" as const, label: "Host profile", icon: Home },
       ];
     }
-    return BASE_STEPS;
+    // Pet owners now verify their ID then complete the prepopulated KYC step.
+    return [IDENTITY_STEP, PROFILE_STEP, PHONE_STEP];
   }, [signupAccountType]);
 
   const finishOrAdvanceAfterPhone = useCallback(async () => {
@@ -308,12 +310,8 @@ export default function ProfileCompletionWizard() {
       }
       setIdentityVerified(profile?.id_verification_status === "verified");
 
-      if (!hasLegalAcceptance(profile)) {
-        setStep("legal");
-        return;
-      }
-      // Hosts verify their ID before filling in KYC, so the captured details
-      // (DOB, gender, ID type/number) pre-fill the profile step.
+      // Everyone verifies their ID first; the captured details (DOB, gender,
+      // ID type/number) then pre-fill the profile step.
       if (needsIdentityVerification(profile)) {
         setStep("identity");
         return;
@@ -342,45 +340,11 @@ export default function ProfileCompletionWizard() {
     nextPath,
   ]);
 
-  const handleLegalSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!legalAccepted) {
-      toast({
-        title: "You must accept the legal agreements to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setLoading(true);
-    try {
-      const result = await recordLegalAcceptance();
-      if (result.success === false) {
-        toast({ title: result.error, variant: "destructive" });
-        return;
-      }
-      toast({ title: "Legal agreements accepted" });
-      setStep(signupAccountType === "host" ? "identity" : "profile");
-    } catch (err) {
-      toast({
-        title: err instanceof Error ? err.message : "Failed to record acceptance",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
-  };
-
-  const handleIdDocChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIdDocFile(file);
   };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -391,28 +355,13 @@ export default function ProfileCompletionWizard() {
       toast({ title: "Profile photo is required.", variant: "destructive" });
       return;
     }
-    const isHost = signupAccountType === "host";
-    if (!isHost && !idDocFile && !form.id_document_path.trim()) {
-      toast({ title: "ID document upload is required.", variant: "destructive" });
-      return;
-    }
 
     setLoading(true);
     try {
       let avatarUrl = form.avatar_url;
-      let idDocumentPath = form.id_document_path;
 
       if (avatarFile) {
         avatarUrl = await uploadAppFile("avatars", avatarFile, user.id, "avatar", "avatar");
-      }
-      if (idDocFile) {
-        idDocumentPath = await uploadAppFile(
-          "kyc-documents",
-          idDocFile,
-          user.id,
-          "id-document",
-          "id-document"
-        );
       }
 
       const result = await saveProfileDetails({
@@ -423,7 +372,7 @@ export default function ProfileCompletionWizard() {
         id_type: form.id_type,
         id_number: form.id_number,
         avatar_url: avatarUrl,
-        id_document_path: idDocumentPath,
+        id_document_path: form.id_document_path,
       });
 
       if (result.success === false) {
@@ -635,13 +584,13 @@ export default function ProfileCompletionWizard() {
     );
   }
 
-  // For verified hosts, fields captured from the ID document are locked when
+  // For verified users, fields captured from the ID document are locked when
   // Stripe returned a value, and stay editable as a fallback when it didn't.
-  const isHostVerifiedKyc = signupAccountType === "host" && identityVerified;
-  const lockDob = isHostVerifiedKyc && idCaptured.dob;
-  const lockGender = isHostVerifiedKyc && idCaptured.gender;
-  const lockIdType = isHostVerifiedKyc && idCaptured.idType;
-  const lockIdNumber = isHostVerifiedKyc && idCaptured.idNumber;
+  const isVerifiedKyc = identityVerified;
+  const lockDob = isVerifiedKyc && idCaptured.dob;
+  const lockGender = isVerifiedKyc && idCaptured.gender;
+  const lockIdType = isVerifiedKyc && idCaptured.idType;
+  const lockIdNumber = isVerifiedKyc && idCaptured.idNumber;
   const hasLockedKycFields =
     lockDob || lockGender || lockIdType || lockIdNumber;
 
@@ -684,35 +633,6 @@ export default function ProfileCompletionWizard() {
           );
         })}
       </div>
-
-      {step === "legal" && (
-        <form onSubmit={handleLegalSubmit} className="space-y-6">
-          <div className="rounded-2xl border border-border bg-muted/40 p-5 text-sm text-muted-foreground">
-            Before continuing, please review and accept our legal documents. These
-            agreements help protect you and Saudi Petsitters when using the
-            platform.
-          </div>
-          <LegalAcceptanceCheckbox
-            checked={legalAccepted}
-            onCheckedChange={setLegalAccepted}
-            id="legal-acceptance-wizard"
-          />
-          <Button
-            type="submit"
-            className="w-full rounded-xl"
-            disabled={loading || !legalAccepted}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving…
-              </>
-            ) : (
-              "Continue"
-            )}
-          </Button>
-        </form>
-      )}
 
       {step === "profile" && (
         <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -848,7 +768,7 @@ export default function ProfileCompletionWizard() {
             />
           </div>
 
-          {isHostVerifiedKyc ? (
+          {isVerifiedKyc ? (
             <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>
@@ -857,27 +777,10 @@ export default function ProfileCompletionWizard() {
                   : "Your ID is verified. Please complete the details below."}
               </span>
             </div>
-          ) : signupAccountType === "host" ? (
+          ) : (
             <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
               Verify your ID with a quick photo and selfie to auto-fill these
               details.
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Label htmlFor="id_doc">ID document (photo or PDF) *</Label>
-              <Input
-                id="id_doc"
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={handleIdDocChange}
-                required={!form.id_document_path && !idDocFile}
-                className="rounded-xl"
-              />
-              {(idDocFile || form.id_document_path) && (
-                <p className="text-xs text-muted-foreground">
-                  {idDocFile?.name ?? "Document uploaded"}
-                </p>
-              )}
             </div>
           )}
 

@@ -18,7 +18,7 @@ import {
 import { getSupabasePublicKey, getSupabaseUrl } from "@/lib/supabase/env";
 
 const PROFILE_SELECT =
-  "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version, signup_account_type";
+  "full_name, city, date_of_birth, gender, id_type, id_number, avatar_url, id_document_path, id_verification_status, profile_completed_at, phone_verified_at, phone, terms_accepted_at, privacy_accepted_at, liability_waiver_accepted_at, legal_documents_version, signup_account_type";
 
 async function userHasHostProfile(
   supabase: Awaited<ReturnType<typeof createServerClient>>,
