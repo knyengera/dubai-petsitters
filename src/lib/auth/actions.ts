@@ -15,6 +15,8 @@ export type PlatformAuthSettingsRow = {
   id: string;
   email_verification_enabled: boolean;
   phone_verification_enabled: boolean;
+  google_oauth_enabled: boolean;
+  apple_oauth_enabled: boolean;
   updated_at: string;
   updated_by: string | null;
 };
@@ -138,6 +140,8 @@ export async function adminGetAuthSettings(): Promise<
 export async function adminUpdateAuthSettings(input: {
   emailVerificationEnabled?: boolean;
   phoneVerificationEnabled?: boolean;
+  googleOauthEnabled?: boolean;
+  appleOauthEnabled?: boolean;
 }): Promise<AuthActionResult<PlatformAuthSettingsRow>> {
   try {
     const admin = await requireAdmin();
@@ -152,6 +156,12 @@ export async function adminUpdateAuthSettings(input: {
     }
     if (input.phoneVerificationEnabled !== undefined) {
       updates.phone_verification_enabled = input.phoneVerificationEnabled;
+    }
+    if (input.googleOauthEnabled !== undefined) {
+      updates.google_oauth_enabled = input.googleOauthEnabled;
+    }
+    if (input.appleOauthEnabled !== undefined) {
+      updates.apple_oauth_enabled = input.appleOauthEnabled;
     }
 
     const { data: existing, error: existingError } = await supabase

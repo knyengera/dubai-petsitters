@@ -120,6 +120,8 @@ export interface Database {
           id: string;
           email_verification_enabled: boolean;
           phone_verification_enabled: boolean;
+          google_oauth_enabled: boolean;
+          apple_oauth_enabled: boolean;
           updated_at: string;
           updated_by: string | null;
         };
@@ -127,6 +129,8 @@ export interface Database {
           id?: string;
           email_verification_enabled?: boolean;
           phone_verification_enabled?: boolean;
+          google_oauth_enabled?: boolean;
+          apple_oauth_enabled?: boolean;
           updated_at?: string;
           updated_by?: string | null;
         };
@@ -134,6 +138,8 @@ export interface Database {
           id?: string;
           email_verification_enabled?: boolean;
           phone_verification_enabled?: boolean;
+          google_oauth_enabled?: boolean;
+          apple_oauth_enabled?: boolean;
           updated_at?: string;
           updated_by?: string | null;
         };
