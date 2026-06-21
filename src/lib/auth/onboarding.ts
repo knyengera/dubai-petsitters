@@ -66,9 +66,16 @@ export function isIdentityVerified(profile: ProfileRow | null): boolean {
   return profile?.id_verification_status === "verified";
 }
 
-/** Whether the user still needs to complete the identity verification step. */
+/**
+ * Whether the user still needs to complete the identity verification step.
+ * New users must verify via Stripe Identity. Users who already finished
+ * onboarding before identity verification was introduced are grandfathered in
+ * (their `profile_completed_at` is set), so they're never forced to re-verify.
+ */
 export function needsIdentityVerification(profile: ProfileRow | null): boolean {
-  return !isIdentityVerified(profile);
+  if (isIdentityVerified(profile)) return false;
+  if (profile?.profile_completed_at) return false;
+  return true;
 }
 
 export function isProfileComplete(profile: ProfileRow | null): boolean {
@@ -103,8 +110,10 @@ export function isOnboardingComplete(
   profile: ProfileRow | null,
   options?: { hasHostProfile?: boolean }
 ): boolean {
+  // Admins don't go through the user onboarding/KYC flow.
+  if (isAdminRole(user?.app_metadata)) return true;
   if (!isBaseOnboardingComplete(user, profile)) return false;
-  if (!isIdentityVerified(profile)) return false;
+  if (needsIdentityVerification(profile)) return false;
   if (isHostSignup(profile)) {
     return options?.hasHostProfile === true;
   }
