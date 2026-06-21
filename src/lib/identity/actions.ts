@@ -6,6 +6,7 @@ import { getAppBaseUrl } from "@/lib/notifications/config";
 import {
   createVerificationSession,
   isStripeIdentityConfigured,
+  retrieveVerificationSession,
 } from "@/lib/identity/stripe-identity";
 import {
   generateToken,
@@ -13,7 +14,11 @@ import {
   recordVerificationSession,
   setProfileVerificationStatus,
 } from "@/lib/identity/session-store";
-import type { IdentityVerificationStatus } from "@/lib/identity/constants";
+import { applyVerificationSession } from "@/lib/identity/webhook";
+import {
+  isTerminalIdentityStatus,
+  type IdentityVerificationStatus,
+} from "@/lib/identity/constants";
 
 export type IdentityStatusResult = {
   status: IdentityVerificationStatus | null;
@@ -33,15 +38,52 @@ export async function getIdentityVerificationStatus(): Promise<IdentityStatusRes
 
   const { data } = await supabase
     .from("profiles")
-    .select("id_verification_status, id_verification_error")
+    .select(
+      "id_verification_status, id_verification_error, stripe_verification_session_id"
+    )
     .eq("id", user.id)
     .maybeSingle();
 
   const row = data as {
     id_verification_status: IdentityVerificationStatus | null;
     id_verification_error: string | null;
+    stripe_verification_session_id: string | null;
   } | null;
   if (!row) return { status: null, error: null };
+
+  // Webhooks can't reach localhost (and may be delayed in prod), so when the
+  // status is still in-flight we reconcile directly against Stripe. This is the
+  // primary signal the desktop poll relies on; the webhook just speeds it up.
+  if (
+    !isTerminalIdentityStatus(row.id_verification_status) &&
+    row.stripe_verification_session_id &&
+    isStripeIdentityConfigured()
+  ) {
+    try {
+      const session = await retrieveVerificationSession(
+        row.stripe_verification_session_id
+      );
+      await applyVerificationSession(user.id, session);
+
+      const { data: fresh } = await supabase
+        .from("profiles")
+        .select("id_verification_status, id_verification_error")
+        .eq("id", user.id)
+        .maybeSingle();
+      const freshRow = fresh as {
+        id_verification_status: IdentityVerificationStatus | null;
+        id_verification_error: string | null;
+      } | null;
+      if (freshRow) {
+        return {
+          status: freshRow.id_verification_status ?? null,
+          error: freshRow.id_verification_error ?? null,
+        };
+      }
+    } catch {
+      // Fall back to the stored status if Stripe can't be reached.
+    }
+  }
 
   return {
     status: row.id_verification_status ?? null,

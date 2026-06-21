@@ -31,6 +31,20 @@ export async function handleIdentityWebhookEvent(
   const userId = session.metadata?.user_id ?? session.client_reference_id;
   if (!userId) return false;
 
+  await applyVerificationSession(userId, session);
+  return true;
+}
+
+/**
+ * Applies a Stripe Identity verification session to our session + profile
+ * records: maps the status, captures the extracted document details on success,
+ * and records the failure reason otherwise. Shared by the webhook handler and
+ * the polling-based reconcile so both paths behave identically.
+ */
+export async function applyVerificationSession(
+  userId: string,
+  session: Stripe.Identity.VerificationSession
+): Promise<void> {
   const status = mapStripeStatus(session.status);
 
   await setSessionStatusByStripeId(session.id, status);
@@ -54,8 +68,6 @@ export async function handleIdentityWebhookEvent(
           : null,
     });
   }
-
-  return true;
 }
 
 type CapturedDocumentDetails = {
