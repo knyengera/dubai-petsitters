@@ -6,6 +6,10 @@ import {
   extractStripeRefundDetails,
   verifyStripeWebhook,
 } from "@/lib/payments/stripe";
+import {
+  handlePartnerSubscriptionEvent,
+  isPartnerSubscriptionEvent,
+} from "@/lib/partners/subscription-webhook";
 
 export const runtime = "nodejs";
 
@@ -19,6 +23,13 @@ export async function POST(request: Request) {
 
   try {
     const event = verifyStripeWebhook(rawBody, signature);
+
+    // Recurring partner-advertising subscriptions (Stripe Billing) are handled
+    // separately from one-time payment captures.
+    if (isPartnerSubscriptionEvent(event)) {
+      await handlePartnerSubscriptionEvent(event);
+      return NextResponse.json({ received: true });
+    }
 
     if (event.type === "charge.refunded" || event.type === "refund.updated" || event.type === "refund.created") {
       const refundDetails = extractStripeRefundDetails(event);

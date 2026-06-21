@@ -21,10 +21,9 @@ import {
   CreditCard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import PaymentModal from "@/components/payment/PaymentModal";
 import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import PartnerTypeFields from "@/components/partners/PartnerTypeFields";
-import { createPartnerAdvertisingPayment } from "@/lib/monetisation/actions";
+import { createPartnerSubscriptionCheckout } from "@/lib/partners/subscription-actions";
 import { getActiveAdvertisingPlans } from "@/lib/partners/actions";
 import {
   ADVERTISING_PLAN_HIGHLIGHT_STYLES,
@@ -79,8 +78,6 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
   const [adPlans, setAdPlans] = useState<AdvertisingPlan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<AdvertisingPlan | null>(null);
-  const [showPayment, setShowPayment] = useState(false);
-  const [inquiryId, setInquiryId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [businessTypeId, setBusinessTypeId] = useState<PartnerTypeId | "">(
     initialBusinessType ?? ""
@@ -119,14 +116,6 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
     setBusinessTypeId(id);
     setBusinessDetails(getDefaultBusinessDetails(id));
     setDetailErrors({});
-  };
-
-  const resetForm = () => {
-    setForm(emptyForm);
-    setBusinessTypeId(initialBusinessType ?? "");
-    setBusinessDetails(initialBusinessType ? getDefaultBusinessDetails(initialBusinessType) : {});
-    setDetailErrors({});
-    setSelectedPlan(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -189,60 +178,35 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
         business_details: validation.data,
         status: "new",
       });
-      setInquiryId(String(inquiry.id));
-      setShowPayment(true);
+
+      const checkout = await createPartnerSubscriptionCheckout({
+        inquiryId: String(inquiry.id),
+        planId: selectedPlan.id,
+        payerName: form.contact_name,
+        payerEmail: form.email,
+      });
+
+      if (checkout.ok === false) {
+        toast({
+          title: "Could not start checkout",
+          description: checkout.error,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to Stripe's hosted subscription checkout.
+      window.location.href = checkout.data.url;
     } catch (err) {
       toast({
         title: "Submission failed",
         description: err instanceof Error ? err.message : "Please try again.",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
-
-  const handlePayConfirm = async (gateway: string) => {
-    if (!inquiryId || !selectedPlan) throw new Error("Payment setup incomplete");
-
-    const result = await createPartnerAdvertisingPayment({
-      inquiryId,
-      gateway,
-      amount: selectedPlan.amount,
-      payerName: form.contact_name,
-      payerEmail: form.email,
-      notes: `Advertising plan: ${selectedPlan.name} | Business: ${form.business_name}`,
-      currency: selectedPlan.currency,
-    });
-
-    if (result.ok === false) {
-      toast({ title: "Payment setup failed", description: result.error, variant: "destructive" });
-      throw new Error(result.error);
-    }
-
-    return { paymentId: String(result.data.id) };
-  };
-
-  const handlePaymentComplete = () => {
-    toast({
-      title: "Payment submitted",
-      description: `Your ${selectedPlan?.name} plan will be activated once payment is confirmed.`,
-    });
-    setShowPayment(false);
-    setInquiryId(null);
-    resetForm();
-  };
-
-  const paymentSummary = selectedPlan
-    ? {
-        title: `${selectedPlan.name} Advertising Plan`,
-        lines: [
-          { label: "Plan", value: selectedPlan.name },
-          { label: "Business", value: form.business_name || "—" },
-        ],
-        total: formatAdvertisingPlanPrice(selectedPlan),
-      }
-    : undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -476,9 +440,14 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
             )}
 
             {selectedPlan && (
-              <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2 text-sm text-primary font-medium">
-                Selected Plan: <strong>{selectedPlan.name}</strong> — {formatAdvertisingPlanPrice(selectedPlan)}
-                {selectedPlan.period_label}
+              <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 text-sm text-primary font-medium space-y-1">
+                <div>
+                  Selected Plan: <strong>{selectedPlan.name}</strong> — {formatAdvertisingPlanPrice(selectedPlan)}
+                  {selectedPlan.period_label}
+                </div>
+                <p className="text-xs font-normal text-primary/80">
+                  Billed monthly. Cancel anytime from your billing portal.
+                </p>
               </div>
             )}
             <Button
@@ -491,19 +460,11 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
               ) : (
                 <CreditCard className="w-5 h-5 mr-2" />
               )}
-              Proceed to Payment
+              Subscribe &amp; Pay Monthly
             </Button>
           </form>
         </div>
       </div>
-
-      <PaymentModal
-        open={showPayment}
-        onClose={() => setShowPayment(false)}
-        summary={paymentSummary}
-        onConfirm={handlePayConfirm}
-        onComplete={handlePaymentComplete}
-      />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList"
 import { getAdminListConfig } from "@/lib/admin/list-config";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { DEFAULT_CURRENCY } from "@/lib/monetisation/constants";
+import PartnerSubscriptionsPanel from "@/components/pages/admin/PartnerSubscriptionsPanel";
 
 const STATUSES = ["pending", "pending_payment", "active", "cancelled", "expired"];
 const LIST_CONFIG = getAdminListConfig(ADMIN_TABLES.vet_subscriptions);
@@ -57,7 +58,9 @@ export default function AdminSubscriptions() {
     updateRow(id, payload, "Subscription updated");
 
   return (
-    <div className="pb-10">
+    <div className="pb-10 space-y-10">
+      <PartnerSubscriptionsPanel />
+
       <AdminPageHeader
         title="Vet Subscriptions"
         description="Legacy vet advertising subscriptions. New vet clinic sign-ups come through /become-partner."

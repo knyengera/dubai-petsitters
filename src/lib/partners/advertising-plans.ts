@@ -11,6 +11,9 @@ export type AdvertisingPlan = {
   highlight: AdvertisingPlanHighlight;
   sort_order: number;
   is_active: boolean;
+  billing_interval: string;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
 };
 
 export function parseAdvertisingPlan(row: Record<string, unknown>): AdvertisingPlan {
@@ -28,6 +31,9 @@ export function parseAdvertisingPlan(row: Record<string, unknown>): AdvertisingP
       : "default") as AdvertisingPlanHighlight,
     sort_order: Number(row.sort_order ?? 0),
     is_active: Boolean(row.is_active),
+    billing_interval: String(row.billing_interval ?? "month"),
+    stripe_product_id: row.stripe_product_id ? String(row.stripe_product_id) : null,
+    stripe_price_id: row.stripe_price_id ? String(row.stripe_price_id) : null,
   };
 }
 
