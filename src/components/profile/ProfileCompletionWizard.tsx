@@ -112,6 +112,15 @@ export default function ProfileCompletionWizard() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [idDocFile, setIdDocFile] = useState<File | null>(null);
   const [identityVerified, setIdentityVerified] = useState(false);
+  // Tracks which KYC fields Stripe actually captured from the verified ID.
+  // Only these are locked; anything Stripe couldn't read stays editable so the
+  // host can fill it in manually.
+  const [idCaptured, setIdCaptured] = useState({
+    dob: false,
+    gender: false,
+    idType: false,
+    idNumber: false,
+  });
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [verificationSettings, setVerificationSettings] =
@@ -171,6 +180,12 @@ export default function ProfileCompletionWizard() {
         if (profile.phone) setPhone(profile.phone);
         setSignupAccountType(getSignupAccountType(profile));
         setIdentityVerified(profile.id_verification_status === "verified");
+        setIdCaptured({
+          dob: !!profile.date_of_birth,
+          gender: !!profile.gender,
+          idType: !!profile.id_type,
+          idNumber: !!profile.id_number?.trim(),
+        });
       }
     } catch {
       // Profile may not exist yet for new users
@@ -444,6 +459,13 @@ export default function ProfileCompletionWizard() {
           (profile.id_type as ProfileDetailsInput["id_type"]) || f.id_type,
         id_number: profile.id_number ?? f.id_number,
       }));
+      // Lock only what Stripe actually returned; leave the rest editable.
+      setIdCaptured({
+        dob: !!profile.date_of_birth,
+        gender: !!profile.gender,
+        idType: !!profile.id_type,
+        idNumber: !!profile.id_number?.trim(),
+      });
     }
     setStep("profile");
   }, [toast]);
@@ -616,10 +638,12 @@ export default function ProfileCompletionWizard() {
   // For verified hosts, fields captured from the ID document are locked when
   // Stripe returned a value, and stay editable as a fallback when it didn't.
   const isHostVerifiedKyc = signupAccountType === "host" && identityVerified;
-  const lockDob = isHostVerifiedKyc && !!form.date_of_birth;
-  const lockGender = isHostVerifiedKyc && !!form.gender;
-  const lockIdType = isHostVerifiedKyc && !!form.id_type;
-  const lockIdNumber = isHostVerifiedKyc && !!form.id_number.trim();
+  const lockDob = isHostVerifiedKyc && idCaptured.dob;
+  const lockGender = isHostVerifiedKyc && idCaptured.gender;
+  const lockIdType = isHostVerifiedKyc && idCaptured.idType;
+  const lockIdNumber = isHostVerifiedKyc && idCaptured.idNumber;
+  const hasLockedKycFields =
+    lockDob || lockGender || lockIdType || lockIdNumber;
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-8">
@@ -828,9 +852,9 @@ export default function ProfileCompletionWizard() {
             <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>
-                Date of birth, gender, ID type and ID number were captured from
-                your verified ID and can&apos;t be edited. Add your name, city
-                and a profile photo to continue.
+                {hasLockedKycFields
+                  ? "Details captured from your verified ID are locked and can't be edited. Please fill in any remaining fields below."
+                  : "Your ID is verified. Please complete the details below."}
               </span>
             </div>
           ) : signupAccountType === "host" ? (

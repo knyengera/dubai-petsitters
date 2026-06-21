@@ -8,10 +8,30 @@ Pet hosts verify their passport or national ID during onboarding using Stripe Id
 |----------|-------|---------|
 | `STRIPE_SECRET_KEY` | Server only | Creates and retrieves Identity verification sessions (reused from payments) |
 | `STRIPE_IDENTITY_WEBHOOK_SECRET` | Server only | Signing secret for the Identity webhook endpoint. Falls back to `STRIPE_WEBHOOK_SECRET` if unset |
+| `STRIPE_IDENTITY_RESTRICTED_KEY` | Server only | Optional. Restricted key used to read the verified `sex` field so the KYC step can auto-fill gender. Falls back to `STRIPE_SECRET_KEY` if unset |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server only | Records verification sessions and writes results from the webhook |
 | `NEXT_PUBLIC_APP_URL` | Public | Base URL embedded in the QR code and Stripe return URL |
 
 No publishable key is needed — the flow redirects to Stripe's hosted page rather than using a Stripe.js modal.
+
+## Auto-filling KYC details (DOB, gender, ID number)
+
+When verification succeeds, Stripe's extracted document data pre-fills the Profile & KYC step. Stripe omits sensitive PII from API responses unless it is explicitly expanded, so we retrieve the verified session with `expand` for `verified_outputs.dob`, `verified_outputs.id_number`, and the document's `sex`/`number` ([src/lib/identity/stripe-identity.ts](../src/lib/identity/stripe-identity.ts)).
+
+- `date of birth` and `ID number` are returned with the standard `STRIPE_SECRET_KEY` once expanded — these always auto-fill.
+- `sex` (gender) is extra-sensitive and Stripe only returns it when the request is authenticated with a restricted API key. To enable gender auto-fill:
+  1. Stripe Dashboard -> Developers -> API keys -> Create restricted key.
+  2. Set these Identity permissions to Read:
+     - "Identity Verification Sessions and Reports"
+     - "Access recent sensitive verification results"
+  3. Set the key as `STRIPE_IDENTITY_RESTRICTED_KEY`.
+- Without the restricted key, gender simply stays a manual selection on the KYC step; everything else still works.
+
+### No IP allowlist required
+
+This integration reads the verified PII immediately when the session becomes `verified` (the webhook and the desktop reconcile during onboarding), then stores it on the profile and never re-reads it from Stripe. That always falls inside Stripe's 48-hour window for the "Access recent sensitive verification results" permission, so a restricted key with that permission works without any IP restriction.
+
+IP allowlisting is only needed for the separate "Access all sensitive verification results" permission (reading PII older than 48 hours), which this app does not use. That matters on Vercel, whose serverless functions don't have stable outbound IPs — you can skip IP restrictions entirely here. (If you later add an over-48h read path, you'd need a static egress IP via Vercel Secure Compute or a proxy like QuotaGuard/Fixie.)
 
 ## Dashboard setup
 

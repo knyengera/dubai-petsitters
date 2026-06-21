@@ -8,6 +8,17 @@ function getStripeClient(): Stripe {
 }
 
 /**
+ * Client used for reading verification PII. Stripe gates `sex` behind a
+ * restricted key, so we prefer STRIPE_IDENTITY_RESTRICTED_KEY when present and
+ * fall back to the standard secret key (which still returns DOB / ID number).
+ */
+function getStripeReadClient(): Stripe {
+  const key = process.env.STRIPE_IDENTITY_RESTRICTED_KEY || getStripeSecretKey();
+  if (!key) throw new Error("Stripe is not configured");
+  return new Stripe(key);
+}
+
+/**
  * Dedicated signing secret for the Identity webhook endpoint. Falls back to the
  * shared payments secret so a single endpoint can serve both if desired.
  */
@@ -65,6 +76,27 @@ export async function retrieveVerificationReport(
 ): Promise<Stripe.Identity.VerificationReport> {
   const stripe = getStripeClient();
   return stripe.identity.verificationReports.retrieve(reportId);
+}
+
+/**
+ * Retrieves a verified session with its PII expanded. Stripe omits sensitive
+ * fields (DOB, sex, document number) from responses unless they're explicitly
+ * expanded, so we request them here to populate the user's KYC details.
+ */
+export async function retrieveVerificationSessionWithDetails(
+  sessionId: string
+): Promise<Stripe.Identity.VerificationSession> {
+  const stripe = getStripeReadClient();
+  return stripe.identity.verificationSessions.retrieve(sessionId, {
+    expand: [
+      "verified_outputs.dob",
+      "verified_outputs.sex",
+      "verified_outputs.id_number",
+      "last_verification_report.document.dob",
+      "last_verification_report.document.sex",
+      "last_verification_report.document.number",
+    ],
+  });
 }
 
 export function verifyIdentityWebhook(

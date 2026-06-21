@@ -6,7 +6,7 @@ import {
   mapStripeSexToGender,
   mapStripeStatus,
 } from "@/lib/identity/constants";
-import { retrieveVerificationReport } from "@/lib/identity/stripe-identity";
+import { retrieveVerificationSessionWithDetails } from "@/lib/identity/stripe-identity";
 import {
   setProfileVerificationStatus,
   setSessionStatusByStripeId,
@@ -87,34 +87,34 @@ type CapturedDocumentDetails = {
 };
 
 /**
- * Reads the document data (name, DOB, type, number, sex) extracted by Stripe
- * from the session's verification report. Returns an empty object when no
- * report is available or it can't be retrieved, so verification still succeeds.
+ * Reads the document data (name, DOB, type, number, sex) extracted by Stripe.
+ * These PII fields are omitted from API responses unless explicitly expanded,
+ * so we re-fetch the session with the PII expanded and prefer `verified_outputs`
+ * (the canonical verified data), falling back to the report's document. Returns
+ * an empty object when nothing can be read so verification still succeeds.
  */
 async function extractDocumentDetails(
   session: Stripe.Identity.VerificationSession
 ): Promise<CapturedDocumentDetails> {
-  const reportRef = session.last_verification_report;
-  if (!reportRef) return {};
-
   try {
-    const report =
-      typeof reportRef === "string"
-        ? await retrieveVerificationReport(reportRef)
-        : reportRef;
-    const doc = report.document;
-    if (!doc) return {};
+    const detailed = await retrieveVerificationSessionWithDetails(session.id);
+    const outputs = detailed.verified_outputs ?? null;
 
-    const firstName = doc.first_name?.trim() ?? "";
-    const lastName = doc.last_name?.trim() ?? "";
+    const report = detailed.last_verification_report;
+    const doc =
+      report && typeof report === "object" ? report.document ?? null : null;
+
+    const firstName = (outputs?.first_name ?? doc?.first_name)?.trim() ?? "";
+    const lastName = (outputs?.last_name ?? doc?.last_name)?.trim() ?? "";
     const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
 
     return {
       fullName: fullName || null,
-      dateOfBirth: formatStripeDob(doc.dob),
-      gender: mapStripeSexToGender(doc.sex),
-      idType: mapDocumentTypeToIdType(doc.type),
-      idNumber: doc.number?.trim() || null,
+      dateOfBirth: formatStripeDob(outputs?.dob ?? doc?.dob),
+      gender: mapStripeSexToGender(outputs?.sex ?? doc?.sex),
+      // Document type isn't part of verified_outputs, so read it from the report.
+      idType: mapDocumentTypeToIdType(doc?.type),
+      idNumber: (outputs?.id_number ?? doc?.number)?.trim() || null,
     };
   } catch {
     // Verification still counts even if we can't read the extracted details.
