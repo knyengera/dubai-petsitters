@@ -113,7 +113,7 @@ export default function SettingsPage() {
                 </dl>
               )}
               <Button variant="outline" className="rounded-xl" asChild>
-                <Link href="/profile/complete">Update profile</Link>
+                <Link href="/profile/edit">Update profile</Link>
               </Button>
             </CardContent>
           </Card>

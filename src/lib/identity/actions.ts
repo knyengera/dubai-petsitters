@@ -96,7 +96,9 @@ export async function getIdentityVerificationStatus(): Promise<IdentityStatusRes
  * app URL to encode in the desktop QR code. Always issues a new session so a
  * "Refresh" action can recover from expired or failed attempts.
  */
-export async function startIdentityVerification(): Promise<StartVerificationResult> {
+export async function startIdentityVerification(
+  options?: { force?: boolean }
+): Promise<StartVerificationResult> {
   if (!isStripeIdentityConfigured()) {
     return { success: false, error: "Identity verification is not configured." };
   }
@@ -122,7 +124,9 @@ export async function startIdentityVerification(): Promise<StartVerificationResu
     return { success: false, error: "Identity verification is only required for hosts." };
   }
 
-  if (profile.id_verification_status === "verified") {
+  // When re-verifying (force), skip the short-circuit so a brand-new session is
+  // created and the stored status is reset to `pending` below.
+  if (!options?.force && profile.id_verification_status === "verified") {
     return { success: true, verifyUrl: "", status: "verified" };
   }
 

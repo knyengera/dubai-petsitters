@@ -18,6 +18,7 @@ const PROTECTED_EXACT = new Set([
   "/appointments",
   "/become-host",
   "/host-profile/edit",
+  "/profile/edit",
   "/pets",
   "/ai-chat",
 ]);

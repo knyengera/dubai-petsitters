@@ -174,6 +174,8 @@ export async function saveProfileDetails(
   });
 
   revalidatePath("/profile/complete");
+  revalidatePath("/profile/edit");
+  revalidatePath("/settings");
   return { success: true };
 }
 
