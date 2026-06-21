@@ -18,6 +18,7 @@ import {
   MessageCircle,
   MapPin,
   Heart,
+  Settings,
 } from "lucide-react";
 import PetRemindersSection from "@/components/home/PetRemindersSection";
 import { usePetHealthAssistant } from "@/lib/pet-health-assistant-context";
@@ -30,6 +31,7 @@ const quickActions = [
   { icon: Stethoscope, color: "bg-success", en: "Find a Vet", ar: "ابحث عن طبيب", to: "/vets" },
   { icon: MessageCircle, color: "bg-warning", en: "Messages", ar: "الرسائل", to: "/messages" },
   { icon: Heart, color: "bg-destructive", en: "My Listings", ar: "إعلاناتي", to: "/my-adoptions" },
+  { icon: Settings, color: "bg-muted-foreground", en: "Settings", ar: "الإعدادات", to: "/settings" },
 ];
 
 export default function OwnerDashboard() {

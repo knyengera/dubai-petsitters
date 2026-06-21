@@ -22,6 +22,7 @@ import {
   Wallet,
   Clock,
   ExternalLink,
+  Settings,
 } from "lucide-react";
 
 const quickActions = [
@@ -30,6 +31,7 @@ const quickActions = [
   { icon: MessageCircle, color: "bg-warning", en: "Messages", ar: "الرسائل", to: "/messages" },
   { icon: Pencil, color: "bg-accent", en: "Edit Listing", ar: "تعديل الإعلان", to: "/host-profile/edit" },
   { icon: Bell, color: "bg-info", en: "Notifications", ar: "الإشعارات", to: "/notifications" },
+  { icon: Settings, color: "bg-muted-foreground", en: "Settings", ar: "الإعدادات", to: "/settings" },
 ];
 
 export default function HostDashboard({ hostProfile }: { hostProfile: NonNullable<HostProfile> }) {
