@@ -94,6 +94,47 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  if (user) {
+    const { data: accountStatus } = await supabase
+      .from("profiles")
+      .select("deactivated_at, deleted_at")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    // Soft-deleted accounts can never reach the app: sign out and bounce to
+    // the login page with a reason so the UI can explain what happened.
+    if (accountStatus?.deleted_at) {
+      await supabase.auth.signOut();
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.search = "";
+      loginUrl.searchParams.set("reason", "deleted");
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      copyCookies(supabaseResponse, redirectResponse);
+      return redirectResponse;
+    }
+
+    // Deactivation is reversible: an authenticated visit reactivates the
+    // account by clearing the flag and restoring the user's host listings.
+    if (accountStatus?.deactivated_at) {
+      const now = new Date().toISOString();
+      await supabase
+        .from("profiles")
+        .update({ deactivated_at: null, updated_at: now })
+        .eq("id", user.id);
+      await supabase
+        .from("pet_hosts")
+        .update({ is_available: true, updated_at: now })
+        .eq("user_id", user.id);
+      if (user.email) {
+        await supabase
+          .from("pet_hosts")
+          .update({ is_available: true, updated_at: now })
+          .eq("created_by", user.email);
+      }
+    }
+  }
+
   if (user && isGuestOnlyPath(pathname)) {
     const next = request.nextUrl.searchParams.get("next");
     const { data: profile } = await supabase

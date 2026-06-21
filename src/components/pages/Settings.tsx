@@ -7,10 +7,11 @@ import Link from "next/link";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, LogOut, AlertTriangle, User, Bell } from 'lucide-react';
+import { Trash2, LogOut, AlertTriangle, User, Bell, PauseCircle } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { getProfile } from "@/lib/profile/actions";
+import { deactivateAccount, softDeleteAccount } from "@/lib/account/actions";
 import { maskIdNumber } from "@/lib/auth/onboarding";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -21,6 +22,7 @@ import type { NotificationPreferences } from "@/lib/notifications/types";
 
 export default function SettingsPage() {
   const [deleting, setDeleting] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
   const { isEmailVerified, isPhoneVerified } = useAuth();
   const [profile, setProfile] = useState<Awaited<ReturnType<typeof getProfile>>>(null);
   const [prefs, setPrefs] = useState<NotificationPreferences | null>(null);
@@ -43,9 +45,24 @@ export default function SettingsPage() {
     setSavingPrefs(false);
   };
 
+  const handleDeactivateAccount = async () => {
+    setDeactivating(true);
+    const result = await deactivateAccount();
+    if (result.success) {
+      window.location.href = "/login";
+    } else {
+      setDeactivating(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     setDeleting(true);
-    await base44.auth.deleteUser();
+    const result = await softDeleteAccount();
+    if (result.success) {
+      window.location.href = "/login?reason=deleted";
+    } else {
+      setDeleting(false);
+    }
   };
 
   const handleLogout = () => {
@@ -169,6 +186,49 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Deactivate Account */}
+        <Card className="rounded-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <PauseCircle className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">Deactivate Account</h3>
+                <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                  Temporarily pauses your account. Your profile and any host listings are hidden, and you'll be signed out. <strong>Logging back in reactivates everything.</strong>
+                </p>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" className="mt-4 rounded-xl select-none min-h-[44px]" disabled={deactivating}>
+                      <PauseCircle className="w-4 h-4 mr-2" />
+                      Deactivate My Account
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Deactivate your account?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Your profile and host listings will be hidden and you'll be signed out. You can restore everything at any time by simply logging back in.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-xl select-none">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeactivateAccount}
+                        className="rounded-xl select-none"
+                        disabled={deactivating}
+                      >
+                        {deactivating ? 'Deactivating...' : 'Deactivate'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Delete Account */}
         <Card className="rounded-2xl border-destructive/20">
           <CardContent className="p-6">
@@ -179,7 +239,7 @@ export default function SettingsPage() {
               <div className="flex-1">
                 <h3 className="font-semibold text-foreground">Delete Account</h3>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                  Permanently deletes your account and all associated data including bookings, adoption requests, and profile information. <strong>This action cannot be undone.</strong>
+                  Closes your account and hides your profile and listings. You won't be able to log back in. Your records are retained, and account removal can be requested through support.
                 </p>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -192,7 +252,7 @@ export default function SettingsPage() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This will permanently delete your account and all your data — including bookings, adoption requests, and profile information. This action <strong>cannot be undone</strong>.
+                        This closes your account and hides your profile and listings. You <strong>won't be able to log back in</strong>. Your records are retained, and full removal can be requested through support.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

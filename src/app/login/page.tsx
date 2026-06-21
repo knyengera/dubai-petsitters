@@ -43,6 +43,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const nextPath = getSafeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
+  const accountDeleted = searchParams.get("reason") === "deleted";
 
   useEffect(() => {
     const typeParam = searchParams.get("type");
@@ -182,6 +183,13 @@ function LoginForm() {
           {isSignUp ? "Create your account" : "Sign in to continue"}
         </p>
       </div>
+
+      {accountDeleted && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          This account is no longer active. If you believe this is a mistake,
+          please contact support.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {isSignUp && (

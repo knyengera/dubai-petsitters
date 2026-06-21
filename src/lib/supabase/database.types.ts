@@ -75,6 +75,8 @@ export interface Database {
           liability_waiver_accepted_at: string | null;
           legal_documents_version: string | null;
           signup_account_type: "client" | "host" | null;
+          deactivated_at: string | null;
+          deleted_at: string | null;
           created_at: string;
           updated_at: string;
         };

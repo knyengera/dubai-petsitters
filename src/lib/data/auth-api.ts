@@ -40,12 +40,4 @@ export const authApi = {
       window.location.href = returnTo;
     }
   },
-
-  async deleteUser() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    console.warn(
-      "[authApi.deleteUser] Account deletion requires a server action with service role."
-    );
-  },
 };
