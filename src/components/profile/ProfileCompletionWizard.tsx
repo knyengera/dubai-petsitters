@@ -7,7 +7,6 @@ import {
   FileText,
   Home,
   Loader2,
-  Mail,
   Phone,
   Shield,
   ShieldCheck,
@@ -64,12 +63,11 @@ import {
 } from "@/lib/hosting/host-profile-form";
 import { entities } from "@/lib/data/entities";
 
-type Step = "legal" | "profile" | "identity" | "email" | "phone" | "host";
+type Step = "legal" | "profile" | "identity" | "phone" | "host";
 
 const BASE_STEPS: { id: Step; label: string; icon: typeof User }[] = [
   { id: "legal", label: "Legal agreements", icon: FileText },
   { id: "profile", label: "Profile & KYC", icon: User },
-  { id: "email", label: "Verify Email", icon: Mail },
   { id: "phone", label: "Verify Phone", icon: Phone },
 ];
 
@@ -89,7 +87,6 @@ export default function ProfileCompletionWizard() {
     isLoadingAuth,
     isEmailVerified,
     isPhoneVerified,
-    resendVerificationEmail,
     sendPhoneOtp,
     resendPhoneOtp,
     verifyPhoneOtp,
@@ -98,7 +95,6 @@ export default function ProfileCompletionWizard() {
   const [step, setStep] = useState<Step>("legal");
   const [loading, setLoading] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
-  const [resendingEmail, setResendingEmail] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [verifiedPhone, setVerifiedPhone] = useState("");
 
@@ -137,8 +133,7 @@ export default function ProfileCompletionWizard() {
         BASE_STEPS[0], // Legal
         IDENTITY_STEP, // Verify ID
         BASE_STEPS[1], // Profile & KYC
-        BASE_STEPS[2], // Email
-        BASE_STEPS[3], // Phone
+        BASE_STEPS[2], // Phone
         { id: "host" as const, label: "Host profile", icon: Home },
       ];
     }
@@ -312,14 +307,11 @@ export default function ProfileCompletionWizard() {
         setStep("profile");
         return;
       }
-      const emailVerified =
-        !!activeUser.email_confirmed_at ||
-        !verificationSettings.emailVerificationEnabled;
+      // Email is verified at account creation, so it's no longer a wizard step.
       const phoneVerified =
         !!activeUser.phone_confirmed_at ||
         !verificationSettings.phoneVerificationEnabled;
-      if (!emailVerified) setStep("email");
-      else if (!phoneVerified) setStep("phone");
+      if (!phoneVerified) setStep("phone");
       else if (isHostSignup(profile) && !hasHostProfile) setStep("host");
       else setStep("profile");
     };
@@ -425,11 +417,7 @@ export default function ProfileCompletionWizard() {
       }
 
       toast({ title: "Profile details saved" });
-      setStep(
-        isEmailVerified || !verificationSettings.emailVerificationEnabled
-          ? "phone"
-          : "email"
-      );
+      setStep("phone");
     } catch (err) {
       toast({
         title: err instanceof Error ? err.message : "Failed to save profile",
@@ -459,21 +447,6 @@ export default function ProfileCompletionWizard() {
     }
     setStep("profile");
   }, [toast]);
-
-  const handleResendEmail = async () => {
-    setResendingEmail(true);
-    try {
-      await resendVerificationEmail();
-      toast({ title: "Verification email sent" });
-    } catch (err) {
-      toast({
-        title: err instanceof Error ? err.message : "Failed to resend email",
-        variant: "destructive",
-      });
-    } finally {
-      setResendingEmail(false);
-    }
-  };
 
   const handleSendOtp = async () => {
     if (!phone.trim()) {
@@ -902,63 +875,6 @@ export default function ProfileCompletionWizard() {
           userId={user.id}
           onVerified={handleIdentityVerified}
         />
-      )}
-
-      {step === "email" && (
-        <div className="space-y-6 text-center">
-          {isEmailVerified ? (
-            <>
-              <CheckCircle className="mx-auto h-12 w-12 text-green-600" />
-              <p className="text-muted-foreground">Your email is verified.</p>
-              <Button
-                className="w-full rounded-xl"
-                onClick={() => setStep("phone")}
-              >
-                Continue to phone verification
-              </Button>
-            </>
-          ) : (
-            <>
-              <Mail className="mx-auto h-12 w-12 text-primary" />
-              <div>
-                <p className="font-medium">Verify your email</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  We sent a link to <strong>{user.email}</strong>. Click it to verify,
-                  then return here.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full rounded-xl"
-                onClick={handleResendEmail}
-                disabled={resendingEmail}
-              >
-                {resendingEmail ? "Sending…" : "Resend verification email"}
-              </Button>
-              <Button
-                className="w-full rounded-xl"
-                onClick={async () => {
-                  const supabase = createClient();
-                  await supabase.auth.refreshSession();
-                  const {
-                    data: { user: refreshed },
-                  } = await supabase.auth.getUser();
-                  if (refreshed?.email_confirmed_at) {
-                    setStep("phone");
-                  } else {
-                    toast({
-                      title: "Email not verified yet",
-                      description:
-                        "Check your inbox and click the verification link.",
-                    });
-                  }
-                }}
-              >
-                I&apos;ve verified my email
-              </Button>
-            </>
-          )}
-        </div>
       )}
 
       {step === "phone" && (
