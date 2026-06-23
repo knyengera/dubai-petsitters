@@ -154,7 +154,7 @@ export default function AppointmentBookingModal({ clinic, open, onClose }) {
                 <Input
                   value={form.owner_phone}
                   onChange={e => set('owner_phone', e.target.value)}
-                  placeholder="+966..."
+                  placeholder="+971..."
                   required
                   className="rounded-xl"
                 />

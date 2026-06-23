@@ -2,220 +2,220 @@ import type { BuildMetadataInput } from "@/lib/seo/metadata";
 
 export type PageSeo = Omit<BuildMetadataInput, "path"> & { path: string };
 
-const CITIES = "Riyadh, Jeddah, Dammam & Khobar";
+const CITIES = "Dubai, Abu Dhabi, Sharjah & Al Ain";
 
 /**
  * Per-route SEO copy for static public pages. Titles omit the brand suffix
- * (the layout template appends "| Saudi Petsitters") unless absoluteTitle is set.
- * Descriptions weave in city names and Arabic keywords for Saudi local search.
+ * (the layout template appends "| Dubai Petsitters") unless absoluteTitle is set.
+ * Descriptions weave in city names and Arabic keywords for UAE local search.
  */
 export const PAGE_SEO: Record<string, PageSeo> = {
   "/": {
     path: "/",
     absoluteTitle: true,
-    title: "Saudi Petsitters | Pet Sitting, Boarding & Vets in Saudi Arabia",
+    title: "Dubai Petsitters | Pet Sitting, Boarding & Vets in the UAE",
     description:
-      "Find trusted pet sitters, boarding, dog walking, and veterinary clinics across Saudi Arabia. Book in-home pet care in Riyadh, Jeddah, Dammam & Khobar. استضافة وفندقة الحيوانات الأليفة.",
+      "Find trusted pet sitters, boarding, dog walking, and veterinary clinics across the UAE. Book in-home pet care in Dubai, Abu Dhabi, Sharjah & Al Ain. استضافة وفندقة الحيوانات الأليفة.",
     keywords: [
-      "pet sitting Saudi Arabia",
-      "pet boarding Riyadh",
-      "pet sitter Riyadh",
-      "dog walking Riyadh",
-      "cat sitting Riyadh",
-      "find a vet Saudi Arabia",
+      "pet sitting UAE",
+      "pet boarding Dubai",
+      "pet sitter Dubai",
+      "dog walking Dubai",
+      "cat sitting Dubai",
+      "find a vet UAE",
       "استضافة حيوانات",
       "فندقة حيوانات أليفة",
     ],
   },
   "/hosting": {
     path: "/hosting",
-    title: "Pet Hosting & Boarding in Saudi Arabia",
+    title: "Pet Hosting & Boarding in the UAE",
     description:
       "Trusted pet hosting, boarding, daycare, and in-home sitting while you travel. Browse verified hosts in " +
       CITIES +
-      ". فندقة واستضافة الحيوانات الأليفة في السعودية.",
+      ". فندقة واستضافة الحيوانات الأليفة في الإمارات.",
     keywords: [
-      "pet boarding Saudi Arabia",
-      "pet hosting Riyadh",
-      "dog hotel Riyadh",
-      "pet daycare Jeddah",
+      "pet boarding UAE",
+      "pet hosting Dubai",
+      "dog hotel Dubai",
+      "pet daycare Abu Dhabi",
       "in-home pet care",
       "فندقة حيوانات",
     ],
   },
   "/hosts": {
     path: "/hosts",
-    title: "Find a Pet Sitter in Saudi Arabia",
+    title: "Find a Pet Sitter in the UAE",
     description:
       "Browse trusted, verified pet sitters and hosts for boarding, daycare, dog walking, and home sitting across " +
       CITIES +
       ". Book the perfect care for your pet. مربي حيوانات موثوق.",
     keywords: [
-      "pet sitter Saudi Arabia",
-      "pet sitter Riyadh",
-      "cat sitting Riyadh",
-      "dog walking Jeddah",
+      "pet sitter UAE",
+      "pet sitter Dubai",
+      "cat sitting Dubai",
+      "dog walking Abu Dhabi",
       "house sitting pets",
       "مربي حيوانات",
     ],
   },
   "/vets": {
     path: "/vets",
-    title: "Find a Vet in Saudi Arabia | Veterinary Clinics",
+    title: "Find a Vet in the UAE | Veterinary Clinics",
     description:
       "Browse veterinary clinics across " +
       CITIES +
-      ". Find emergency vets, specialists, vaccinations, and routine care near you. عيادات بيطرية في السعودية.",
+      ". Find emergency vets, specialists, vaccinations, and routine care near you. عيادات بيطرية في الإمارات.",
     keywords: [
-      "vet Saudi Arabia",
-      "veterinary clinic Riyadh",
-      "emergency vet Riyadh",
-      "animal hospital Jeddah",
+      "vet UAE",
+      "veterinary clinic Dubai",
+      "emergency vet Dubai",
+      "animal hospital Abu Dhabi",
       "pet vaccination",
       "عيادة بيطرية",
     ],
   },
   "/adopt": {
     path: "/adopt",
-    title: "Adopt a Pet in Saudi Arabia",
+    title: "Adopt a Pet in the UAE",
     description:
-      "Give a loving home to a pet in need. Browse cats, dogs, and other animals available for adoption across Saudi Arabia and submit an application online. تبني الحيوانات الأليفة.",
+      "Give a loving home to a pet in need. Browse cats, dogs, and other animals available for adoption across the UAE and submit an application online. تبني الحيوانات الأليفة.",
     keywords: [
-      "pet adoption Saudi Arabia",
-      "adopt a cat Riyadh",
-      "adopt a dog Jeddah",
-      "rescue pets Saudi Arabia",
+      "pet adoption UAE",
+      "adopt a cat Dubai",
+      "adopt a dog Abu Dhabi",
+      "rescue pets UAE",
       "تبني حيوانات",
     ],
   },
   "/lost-pets": {
     path: "/lost-pets",
-    title: "Lost & Found Pets in Saudi Arabia",
+    title: "Lost & Found Pets in the UAE",
     description:
-      "Report a lost pet or help reunite found animals with their owners across Saudi Arabia. Search lost and found listings in " +
+      "Report a lost pet or help reunite found animals with their owners across the UAE. Search lost and found listings in " +
       CITIES +
       ". الحيوانات المفقودة.",
     keywords: [
-      "lost pet Saudi Arabia",
-      "found pet Riyadh",
-      "lost dog Riyadh",
-      "lost cat Jeddah",
+      "lost pet UAE",
+      "found pet Dubai",
+      "lost dog Dubai",
+      "lost cat Abu Dhabi",
       "حيوانات مفقودة",
     ],
   },
   "/travel": {
     path: "/travel",
-    title: "Pet Travel Requirements for Saudi Arabia",
+    title: "Pet Travel Requirements for the UAE",
     description:
-      "Step-by-step guide to Saudi Arabia pet import and export requirements, vaccinations, and documents for travelling with your dog or cat. السفر مع الحيوانات الأليفة.",
+      "Step-by-step guide to UAE pet import and export requirements, vaccinations, and documents for travelling with your dog or cat. السفر مع الحيوانات الأليفة.",
     keywords: [
-      "pet travel Saudi Arabia",
-      "pet import Saudi Arabia",
-      "travelling with pets Saudi Arabia",
+      "pet travel UAE",
+      "pet import UAE",
+      "travelling with pets UAE",
       "pet export requirements",
       "السفر مع الحيوانات",
     ],
   },
   "/forum": {
     path: "/forum",
-    title: "Pet Owner Community Forum | Saudi Arabia",
+    title: "Pet Owner Community Forum | UAE",
     description:
-      "Ask questions, share advice, and connect with fellow pet owners across Saudi Arabia. Discuss pet care, health, training, and local services. مجتمع محبي الحيوانات.",
+      "Ask questions, share advice, and connect with fellow pet owners across the UAE. Discuss pet care, health, training, and local services. مجتمع محبي الحيوانات.",
     keywords: [
-      "pet forum Saudi Arabia",
+      "pet forum UAE",
       "pet owners community",
       "pet care advice",
-      "dog owners Riyadh",
+      "dog owners Dubai",
       "منتدى الحيوانات الأليفة",
     ],
   },
   "/blog": {
     path: "/blog",
-    title: "Pet Care Blog & Guides | Saudi Arabia",
+    title: "Pet Care Blog & Guides | UAE",
     description:
-      "Expert pet care tips, guides, and stories for pet owners in Saudi Arabia. Learn about pet health, nutrition, training, and travel. مدونة العناية بالحيوانات.",
+      "Expert pet care tips, guides, and stories for pet owners in the UAE. Learn about pet health, nutrition, training, and travel. مدونة العناية بالحيوانات.",
     keywords: [
-      "pet care tips Saudi Arabia",
+      "pet care tips UAE",
       "pet care blog",
       "dog care guide",
-      "cat care Saudi Arabia",
+      "cat care UAE",
       "مدونة الحيوانات الأليفة",
     ],
   },
   "/about": {
     path: "/about",
-    title: "About Saudi Petsitters",
+    title: "About Dubai Petsitters",
     description:
-      "Saudi Petsitters connects pet owners with trusted hosts, sitters, vets, and resources across the Kingdom. Learn about our mission to improve pet care in Saudi Arabia.",
+      "Dubai Petsitters connects pet owners with trusted hosts, sitters, vets, and resources across the UAE. Learn about our mission to improve pet care in the UAE.",
     keywords: [
-      "about Saudi Petsitters",
-      "pet care community Saudi Arabia",
+      "about Dubai Petsitters",
+      "pet care community UAE",
       "trusted pet services",
     ],
   },
   "/partners": {
     path: "/partners",
-    title: "Pet Business Partners in Saudi Arabia | Shops, Groomers & More",
+    title: "Pet Business Partners in the UAE | Shops, Groomers & More",
     description:
-      "Discover trusted pet businesses across Saudi Arabia — pet shops, groomers, trainers, breeders, insurance, and more. Browse partners by city and service.",
+      "Discover trusted pet businesses across the UAE — pet shops, groomers, trainers, breeders, insurance, and more. Browse partners by city and service.",
     keywords: [
-      "pet business directory Saudi Arabia",
-      "pet shop Riyadh",
-      "pet groomer Jeddah",
-      "dog trainer Saudi Arabia",
-      "pet insurance Saudi Arabia",
+      "pet business directory UAE",
+      "pet shop Dubai",
+      "pet groomer Abu Dhabi",
+      "dog trainer UAE",
+      "pet insurance UAE",
     ],
   },
   "/deals": {
     path: "/deals",
-    title: "Pet Deals & Discounts in Saudi Arabia | Member Offers",
+    title: "Pet Deals & Discounts in the UAE | Member Offers",
     description:
       "Exclusive deals and discount codes from trusted pet partners across " +
       CITIES +
       ". Save on pet shops, grooming, vet care, food, and insurance. Sign in to reveal member promo codes.",
     keywords: [
-      "pet deals Saudi Arabia",
-      "pet discounts Riyadh",
-      "pet shop offers Jeddah",
-      "grooming discount Saudi Arabia",
+      "pet deals UAE",
+      "pet discounts Dubai",
+      "pet shop offers Abu Dhabi",
+      "grooming discount UAE",
       "pet promo codes",
       "عروض الحيوانات الأليفة",
     ],
   },
   "/become-partner": {
     path: "/become-partner",
-    title: "Advertise Your Pet Business in Saudi Arabia",
+    title: "Advertise Your Pet Business in the UAE",
     description:
-      "Reach Saudi Arabia's most engaged community of pet owners. Advertise your vet clinic, pet shop, grooming, training, or boarding business with Saudi Petsitters.",
+      "Reach the UAE's most engaged community of pet owners. Advertise your vet clinic, pet shop, grooming, training, or boarding business with Dubai Petsitters.",
     keywords: [
-      "pet business advertising Saudi Arabia",
+      "pet business advertising UAE",
       "vet clinic marketing",
-      "pet shop advertising Riyadh",
-      "grooming business Saudi Arabia",
+      "pet shop advertising Dubai",
+      "grooming business UAE",
     ],
   },
   "/terms": {
     path: "/terms",
     title: "Terms & Conditions",
     description:
-      "Read the terms and conditions governing the use of Saudi Petsitters services.",
+      "Read the terms and conditions governing the use of Dubai Petsitters services.",
   },
   "/privacy": {
     path: "/privacy",
     title: "Privacy Policy",
     description:
-      "Learn how Saudi Petsitters collects, uses, and protects your personal information.",
+      "Learn how Dubai Petsitters collects, uses, and protects your personal information.",
   },
   "/disclaimer": {
     path: "/disclaimer",
     title: "Disclaimer",
     description:
-      "Important disclaimers regarding the use of Saudi Petsitters and its services.",
+      "Important disclaimers regarding the use of Dubai Petsitters and its services.",
   },
   "/liability-waiver": {
     path: "/liability-waiver",
     title: "Liability Waiver",
     description:
-      "Review the liability waiver for pet hosting and care services arranged through Saudi Petsitters.",
+      "Review the liability waiver for pet hosting and care services arranged through Dubai Petsitters.",
   },
 };

@@ -6,8 +6,8 @@ export const forumStrings = {
     ar: "منتدى المجتمع",
   },
   heroSubtitle: {
-    en: "Ask questions, share advice, and connect with fellow pet owners across Saudi Arabia.",
-    ar: "اطرح الأسئلة، شارك النصائح، وتواصل مع مربي الحيوانات الأليفة في جميع أنحاء المملكة.",
+    en: "Ask questions, share advice, and connect with fellow pet owners across the UAE.",
+    ar: "اطرح الأسئلة، شارك النصائح، وتواصل مع مربي الحيوانات الأليفة في جميع أنحاء الإمارات.",
   },
   searchForums: {
     en: "Search forums...",
@@ -380,8 +380,8 @@ export const forumBoardI18n: Record<
   announcements: {
     title: { en: "Announcements", ar: "الإعلانات" },
     description: {
-      en: "Official updates and news from Saudi Petsitters.",
-      ar: "تحديثات وأخبار رسمية من Saudi Petsitters.",
+      en: "Official updates and news from Dubai Petsitters.",
+      ar: "تحديثات وأخبار رسمية من Dubai Petsitters.",
     },
   },
   "pet-care": {

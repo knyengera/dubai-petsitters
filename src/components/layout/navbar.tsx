@@ -33,7 +33,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center group">
             <img
               src="/logo.png"
-              alt="Saudi Petsitters"
+              alt="Dubai Petsitters"
               className="h-10 w-auto transition-transform group-hover:scale-105 lg:h-12"
             />
           </Link>

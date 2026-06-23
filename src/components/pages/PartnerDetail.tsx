@@ -59,7 +59,7 @@ export default function PartnerDetail() {
   const galleryPhotos = [partner.image_url, ...(partner.gallery || [])].filter(Boolean);
   const fallbackPhotos = galleryPhotos.length > 0 ? galleryPhotos : [FALLBACK_IMAGE];
   const mapQuery = encodeURIComponent(
-    [partner.name, partner.address, partner.city, "Saudi Arabia"].filter(Boolean).join(", ")
+    [partner.name, partner.address, partner.city, "UAE"].filter(Boolean).join(", ")
   );
   const detailRows = formatBusinessDetailsForDisplay(
     partner.business_type,

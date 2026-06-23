@@ -1,4 +1,4 @@
--- Demo blog posts for Saudi Petsitters (idempotent upsert)
+-- Demo blog posts for Dubai Petsitters (idempotent upsert)
 
 INSERT INTO blog_posts (
   id,
@@ -20,28 +20,28 @@ INSERT INTO blog_posts (
 ) VALUES
   (
     '55555555-5555-4555-8555-111111111111',
-    'How to Prepare Your Pet for Summer in Saudi Arabia',
-    'prepare-pet-for-saudi-summer',
+    'How to Prepare Your Pet for Summer in the UAE',
+    'prepare-pet-for-dubai-summer',
     'Practical heat-safety tips for walks, hydration, grooming, and emergency warning signs.',
-    '<p>Saudi summers can be challenging for pets. With temperatures regularly exceeding 40°C, owners need a proactive plan to keep animals safe, comfortable, and healthy.</p><h2>Walk smarter, not longer</h2><p>Keep walks short and schedule them before sunrise or after sunset. Hot pavement can burn paw pads in seconds — if you cannot hold your hand on the ground for five seconds, it is too hot for your pet.</p><h2>Hydration and shade</h2><ul><li>Provide constant access to fresh, cool water indoors and outdoors.</li><li>Never leave pets in parked cars, even for a few minutes.</li><li>Create shaded rest areas if your pet spends time in a yard or balcony.</li></ul><h2>Warning signs to watch for</h2><p>Heavy panting, weakness, drooling, vomiting, or confusion can signal heatstroke. Move your pet to a cool area immediately and contact a veterinarian without delay.</p>',
+    '<p>UAE summers can be challenging for pets. With temperatures regularly exceeding 40°C, owners need a proactive plan to keep animals safe, comfortable, and healthy.</p><h2>Walk smarter, not longer</h2><p>Keep walks short and schedule them before sunrise or after sunset. Hot pavement can burn paw pads in seconds — if you cannot hold your hand on the ground for five seconds, it is too hot for your pet.</p><h2>Hydration and shade</h2><ul><li>Provide constant access to fresh, cool water indoors and outdoors.</li><li>Never leave pets in parked cars, even for a few minutes.</li><li>Create shaded rest areas if your pet spends time in a yard or balcony.</li></ul><h2>Warning signs to watch for</h2><p>Heavy panting, weakness, drooling, vomiting, or confusion can signal heatstroke. Move your pet to a cool area immediately and contact a veterinarian without delay.</p>',
     'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1200&q=85',
     'pet_care',
-    'Saudi Petsitters Team',
+    'Dubai Petsitters Team',
     true,
     'published',
     now() - interval '14 days',
-    ARRAY['summer', 'heat-safety', 'saudi-arabia'],
-    'Summer Pet Care Guide for Saudi Arabia',
-    'Heat-safety tips for pet walks, hydration, grooming, and emergency warning signs in Saudi summers.',
+    ARRAY['summer', 'heat-safety', 'uae'],
+    'Summer Pet Care Guide for the UAE',
+    'Heat-safety tips for pet walks, hydration, grooming, and emergency warning signs in UAE summers.',
     true,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-222222222222',
     'Vaccination Basics for New Pet Owners',
     'vaccination-basics-new-pet-owners',
     'A simple guide to core vaccines and when to ask your vet for a tailored schedule.',
-    '<p>Bringing a new pet home is exciting — and vaccinations are one of the most important steps in protecting their long-term health.</p><h2>Start with a wellness visit</h2><p>Vaccination plans depend on species, age, lifestyle, and previous medical history. Schedule a wellness check within the first week, bring any adoption or breeder records, and ask your veterinarian to build a schedule tailored to your pet.</p><h2>Core vaccines to discuss</h2><ul><li>Rabies (required in many regions)</li><li>Combination vaccines for dogs (distemper, parvovirus, adenovirus)</li><li>Core feline vaccines (panleukopenia, calicivirus, herpesvirus)</li><li>Parasite prevention for fleas, ticks, and worms</li></ul><p>Keep a simple vaccination log and set reminders for boosters. Your vet clinic on Saudi Petsitters can help you stay on track.</p>',
+    '<p>Bringing a new pet home is exciting — and vaccinations are one of the most important steps in protecting their long-term health.</p><h2>Start with a wellness visit</h2><p>Vaccination plans depend on species, age, lifestyle, and previous medical history. Schedule a wellness check within the first week, bring any adoption or breeder records, and ask your veterinarian to build a schedule tailored to your pet.</p><h2>Core vaccines to discuss</h2><ul><li>Rabies (required in many regions)</li><li>Combination vaccines for dogs (distemper, parvovirus, adenovirus)</li><li>Core feline vaccines (panleukopenia, calicivirus, herpesvirus)</li><li>Parasite prevention for fleas, ticks, and worms</li></ul><p>Keep a simple vaccination log and set reminders for boosters. Your vet clinic on Dubai Petsitters can help you stay on track.</p>',
     'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=1200&q=85',
     'health',
     'Dr. Reem Al-Salem',
@@ -50,19 +50,19 @@ INSERT INTO blog_posts (
     now() - interval '10 days',
     ARRAY['vaccination', 'vet-care', 'new-owners'],
     'Vaccination Basics for New Pet Owners',
-    'Core vaccines, wellness visits, and booster schedules explained for new pet owners in Saudi Arabia.',
+    'Core vaccines, wellness visits, and booster schedules explained for new pet owners in the UAE.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-333333333333',
     'Choosing the Right Pet Sitter',
     'choosing-the-right-pet-sitter',
     'Questions to ask before boarding, daycare, or home-sitting bookings.',
-    '<p>Finding trustworthy care for your pet while you travel or work long hours can feel overwhelming. The right sitter should feel like an extension of your own routine.</p><h2>What to ask every sitter</h2><ul><li>How many pets do you host at once, and what species do you accept?</li><li>Can you follow my pet''s feeding, medication, and exercise schedule?</li><li>What is your emergency plan if my pet becomes ill?</li><li>How often will you send updates and photos?</li></ul><h2>Red flags to avoid</h2><p>Vague answers about experience, unwillingness to share references, or no clear cancellation policy are worth noting. On Saudi Petsitters, verified hosts display ratings, services, and availability to help you compare options confidently.</p>',
+    '<p>Finding trustworthy care for your pet while you travel or work long hours can feel overwhelming. The right sitter should feel like an extension of your own routine.</p><h2>What to ask every sitter</h2><ul><li>How many pets do you host at once, and what species do you accept?</li><li>Can you follow my pet''s feeding, medication, and exercise schedule?</li><li>What is your emergency plan if my pet becomes ill?</li><li>How often will you send updates and photos?</li></ul><h2>Red flags to avoid</h2><p>Vague answers about experience, unwillingness to share references, or no clear cancellation policy are worth noting. On Dubai Petsitters, verified hosts display ratings, services, and availability to help you compare options confidently.</p>',
     'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200&q=85',
     'lifestyle',
-    'Saudi Petsitters Team',
+    'Dubai Petsitters Team',
     true,
     'published',
     now() - interval '7 days',
@@ -70,7 +70,7 @@ INSERT INTO blog_posts (
     'How to Choose the Right Pet Sitter',
     'Essential questions for boarding, daycare, and home-sitting before you book a pet sitter.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-444444444444',
@@ -86,9 +86,9 @@ INSERT INTO blog_posts (
     now() - interval '5 days',
     ARRAY['dog-training', 'obedience', 'puppies'],
     '5 Essential Dog Training Commands',
-    'Teach sit, stay, come, leave it, and heel with practical tips for Saudi pet owners.',
+    'Teach sit, stay, come, leave it, and heel with practical tips for UAE pet owners.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-555555555555',
@@ -106,25 +106,25 @@ INSERT INTO blog_posts (
     'Beginner''s Guide to Pet Nutrition',
     'Label reading, portion control, and species-specific feeding tips for pet owners.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-666666666666',
-    'Saudi Petsitters Launches Nationwide Vet Directory',
-    'saudi-petsitters-vet-directory-launch',
+    'Dubai Petsitters Launches Nationwide Vet Directory',
+    'dubai-petsitters-vet-directory-launch',
     'Find approved clinics, book appointments, and access pet health resources in one place.',
-    '<p>We are excited to announce the expansion of our vet directory across Saudi Arabia, making it easier than ever to find trusted clinics near you.</p><h2>What is new</h2><ul><li>Search clinics by city, specialty, and services offered.</li><li>Book appointments directly through the platform.</li><li>Read verified reviews from other pet owners.</li><li>Access our growing library of pet care articles.</li></ul><p>Whether you need a routine checkup, emergency care referral, or specialist consultation, Saudi Petsitters connects you with the right clinic faster.</p><p><strong>Explore the directory today</strong> and give your pet the care they deserve.</p>',
+    '<p>We are excited to announce the expansion of our vet directory across the UAE, making it easier than ever to find trusted clinics near you.</p><h2>What is new</h2><ul><li>Search clinics by city, specialty, and services offered.</li><li>Book appointments directly through the platform.</li><li>Read verified reviews from other pet owners.</li><li>Access our growing library of pet care articles.</li></ul><p>Whether you need a routine checkup, emergency care referral, or specialist consultation, Dubai Petsitters connects you with the right clinic faster.</p><p><strong>Explore the directory today</strong> and give your pet the care they deserve.</p>',
     'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=1200&q=85',
     'news',
-    'Saudi Petsitters Team',
+    'Dubai Petsitters Team',
     true,
     'published',
     now() - interval '1 day',
     ARRAY['news', 'vet-directory', 'platform'],
-    'Saudi Petsitters Vet Directory Launch',
+    'Dubai Petsitters Vet Directory Launch',
     'Nationwide vet directory with appointments, reviews, and pet health resources.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   )
 ON CONFLICT (id) DO UPDATE SET
   title = EXCLUDED.title,

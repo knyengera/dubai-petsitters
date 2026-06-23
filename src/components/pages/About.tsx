@@ -7,7 +7,7 @@ import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_TEL } from '@/lib/seo/site'
 const values = [
   { icon: Heart, title: 'Compassion First', desc: 'Every decision we make is guided by the well-being of animals and the people who love them.' },
   { icon: Shield, title: 'Trust & Safety', desc: 'All hosts and vet listings are reviewed to ensure a safe, reliable experience for every pet family.' },
-  { icon: Users, title: 'Community Driven', desc: 'Built by Saudi pet lovers, for Saudi pet lovers — a community that genuinely cares.' },
+  { icon: Users, title: 'Community Driven', desc: 'Built by UAE pet lovers, for UAE pet lovers — a community that genuinely cares.' },
 ];
 
 export default function About() {
@@ -18,7 +18,7 @@ export default function About() {
         <section>
           <h2 className="font-heading text-2xl font-bold text-foreground mb-4">Our Mission</h2>
           <p className="text-muted-foreground leading-relaxed text-base">
-            Saudi Petsitters was founded with a simple mission: to make pet care in Saudi Arabia easier, safer, and more accessible. 
+            Dubai Petsitters was founded with a simple mission: to make pet care in the UAE easier, safer, and more accessible. 
             Whether you're looking for a trusted host to care for your pet while you travel, a reputable veterinary clinic, or a loving 
             home for an animal in need — we're here to help every step of the way.
           </p>
@@ -44,9 +44,9 @@ export default function About() {
         <section>
           <h2 className="font-heading text-2xl font-bold text-foreground mb-4">Our Story</h2>
           <p className="text-muted-foreground leading-relaxed text-base">
-            Founded in Riyadh, Saudi Petsitters grew out of a personal frustration: finding reliable, caring pet services in the Kingdom 
+            Founded in Dubai, Dubai Petsitters grew out of a personal frustration: finding reliable, caring pet services in the UAE 
             was unnecessarily difficult. Our founders — passionate pet owners themselves — set out to build a platform that solves this 
-            problem for every family in Saudi Arabia. Today, we connect thousands of pet owners with vetted hosts, certified vet clinics, 
+            problem for every family in the UAE. Today, we connect thousands of pet owners with vetted hosts, certified vet clinics, 
             adoption centers, and a thriving community of fellow animal lovers.
           </p>
         </section>

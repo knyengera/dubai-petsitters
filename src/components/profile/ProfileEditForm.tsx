@@ -258,7 +258,7 @@ export default function ProfileEditForm() {
                     value={form.city}
                     onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                     required
-                    placeholder="e.g. Riyadh"
+                    placeholder="e.g. Dubai"
                     className="rounded-xl"
                   />
                 </div>

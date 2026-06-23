@@ -14,14 +14,14 @@ export const SPECIES_REQS: Record<string, string[]> = {
     "Rabies vaccination",
     "Health certificate (within 10 days)",
     "Microchip (ISO 11784/11785)",
-    "MEWA export permit",
+    "MOCCAE export permit",
     "Vet-signed health declaration",
   ],
   cat: [
     "Rabies vaccination (if required)",
     "Health certificate (within 10 days)",
     "Microchip recommended",
-    "MEWA export permit",
+    "MOCCAE export permit",
   ],
   bird: [
     "CITES permit (if applicable)",
@@ -31,15 +31,15 @@ export const SPECIES_REQS: Record<string, string[]> = {
   ],
 };
 
-export const SAUDI_IMPORT_CHECKLIST = [
+export const UAE_IMPORT_CHECKLIST = [
   { en: "Original health certificate from country of origin", ar: "شهادة صحة أصلية من بلد المنشأ" },
   { en: "Rabies vaccination certificate", ar: "شهادة تطعيم ضد داء الكلب" },
   { en: "Valid microchip (ISO standard)", ar: "رقاقة إلكترونية سارية المفعول (معيار ISO)" },
-  { en: "MEWA import permit", ar: "تصريح استيراد من وزارة البيئة (مياه وزراعة)" },
-  { en: "Nafath digital identity verification", ar: "التحقق من الهوية الرقمية عبر نفاذ" },
-  { en: "Pet must not be on Saudi banned species list", ar: "يجب ألا يكون الحيوان ضمن القائمة المحظورة" },
-  { en: "Pet must be at least 3 months old", ar: "يجب ألا يقل عمر الحيوان عن 3 أشهر" },
-  { en: "Owner must be Saudi national or resident", ar: "يجب أن يكون المالك مواطناً سعودياً أو مقيماً" },
+  { en: "MOCCAE import permit", ar: "تصريح استيراد من وزارة التغير المناخي والبيئة" },
+  { en: "UAE Pass digital identity verification", ar: "التحقق من الهوية الرقمية عبر الهوية الرقمية UAE Pass" },
+  { en: "Pet must not be on the UAE banned species list", ar: "يجب ألا يكون الحيوان ضمن القائمة المحظورة" },
+  { en: "Pet must be at least 4 months old", ar: "يجب ألا يقل عمر الحيوان عن 4 أشهر" },
+  { en: "Owner must be a UAE national or resident", ar: "يجب أن يكون المالك مواطناً إماراتياً أو مقيماً" },
 ] as const;
 
 export function formatTravelKnowledgeForPrompt(): string {
@@ -52,14 +52,14 @@ export function formatTravelKnowledgeForPrompt(): string {
     .map(([species, reqs]) => `${species}: ${reqs.join("; ")}`)
     .join("\n");
 
-  const importChecklist = SAUDI_IMPORT_CHECKLIST.map((item) => `- ${item.en}`).join("\n");
+  const importChecklist = UAE_IMPORT_CHECKLIST.map((item) => `- ${item.en}`).join("\n");
 
   return `Known destination rules (verify with authorities — regulations change):
 ${destinations}
 
-Saudi export requirements by species:
+UAE export requirements by species:
 ${exportReqs}
 
-Saudi import checklist:
+UAE import checklist:
 ${importChecklist}`;
 }

@@ -90,7 +90,7 @@ const trustStats = [
   { icon: Clock, headlineEn: '24/7 Emergency', headlineAr: 'طوارئ ٢٤/٧', subEn: 'Always here for you', subAr: 'نحن دائماً معك' },
   { icon: Users, headlineEn: '12,000+', headlineAr: '+١٢٠٠٠', subEn: 'Pet Owners', subAr: 'مالك حيوان أليف' },
   { icon: Stethoscope, headlineEn: '350+', headlineAr: '+٣٥٠', subEn: 'Verified Vets', subAr: 'طبيب معتمد' },
-  { icon: MapPin, headlineEn: '15', headlineAr: '١٥', subEn: 'Saudi Cities', subAr: 'مدينة سعودية' },
+  { icon: MapPin, headlineEn: '7', headlineAr: '٧', subEn: 'Emirates', subAr: 'إمارات' },
 ];
 
 function FeaturedVetsSection({ t }) {
@@ -292,7 +292,7 @@ export default function Home() {
             {t("Start Your Pet's Health Journey", 'ابدأ رحلة صحة حيوانك الأليف')}
           </h2>
           <p className="text-white/80 mb-6">
-            {t('Join thousands of Saudi pet owners trusting Saudi Petsitters', 'انضم لآلاف أصحاب الحيوانات الأليفة الذين يثقون بـ سعودي بيتسيترز')}
+            {t('Join thousands of UAE pet owners trusting Dubai Petsitters', 'انضم لآلاف أصحاب الحيوانات الأليفة الذين يثقون بـ دبي بيتسيترز')}
           </p>
           <Link
             href={homePath}

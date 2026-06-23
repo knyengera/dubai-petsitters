@@ -32,7 +32,7 @@ import {
 } from "@/lib/partners/advertising-plans";
 import {
   PARTNER_TYPES,
-  SAUDI_CITIES,
+  UAE_CITIES,
   getDefaultBusinessDetails,
   getPartnerTypeLabel,
   validateBusinessDetails,
@@ -53,7 +53,7 @@ const PARTNER_ICONS: Record<PartnerTypeId, LucideIcon> = {
 const stats = [
   { num: "12,000+", label: "Active Pet Owners" },
   { num: "350+", label: "Vet Connections" },
-  { num: "15", label: "Saudi Cities" },
+  { num: "7", label: "Emirates" },
   { num: "4.9★", label: "Platform Rating" },
 ];
 
@@ -225,7 +225,7 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
         <div className="text-center mb-10">
           <h2 className="font-heading text-3xl font-bold text-foreground mb-2">Who Can Partner With Us?</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            We welcome all pet-related businesses looking to grow their customer base in Saudi Arabia.
+            We welcome all pet-related businesses looking to grow their customer base in the UAE.
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-16">
@@ -398,7 +398,7 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
                   className="mt-1 w-full h-9 rounded-xl border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   <option value="">Select city</option>
-                  {SAUDI_CITIES.map((c) => (
+                  {UAE_CITIES.map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>

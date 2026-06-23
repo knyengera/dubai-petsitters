@@ -19,7 +19,7 @@ export async function generateMetadata({
   if (UUID_RE.test(boardSlug)) {
     return buildPageMetadata({
       title: "Community Forum",
-      description: "Saudi Petsitters pet owner community forum.",
+      description: "Dubai Petsitters pet owner community forum.",
       path: "/forum",
       noIndex: true,
     });
@@ -31,7 +31,7 @@ export async function generateMetadata({
   if (!board) {
     return buildPageMetadata({
       title: "Forum Board",
-      description: "Browse discussions in the Saudi Petsitters community forum.",
+      description: "Browse discussions in the Dubai Petsitters community forum.",
       path: `/forum/${boardSlug}`,
       noIndex: true,
     });
@@ -41,11 +41,11 @@ export async function generateMetadata({
     title: `${board.title} — Pet Forum`,
     description:
       board.description ||
-      `Discussions about ${board.title} from pet owners across Saudi Arabia. Ask questions and share advice.`,
+      `Discussions about ${board.title} from pet owners across the UAE. Ask questions and share advice.`,
     path: `/forum/${board.slug}`,
     keywords: [
       `${board.title} pet forum`,
-      "pet owners community Saudi Arabia",
+      "pet owners community UAE",
     ],
   });
 }

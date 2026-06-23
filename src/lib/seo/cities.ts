@@ -8,18 +8,18 @@ export type CitySeo = {
 };
 
 /**
- * Cities Saudi Petsitters operates in. The `name` values must match the city
+ * Cities Dubai Petsitters operates in. The `name` values must match the city
  * strings stored on `pet_hosts.city` and `vet_clinics.city` (see HostFilters).
  */
 export const SEO_CITIES: CitySeo[] = [
-  { slug: "riyadh", name: "Riyadh", nameAr: "الرياض" },
-  { slug: "jeddah", name: "Jeddah", nameAr: "جدة" },
-  { slug: "dammam", name: "Dammam", nameAr: "الدمام" },
-  { slug: "makkah", name: "Makkah", nameAr: "مكة" },
-  { slug: "madinah", name: "Madinah", nameAr: "المدينة" },
-  { slug: "khobar", name: "Khobar", nameAr: "الخبر" },
-  { slug: "tabuk", name: "Tabuk", nameAr: "تبوك" },
-  { slug: "abha", name: "Abha", nameAr: "أبها" },
+  { slug: "dubai", name: "Dubai", nameAr: "دبي" },
+  { slug: "abu-dhabi", name: "Abu Dhabi", nameAr: "أبوظبي" },
+  { slug: "sharjah", name: "Sharjah", nameAr: "الشارقة" },
+  { slug: "ajman", name: "Ajman", nameAr: "عجمان" },
+  { slug: "al-ain", name: "Al Ain", nameAr: "العين" },
+  { slug: "ras-al-khaimah", name: "Ras Al Khaimah", nameAr: "رأس الخيمة" },
+  { slug: "fujairah", name: "Fujairah", nameAr: "الفجيرة" },
+  { slug: "umm-al-quwain", name: "Umm Al Quwain", nameAr: "أم القيوين" },
 ];
 
 export function getCityBySlug(slug: string): CitySeo | undefined {

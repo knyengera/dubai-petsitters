@@ -14,14 +14,14 @@ const DEFAULT_ALT = "Pet care banner";
 /** Exact path → hero metadata. All routes use the hosting image unless overridden. */
 export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
   "/": {
-    title: "Saudi Petsitters",
-    subtitle: "Saudi Arabia's trusted pet care community",
+    title: "Dubai Petsitters",
+    subtitle: "The UAE's trusted pet care community",
     imageAlt: DEFAULT_ALT,
   },
   "/vets": {
     title: "Find a Vet",
     subtitle:
-      "Browse veterinary clinics across Saudi Arabia. Find emergency services, specialists, and routine care near you.",
+      "Browse veterinary clinics across the UAE. Find emergency services, specialists, and routine care near you.",
     imageAlt: DEFAULT_ALT,
   },
   "/adopt": {
@@ -45,34 +45,34 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
   "/hosts": {
     title: "Find a Pet Host",
     subtitle:
-      "Browse trusted pet sitters and hosts across Saudi Arabia. Book the perfect care for your pet.",
+      "Browse trusted pet sitters and hosts across the UAE. Book the perfect care for your pet.",
     imageAlt: DEFAULT_ALT,
   },
   "/blog": {
     title: "Blog",
-    subtitle: "Expert tips, guides, and stories about pet care in Saudi Arabia.",
+    subtitle: "Expert tips, guides, and stories about pet care in the UAE.",
     imageAlt: DEFAULT_ALT,
   },
   "/forum": {
     title: "Community Forum",
     subtitle:
-      "Ask questions, share advice, and connect with fellow pet owners across Saudi Arabia.",
+      "Ask questions, share advice, and connect with fellow pet owners across the UAE.",
     imageAlt: DEFAULT_ALT,
   },
   "/about": {
-    title: "About Saudi Petsitters",
+    title: "About Dubai Petsitters",
     subtitle:
-      "Saudi Arabia's trusted pet care community — connecting pet owners with trusted hosts, vets, and resources.",
+      "The UAE's trusted pet care community — connecting pet owners with trusted hosts, vets, and resources.",
     imageAlt: DEFAULT_ALT,
   },
   "/travel": {
     title: "Travel Compliance Wizard",
-    subtitle: "Saudi pet import/export requirements",
+    subtitle: "UAE pet import/export requirements",
     imageAlt: DEFAULT_ALT,
   },
   "/lost-pets": {
     title: "Lost & Found Pets",
-    subtitle: "Report & find missing pets in Saudi Arabia",
+    subtitle: "Report & find missing pets in the UAE",
     imageAlt: DEFAULT_ALT,
   },
   "/become-host": {
@@ -84,7 +84,7 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
   "/partners": {
     title: "Our Partners",
     subtitle:
-      "Discover trusted pet shops, groomers, trainers, breeders, and more across Saudi Arabia.",
+      "Discover trusted pet shops, groomers, trainers, breeders, and more across the UAE.",
     imageAlt: DEFAULT_ALT,
   },
   "/deals": {
@@ -96,7 +96,7 @@ export const PAGE_HERO_BY_PATH: Record<string, PageHeroConfig> = {
   "/become-partner": {
     title: "Grow Your Pet Business",
     subtitle:
-      "Advertise to Saudi Arabia's most engaged community of pet owners.",
+      "Advertise to the UAE's most engaged community of pet owners.",
     imageAlt: DEFAULT_ALT,
   },
   "/terms": {
@@ -274,7 +274,7 @@ const PAGE_HERO_PATTERNS: {
     pattern: /^\/lost-pets\/[^/]+$/,
     config: {
       title: "Lost & Found Pets",
-      subtitle: "Report & find missing pets in Saudi Arabia",
+      subtitle: "Report & find missing pets in the UAE",
       imageAlt: DEFAULT_ALT,
     },
   },
@@ -282,7 +282,7 @@ const PAGE_HERO_PATTERNS: {
     pattern: /^\/blog\/[^/]+$/,
     config: {
       title: "Blog Article",
-      subtitle: "Pet care tips and stories from Saudi Petsitters",
+      subtitle: "Pet care tips and stories from Dubai Petsitters",
       imageAlt: DEFAULT_ALT,
     },
   },

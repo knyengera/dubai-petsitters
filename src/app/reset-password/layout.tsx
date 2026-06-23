@@ -3,7 +3,7 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = buildPageMetadata({
   title: "Reset Password",
-  description: "Set a new password for your Saudi Petsitters account.",
+  description: "Set a new password for your Dubai Petsitters account.",
   path: "/reset-password",
   noIndex: true,
 });

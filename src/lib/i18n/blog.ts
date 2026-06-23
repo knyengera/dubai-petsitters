@@ -6,12 +6,12 @@ export const blogStrings = {
     ar: "المدونة",
   },
   heroSubtitle: {
-    en: "Expert tips, guides, and stories about pet care in Saudi Arabia.",
-    ar: "نصائح وإرشادات وقصص متخصصة عن رعاية الحيوانات الأليفة في المملكة.",
+    en: "Expert tips, guides, and stories about pet care in the UAE.",
+    ar: "نصائح وإرشادات وقصص متخصصة عن رعاية الحيوانات الأليفة في الإمارات.",
   },
   articleHeroSubtitle: {
-    en: "Pet care tips and stories from Saudi Petsitters",
-    ar: "نصائح وقصص عن رعاية الحيوانات من Saudi Petsitters",
+    en: "Pet care tips and stories from Dubai Petsitters",
+    ar: "نصائح وقصص عن رعاية الحيوانات من Dubai Petsitters",
   },
   filterArticles: {
     en: "Filter articles",

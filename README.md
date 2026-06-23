@@ -1,4 +1,4 @@
-# Saudi Petsitters (Next.js + Supabase)
+# Dubai Petsitters (Next.js + Supabase)
 
 Next.js TypeScript app migrated from the [saudi-petsitters](../saudi-petsitters) Vite/Base44 reference, with Supabase as the backend.
 

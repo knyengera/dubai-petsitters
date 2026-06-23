@@ -219,7 +219,7 @@ export default function HostDetail() {
   }
 
   const galleryPhotos = [host.photo_url, ...(host.gallery || [])].filter(Boolean);
-  const mapQuery = encodeURIComponent([host.neighborhood, host.city, 'Saudi Arabia'].filter(Boolean).join(', '));
+  const mapQuery = encodeURIComponent([host.neighborhood, host.city, 'UAE'].filter(Boolean).join(', '));
   const paymentSummary = quote
     ? quoteToSummary(quote, `Booking with ${host.full_name}`)
     : { title: `Booking with ${host.full_name}`, lines: [], total: '—' };

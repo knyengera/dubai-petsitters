@@ -9,7 +9,7 @@ const sections = [
   { title: '3. Data Sharing', body: 'We may share your information with service providers (hosts, vet clinics) necessary to fulfil a booking, payment processors for secure transactions, and authorities when required by law. All partners are bound by confidentiality agreements.' },
   { title: '4. Cookies', body: 'We use cookies and similar technologies to improve user experience, analyse site traffic, and personalise content. You may disable cookies in your browser settings, though this may affect functionality.' },
   { title: '5. Data Retention', body: 'We retain your personal data for as long as your account is active or as needed to provide services. You may request deletion of your account and associated data at any time by contacting us.' },
-  { title: '6. Your Rights', body: 'You have the right to access, correct, or delete your personal data. To exercise these rights, please contact us at privacy@saudipetsitters.com. We will respond within 30 days.' },
+  { title: '6. Your Rights', body: 'You have the right to access, correct, or delete your personal data. To exercise these rights, please contact us at privacy@dubaipetsitters.com. We will respond within 30 days.' },
   { title: '7. Security', body: 'We implement industry-standard security measures to protect your data. However, no method of electronic transmission is 100% secure, and we cannot guarantee absolute security.' },
   { title: '8. Changes to This Policy', body: 'We may update this Privacy Policy from time to time. We will notify you of significant changes by posting a notice on our website or sending an email. Continued use of our services constitutes acceptance of the updated policy.' },
 ];
@@ -19,7 +19,7 @@ export default function Privacy() {
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <p className="text-muted-foreground mb-10 leading-relaxed">
-          Saudi Petsitters ("we", "us", or "our") is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you use our platform.
+          Dubai Petsitters ("we", "us", or "our") is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you use our platform.
         </p>
         <div className="space-y-8">
           {sections.map(s => (
@@ -33,7 +33,7 @@ export default function Privacy() {
           For privacy-related enquiries, contact us at{" "}
           <a href={`tel:${CONTACT_PHONE_TEL}`} className="text-primary hover:underline">{CONTACT_PHONE}</a>
           {" "}or{" "}
-          <a href="mailto:privacy@saudipetsitters.com" className="text-primary hover:underline">privacy@saudipetsitters.com</a>.
+          <a href="mailto:privacy@dubaipetsitters.com" className="text-primary hover:underline">privacy@dubaipetsitters.com</a>.
         </div>
       </div>
     </div>

@@ -24,12 +24,12 @@ Branded Supabase auth email HTML lives in [`docs/supabase-email-templates/`](sup
 
 | File | Dashboard slot | Recommended subject |
 |------|----------------|---------------------|
-| `confirmation.html` | Confirm signup | `Confirm your email — Saudi Petsitters` |
+| `confirmation.html` | Confirm signup | `Confirm your email — Dubai Petsitters` |
 | `email_change.html` | Change email address | `Confirm your new email address` |
 | `recovery.html` | Reset password | `Reset your password` |
 | `magic_link.html` | Magic Link | `Your sign-in link` |
 | `magic_link_otp.html` | Magic Link (OTP variant) | `Your verification code` |
-| `invite.html` | Invite user | `You've been invited to Saudi Petsitters` |
+| `invite.html` | Invite user | `You've been invited to Dubai Petsitters` |
 | `reauthentication.html` | Reauthentication | `{{ .Token }} is your verification code` |
 
 **Paste steps:** open the template type in the Dashboard → paste the full HTML from the matching file into **Message body** → set **Subject** from the table → Save.
@@ -60,7 +60,7 @@ TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
 TWILIO_MESSAGE_SERVICE_SID=
 TWILIO_EMAIL_FROM=noreply@yourdomain.com
-TWILIO_EMAIL_FROM_NAME=Saudi Petsitters
+TWILIO_EMAIL_FROM_NAME=Dubai Petsitters
 AUTH_HOOK_SECRET=
 ```
 
@@ -74,7 +74,7 @@ SMTP_PORT=587
 SMTP_USER=
 SMTP_PASSWORD=
 SMTP_FROM=
-SMTP_FROM_NAME=Saudi Petsitters
+SMTP_FROM_NAME=Dubai Petsitters
 ```
 
 Use port `465` for SMTPS or `587` for STARTTLS.
@@ -98,7 +98,7 @@ API: `POST https://comms.twilio.com/v1/Emails` (Basic Auth with Account SID + Au
   - Twilio Auth Token
   - Twilio Message Service SID (or Verify Service)
 
-Phone numbers must be in E.164 format (e.g. `+966501234567`).
+Phone numbers must be in E.164 format (e.g. `+971501234567`).
 
 ## Google OAuth
 

@@ -304,7 +304,7 @@ CREATE TRIGGER forum_topics_stats_trigger
 -- Seed default boards
 -- ---------------------------------------------------------------------------
 INSERT INTO forum_boards (id, title, slug, description, color, display_order) VALUES
-  ('aaaaaaaa-aaaa-4aaa-8aaa-111111111111', 'Announcements', 'announcements', 'Official updates and news from Saudi Petsitters.', 'blue', 1),
+  ('aaaaaaaa-aaaa-4aaa-8aaa-111111111111', 'Announcements', 'announcements', 'Official updates and news from Dubai Petsitters.', 'blue', 1),
   ('aaaaaaaa-aaaa-4aaa-8aaa-222222222222', 'Pet Care', 'pet-care', 'General pet care questions and everyday tips.', 'green', 2),
   ('aaaaaaaa-aaaa-4aaa-8aaa-333333333333', 'Health & Wellness', 'health', 'Health, vet visits, vaccinations, and wellness.', 'red', 3),
   ('aaaaaaaa-aaaa-4aaa-8aaa-444444444444', 'Training & Behavior', 'training', 'Training techniques and behavioral advice.', 'indigo', 4),

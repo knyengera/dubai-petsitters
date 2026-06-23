@@ -12,7 +12,7 @@ export type BuildMetadataInput = {
   description: string;
   /** Canonical path beginning with "/" (e.g. "/hosts"). */
   path: string;
-  /** When true, the title bypasses the "%s | Saudi Petsitters" template. */
+  /** When true, the title bypasses the "%s | Dubai Petsitters" template. */
   absoluteTitle?: boolean;
   keywords?: string[];
   /** Absolute or root-relative image URL; falls back to the brand logo. */

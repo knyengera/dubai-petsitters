@@ -11,7 +11,7 @@ function getTwilioEmailConfig() {
   const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
   const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
   const emailFrom = Deno.env.get("TWILIO_EMAIL_FROM");
-  const emailFromName = Deno.env.get("TWILIO_EMAIL_FROM_NAME") ?? "Saudi Petsitters";
+  const emailFromName = Deno.env.get("TWILIO_EMAIL_FROM_NAME") ?? "Dubai Petsitters";
   return {
     accountSid,
     authToken,
@@ -27,7 +27,7 @@ function getSmtpConfig() {
   const user = Deno.env.get("SMTP_USER");
   const password = Deno.env.get("SMTP_PASSWORD");
   const from = Deno.env.get("SMTP_FROM");
-  const fromName = Deno.env.get("SMTP_FROM_NAME") ?? "Saudi Petsitters";
+  const fromName = Deno.env.get("SMTP_FROM_NAME") ?? "Dubai Petsitters";
   return {
     host,
     port,

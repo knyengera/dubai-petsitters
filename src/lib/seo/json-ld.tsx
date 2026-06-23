@@ -34,13 +34,13 @@ export function organizationSchema(): JsonLdObject {
     description: SITE_TAGLINE,
     email: CONTACT_EMAIL,
     telephone: CONTACT_PHONE_TEL,
-    areaServed: { "@type": "Country", name: "Saudi Arabia" },
+    areaServed: { "@type": "Country", name: "United Arab Emirates" },
     contactPoint: {
       "@type": "ContactPoint",
       email: CONTACT_EMAIL,
       telephone: CONTACT_PHONE_TEL,
       contactType: "customer support",
-      areaServed: "SA",
+      areaServed: "AE",
       availableLanguage: ["en", "ar"],
     },
   };
@@ -127,12 +127,12 @@ export function petSitterServiceSchema(input: {
       ? {
           "@type": "PostalAddress",
           addressLocality: input.city,
-          addressCountry: "SA",
+          addressCountry: "AE",
         }
       : undefined,
     areaServed: input.city
       ? { "@type": "City", name: input.city }
-      : { "@type": "Country", name: "Saudi Arabia" },
+      : { "@type": "Country", name: "United Arab Emirates" },
     makesOffer: input.services?.map((service) => ({
       "@type": "Offer",
       itemOffered: { "@type": "Service", name: service },
@@ -169,12 +169,12 @@ export function veterinaryCareSchema(input: {
             "@type": "PostalAddress",
             streetAddress: input.address ?? undefined,
             addressLocality: input.city ?? undefined,
-            addressCountry: "SA",
+            addressCountry: "AE",
           }
         : undefined,
     areaServed: input.city
       ? { "@type": "City", name: input.city }
-      : { "@type": "Country", name: "Saudi Arabia" },
+      : { "@type": "Country", name: "United Arab Emirates" },
     availableService: input.services?.map((service) => ({
       "@type": "MedicalProcedure",
       name: service,

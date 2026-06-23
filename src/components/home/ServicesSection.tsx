@@ -9,7 +9,7 @@ const services = [
   {
     icon: Heart,
     title: 'Pet Adoption',
-    description: 'Find your perfect furry companion from our verified adoption listings across Saudi Arabia.',
+    description: 'Find your perfect furry companion from our verified adoption listings across the UAE.',
     link: '/adopt',
     color: 'bg-primary/10 text-primary border-primary/20',
   },
@@ -30,7 +30,7 @@ const services = [
   {
     icon: BookOpen,
     title: 'Pet Blog',
-    description: 'Expert tips on pet care, health, training, and lifestyle in the Saudi climate.',
+    description: 'Expert tips on pet care, health, training, and lifestyle in the UAE climate.',
     link: '/blog',
     color: 'bg-warning-muted text-warning border-warning-border',
   },
@@ -50,7 +50,7 @@ export default function ServicesSection() {
             Everything Your Pet Needs
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            From adoption to daily care, we're building the most comprehensive pet care ecosystem in Saudi Arabia.
+            From adoption to daily care, we're building the most comprehensive pet care ecosystem in the UAE.
           </p>
         </motion.div>
 

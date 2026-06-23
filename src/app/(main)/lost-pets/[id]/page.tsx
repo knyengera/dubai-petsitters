@@ -24,7 +24,7 @@ export async function generateMetadata({
   }
 
   const name = pet.pet_name || "Pet";
-  const cityPart = pet.city ? ` in ${pet.city}` : " in Saudi Arabia";
+  const cityPart = pet.city ? ` in ${pet.city}` : " in the UAE";
   const statusWord = pet.status === "found" ? "Found" : "Lost";
 
   return buildPageMetadata({
@@ -35,8 +35,8 @@ export async function generateMetadata({
     path: `/lost-pets/${id}`,
     image: pet.image_url || undefined,
     keywords: [
-      `lost pet ${pet.city ?? "Saudi Arabia"}`,
-      `found pet ${pet.city ?? "Saudi Arabia"}`,
+      `lost pet ${pet.city ?? "the UAE"}`,
+      `found pet ${pet.city ?? "the UAE"}`,
     ],
   });
 }

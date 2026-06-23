@@ -1,14 +1,14 @@
 import { z } from "zod";
 
-export const SAUDI_CITIES = [
-  "Riyadh",
-  "Jeddah",
-  "Mecca",
-  "Medina",
-  "Dammam",
-  "Khobar",
-  "Tabuk",
-  "Abha",
+export const UAE_CITIES = [
+  "Dubai",
+  "Abu Dhabi",
+  "Sharjah",
+  "Ajman",
+  "Al Ain",
+  "Ras Al Khaimah",
+  "Fujairah",
+  "Umm Al Quwain",
   "Other",
 ] as const;
 
@@ -115,7 +115,7 @@ export const PARTNER_TYPES: {
   {
     id: "pet-shops",
     label: "Pet Shops & Stores",
-    desc: "Promote your products to an engaged Saudi audience.",
+    desc: "Promote your products to an engaged UAE audience.",
   },
   {
     id: "pet-insurance",
@@ -275,7 +275,7 @@ export const PARTNER_TYPE_FIELDS: Record<PartnerTypeId, PartnerFieldDef[]> = {
       label: "Cities Covered",
       inputType: "comma-list",
       required: true,
-      placeholder: "e.g. Riyadh, Jeddah",
+      placeholder: "e.g. Dubai, Abu Dhabi",
       showWhen: { field: "coverage_area", equals: "Specific cities" },
     },
     ...promoFields,

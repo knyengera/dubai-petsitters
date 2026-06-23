@@ -1,4 +1,4 @@
--- Saudi Petsitters — initial schema migrated from Base44 entities
+-- Dubai Petsitters — initial schema migrated from Base44 entities
 -- Apply with: supabase db push (after linking project)
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";

@@ -22,7 +22,7 @@ export async function generateMetadata({
   if (!city) {
     return buildPageMetadata({
       title: "Pet Sitters",
-      description: "Find trusted pet sitters across Saudi Arabia.",
+      description: "Find trusted pet sitters across the UAE.",
       path: `/hosts/city/${slug}`,
       noIndex: true,
     });
@@ -30,7 +30,7 @@ export async function generateMetadata({
 
   return buildPageMetadata({
     title: `Pet Sitters in ${city.name} | Boarding, Dog Walking & Cat Sitting`,
-    description: `Find trusted pet sitters in ${city.name} for boarding, daycare, dog walking, and in-home pet care. Compare verified hosts, reviews, and prices on Saudi Petsitters. مربي حيوانات في ${city.nameAr}.`,
+    description: `Find trusted pet sitters in ${city.name} for boarding, daycare, dog walking, and in-home pet care. Compare verified hosts, reviews, and prices on Dubai Petsitters. مربي حيوانات في ${city.nameAr}.`,
     path: `/hosts/city/${city.slug}`,
     keywords: [
       `pet sitter ${city.name}`,

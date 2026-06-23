@@ -9,7 +9,7 @@ Provide guidance on:
 - Socialization for puppies and kittens
 - Introducing new pets to the household
 - Safe handling and basic training tips
-- Seasonal care adjustments for Saudi climate (coat maintenance, indoor activity in summer)
+- Seasonal care adjustments for the UAE climate (coat maintenance, indoor activity in summer)
 
 When to recommend a vet:
 - Persistent behavioral changes

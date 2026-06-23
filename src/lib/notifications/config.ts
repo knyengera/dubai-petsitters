@@ -11,7 +11,7 @@ export function getTwilioConfig() {
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   const messageServiceSid = process.env.TWILIO_MESSAGE_SERVICE_SID;
   const emailFrom = process.env.TWILIO_EMAIL_FROM;
-  const emailFromName = process.env.TWILIO_EMAIL_FROM_NAME || "Saudi Petsitters";
+  const emailFromName = process.env.TWILIO_EMAIL_FROM_NAME || "Dubai Petsitters";
 
   return {
     accountSid,
@@ -30,7 +30,7 @@ export function getSmtpConfig() {
   const user = process.env.SMTP_USER;
   const password = process.env.SMTP_PASSWORD;
   const from = process.env.SMTP_FROM;
-  const fromName = process.env.SMTP_FROM_NAME || "Saudi Petsitters";
+  const fromName = process.env.SMTP_FROM_NAME || "Dubai Petsitters";
 
   return {
     host,

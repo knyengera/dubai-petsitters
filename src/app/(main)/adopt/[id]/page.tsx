@@ -24,7 +24,7 @@ export async function generateMetadata({
   }
 
   const name = pet.name || "Pet";
-  const cityPart = pet.city ? ` in ${pet.city}` : " in Saudi Arabia";
+  const cityPart = pet.city ? ` in ${pet.city}` : " in the UAE";
   const breedPart = pet.breed ? `${pet.breed} ` : "";
 
   return buildPageMetadata({
@@ -35,8 +35,8 @@ export async function generateMetadata({
     path: `/adopt/${id}`,
     image: pet.image_url || undefined,
     keywords: [
-      `adopt ${pet.species ?? "pet"} ${pet.city ?? "Saudi Arabia"}`,
-      "pet adoption Saudi Arabia",
+      `adopt ${pet.species ?? "pet"} ${pet.city ?? "UAE"}`,
+      "pet adoption UAE",
     ],
   });
 }

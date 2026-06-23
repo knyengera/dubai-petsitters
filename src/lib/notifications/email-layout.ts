@@ -15,7 +15,7 @@ export const EMAIL_BRAND = {
   muted: "#EFEBE8",
   fontHeading: "Roboto, Arial, Helvetica, sans-serif",
   fontBody: "Poppins, Arial, Helvetica, sans-serif",
-  appName: "Saudi Petsitters",
+  appName: "Dubai Petsitters",
 } as const;
 
 export function escapeHtml(value: unknown): string {
@@ -179,7 +179,7 @@ export function buildBrandedEmail(options: BrandedEmailOptions): string {
                 </tr>
                 <tr>
                   <td align="center" style="padding-top:12px;">
-                    <p style="margin:0;font-family:${b.fontHeading};font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:${b.accent};font-weight:600;">Pet care across Saudi Arabia</p>
+                    <p style="margin:0;font-family:${b.fontHeading};font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:${b.accent};font-weight:600;">Pet care across the UAE</p>
                   </td>
                 </tr>
               </table>

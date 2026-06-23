@@ -57,7 +57,7 @@ async function main() {
   try {
     await client.query(sql);
     const { rows } = await client.query(
-      `SELECT count(*)::int AS count FROM blog_posts WHERE created_by = 'seed@saudipetsitters.com'`
+      `SELECT count(*)::int AS count FROM blog_posts WHERE created_by = 'seed@dubaipetsitters.com'`
     );
     await client.query("COMMIT");
     console.log(`Done. ${rows[0].count} demo blog post(s) in database.`);

@@ -190,7 +190,7 @@ const IN_APP_TEMPLATES: Record<string, InAppTemplateFn> = {
   },
   generic: (p) => ({
     title: "Notification",
-    body: str(p.text, "You have a new notification from Saudi Petsitters."),
+    body: str(p.text, "You have a new notification from Dubai Petsitters."),
     actionUrl: "/dashboard",
   }),
 };
@@ -570,14 +570,14 @@ const TEMPLATES: Record<string, TemplateFn> = {
 
   "auth.signup": (_channel, p) => {
     const url = str(p.confirmation_url);
-    const text = `Welcome to Saudi Petsitters! Confirm your email: ${url}`;
+    const text = `Welcome to Dubai Petsitters! Confirm your email: ${url}`;
     return {
-      subject: "Confirm your email — Saudi Petsitters",
+      subject: "Confirm your email — Dubai Petsitters",
       text,
       html: brandedHtml(
         "Confirm your email",
         emailParagraph(
-          "Welcome to Saudi Petsitters! Please confirm your email address to get started."
+          "Welcome to Dubai Petsitters! Please confirm your email address to get started."
         ),
         {
           preheader: "Confirm your email to get started",
@@ -590,7 +590,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
 
   "auth.recovery": (_channel, p) => {
     const url = str(p.recovery_url);
-    const text = `Reset your Saudi Petsitters password: ${url}`;
+    const text = `Reset your Dubai Petsitters password: ${url}`;
     return {
       subject: "Reset your password",
       text,
@@ -603,7 +603,7 @@ const TEMPLATES: Record<string, TemplateFn> = {
           ),
         ].join(""),
         {
-          preheader: "Reset your Saudi Petsitters password",
+          preheader: "Reset your Dubai Petsitters password",
           cta: { label: "Reset password", href: url },
           showLinkFallback: true,
         }
@@ -613,12 +613,12 @@ const TEMPLATES: Record<string, TemplateFn> = {
 
   "auth.magic_link": (_channel, p) => {
     const url = str(p.magic_link_url);
-    const text = `Sign in to Saudi Petsitters: ${url}`;
+    const text = `Sign in to Dubai Petsitters: ${url}`;
     return {
       subject: "Your sign-in link",
       text,
       html: brandedHtml(
-        "Sign in to Saudi Petsitters",
+        "Sign in to Dubai Petsitters",
         emailParagraph("Use the button below to sign in to your account. This link expires shortly."),
         {
           preheader: "Your one-time sign-in link",
@@ -652,10 +652,10 @@ const TEMPLATES: Record<string, TemplateFn> = {
   }),
 
   generic: (channel, p) => {
-    const text = str(p.text, "You have a new notification from Saudi Petsitters.");
+    const text = str(p.text, "You have a new notification from Dubai Petsitters.");
     if (channel === "sms") return { text };
     return {
-      subject: "Notification from Saudi Petsitters",
+      subject: "Notification from Dubai Petsitters",
       text,
       html: brandedHtml("Notification", emailParagraph(escapeHtml(text))),
     };

@@ -39,13 +39,13 @@ export const TOPIC_QUICK_PROMPTS: Record<
   general: {
     en: [
       "How often should I feed my adult cat?",
-      "What do I need to travel with my dog to UAE?",
-      "Is it safe to walk my dog at noon in Riyadh?",
+      "What do I need to travel with my dog to the UK?",
+      "Is it safe to walk my dog at noon in Dubai?",
       "How do I introduce a new kitten to my home?",
     ],
     ar: [
       "كم مرة يجب أن أطعم قطتي البالغة؟",
-      "ماذا أحتاج للسفر مع كلبي إلى الإمارات؟",
+      "ماذا أحتاج للسفر مع كلبي إلى المملكة المتحدة؟",
       "هل من الآمن تمشية كلبي ظهراً في الرياض؟",
       "كيف أُعرف قطّاً جديداً على منزلي؟",
     ],
@@ -66,21 +66,21 @@ export const TOPIC_QUICK_PROMPTS: Record<
   },
   travel: {
     en: [
-      "What do I need to export my cat to UAE?",
-      "How do I import a dog into Saudi Arabia?",
+      "What do I need to export my cat to the UK?",
+      "How do I import a dog into the UAE?",
       "Does my pet need a microchip for international travel?",
       "How far in advance should I plan pet travel?",
     ],
     ar: [
-      "ماذا أحتاج لتصدير قطتي إلى الإمارات؟",
-      "كيف أستورد كلباً إلى المملكة العربية السعودية؟",
+      "ماذا أحتاج لتصدير قطتي إلى المملكة المتحدة؟",
+      "كيف أستورد كلباً إلى الإمارات العربية المتحدة؟",
       "هل يحتاج حيواني الأليف إلى شريحة إلكترونية للسفر الدولي؟",
       "متى يجب أن أبدأ التخطيط لسفر الحيوانات الأليفة؟",
     ],
   },
   heat_safety: {
     en: [
-      "Is it safe to walk my dog at noon in Riyadh?",
+      "Is it safe to walk my dog at noon in Dubai?",
       "Signs of heat stroke in dogs",
       "How to keep my cat cool in summer",
       "Can I leave my pet in the car for 5 minutes?",

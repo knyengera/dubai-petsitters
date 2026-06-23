@@ -27,7 +27,7 @@ export async function generateMetadata({
   if (!topic || !topic.title) {
     return buildPageMetadata({
       title: "Forum Topic",
-      description: "Join the conversation in the Saudi Petsitters community forum.",
+      description: "Join the conversation in the Dubai Petsitters community forum.",
       path: `/forum/${boardSlug}/${topicSlug}`,
       noIndex: true,
     });
@@ -39,7 +39,7 @@ export async function generateMetadata({
     title: `${topic.title}${boardSuffix}`,
     description: toExcerpt(
       topic.content,
-      `Read and join the discussion "${topic.title}" in the Saudi Petsitters pet owner community.`
+      `Read and join the discussion "${topic.title}" in the Dubai Petsitters pet owner community.`
     ),
     path: `/forum/${boardSlug}/${topicSlug}`,
     type: "article",

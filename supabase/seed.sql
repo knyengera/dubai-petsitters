@@ -26,7 +26,7 @@ INSERT INTO pet_hosts (
   (
     '11111111-1111-4111-8111-111111111111',
     'Sara Al-Dosari',
-    'Riyadh',
+    'Dubai',
     'Al Olaya',
     'Passionate animal lover with 5 years hosting experience.',
     ARRAY['boarding','daycare'],
@@ -44,12 +44,12 @@ INSERT INTO pet_hosts (
     ARRAY['Arabic','English'],
     'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80',
     ARRAY['https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=900&q=80'],
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '11111111-1111-4111-8111-222222222222',
     'Mohammed Al-Qahtani',
-    'Jeddah',
+    'Abu Dhabi',
     'Al Rawdah',
     'Dog trainer and boarding specialist. Large yard available.',
     ARRAY['boarding','dog_walking'],
@@ -67,12 +67,12 @@ INSERT INTO pet_hosts (
     ARRAY['Arabic','English'],
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
     ARRAY['https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&q=80'],
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '11111111-1111-4111-8111-333333333333',
     'Nora Al-Harbi',
-    'Dammam',
+    'Sharjah',
     'Al Faisaliyah',
     'Vet nurse offering professional home care.',
     ARRAY['home_sitting','daycare'],
@@ -90,12 +90,12 @@ INSERT INTO pet_hosts (
     ARRAY['Arabic','English'],
     'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80',
     ARRAY['https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=900&q=80'],
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '11111111-1111-4111-8111-444444444444',
     'Khalid Al-Otaibi',
-    'Riyadh',
+    'Dubai',
     'Al Malaz',
     'Lifelong pet owner. Cats, small dogs and birds are my specialty!',
     ARRAY['boarding','home_sitting'],
@@ -113,7 +113,7 @@ INSERT INTO pet_hosts (
     ARRAY['Arabic'],
     'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
     ARRAY['https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=900&q=80'],
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   )
 ON CONFLICT (id) DO UPDATE SET
   full_name = EXCLUDED.full_name,
@@ -157,9 +157,9 @@ INSERT INTO vet_clinics (
   (
     '22222222-2222-4222-8222-111111111111',
     'Al-Noor Vet Clinic',
-    'Riyadh',
+    'Dubai',
     'King Fahd Road, Al Olaya',
-    '+966-11-123-4567',
+    '+971-11-123-4567',
     'info@alnoor.com',
     'https://example.com/al-noor-vet-clinic',
     ARRAY['emergency','surgery','vaccination'],
@@ -174,9 +174,9 @@ INSERT INTO vet_clinics (
   (
     '22222222-2222-4222-8222-222222222222',
     'Pet Care Plus',
-    'Jeddah',
+    'Abu Dhabi',
     'Prince Sultan Street, Al Rawdah',
-    '+966-12-234-5678',
+    '+971-12-234-5678',
     'hello@petcareplus.com',
     'https://example.com/pet-care-plus',
     ARRAY['checkup','dental','grooming'],
@@ -191,9 +191,9 @@ INSERT INTO vet_clinics (
   (
     '22222222-2222-4222-8222-333333333333',
     'Paws Medical Center',
-    'Dammam',
+    'Sharjah',
     'Prince Mohammed Bin Fahd Road',
-    '+966-13-345-6789',
+    '+971-13-345-6789',
     'contact@pawsmedical.com',
     'https://example.com/paws-medical-center',
     ARRAY['xray','lab','ultrasound'],
@@ -208,9 +208,9 @@ INSERT INTO vet_clinics (
   (
     '22222222-2222-4222-8222-444444444444',
     'Happy Tails Veterinary',
-    'Riyadh',
+    'Dubai',
     'Al Malaz District',
-    '+966-11-456-7890',
+    '+971-11-456-7890',
     'support@happytails.com',
     'https://example.com/happy-tails-veterinary',
     ARRAY['vaccination','microchip','consultation'],
@@ -225,9 +225,9 @@ INSERT INTO vet_clinics (
   (
     '22222222-2222-4222-8222-555555555555',
     'Advanced Pet Hospital',
-    'Jeddah',
+    'Abu Dhabi',
     'Tahlia Street',
-    '+966-12-567-8901',
+    '+971-12-567-8901',
     'admin@advancedpet.com',
     'https://example.com/advanced-pet-hospital',
     ARRAY['surgery','emergency','icu'],
@@ -285,14 +285,14 @@ INSERT INTO pets (
     'small',
     'Gentle and affectionate cat who loves sunny windows and quiet homes.',
     'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=800&q=85',
-    'Riyadh',
+    'Dubai',
     true,
     true,
     'available',
-    'seed@saudipetsitters.com',
+    'seed@dubaipetsitters.com',
     'Layla Al-Harbi',
     'layla@example.com',
-    '+966-55-440-1188'
+    '+971-55-440-1188'
   ),
   (
     '33333333-3333-4333-8333-222222222222',
@@ -304,14 +304,14 @@ INSERT INTO pets (
     'large',
     'Playful, trained, and great with families.',
     'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&q=85',
-    'Jeddah',
+    'Abu Dhabi',
     true,
     true,
     'available',
-    'seed@saudipetsitters.com',
+    'seed@dubaipetsitters.com',
     'Omar Khalid',
     'omar@example.com',
-    '+966-56-220-7744'
+    '+971-56-220-7744'
   ),
   (
     '33333333-3333-4333-8333-333333333333',
@@ -323,14 +323,14 @@ INSERT INTO pets (
     'small',
     'Curious indoor rabbit looking for a calm home.',
     'https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=800&q=85',
-    'Dammam',
+    'Sharjah',
     true,
     false,
     'available',
-    'seed@saudipetsitters.com',
+    'seed@dubaipetsitters.com',
     'Sara Mansour',
     'sara@example.com',
-    '+966-50-913-2266'
+    '+971-50-913-2266'
   ),
   (
     '33333333-3333-4333-8333-444444444444',
@@ -342,14 +342,14 @@ INSERT INTO pets (
     'small',
     'Social cockatiel who enjoys gentle handling.',
     'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=800&q=85',
-    'Khobar',
+    'Ajman',
     false,
     false,
     'available',
-    'seed@saudipetsitters.com',
+    'seed@dubaipetsitters.com',
     'Fahad Al-Otaibi',
     'fahad@example.com',
-    '+966-53-771-9050'
+    '+971-53-771-9050'
   ),
   (
     '33333333-3333-4333-8333-555555555555',
@@ -361,14 +361,14 @@ INSERT INTO pets (
     'medium',
     'Calm, loyal, and comfortable around older children.',
     'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&q=85',
-    'Riyadh',
+    'Dubai',
     true,
     true,
     'available',
-    'seed@saudipetsitters.com',
+    'seed@dubaipetsitters.com',
     'Noura Saad',
     'noura@example.com',
-    '+966-54-308-6611'
+    '+971-54-308-6611'
   ),
   (
     '33333333-3333-4333-8333-666666666666',
@@ -378,16 +378,16 @@ INSERT INTO pets (
     '10 months',
     'female',
     'small',
-    'Sweet kitten rescued in Jeddah and ready for adoption.',
+    'Sweet kitten rescued in Abu Dhabi and ready for adoption.',
     'https://images.unsplash.com/photo-1519052537078-e6302a4968d4?w=800&q=85',
-    'Jeddah',
+    'Abu Dhabi',
     true,
     false,
     'available',
-    'seed@saudipetsitters.com',
+    'seed@dubaipetsitters.com',
     'Huda Zayed',
     'huda@example.com',
-    '+966-58-122-4477'
+    '+971-58-122-4477'
   )
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
@@ -424,13 +424,13 @@ INSERT INTO partner_deals (
   (
     '44444444-4444-4444-8444-111111111111',
     '20% Off Annual Vet Checkup',
-    'Book your pet''s annual health checkup and get 20% off at any of our partner clinics in Riyadh.',
+    'Book your pet''s annual health checkup and get 20% off at any of our partner clinics in Dubai.',
     'Al Hayat Vet Clinics',
     'vet_clinic',
     '20% OFF',
     '20% OFF',
     'PETSITTER20',
-    'Riyadh',
+    'Dubai',
     'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=400&q=80',
     'https://example.com/al-hayat-vet-clinics',
     true
@@ -444,7 +444,7 @@ INSERT INTO partner_deals (
     'FREE Session',
     'FREE Session',
     'FIRSTPAW',
-    'Jeddah',
+    'Abu Dhabi',
     'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80',
     'https://example.com/pawspa-grooming',
     true
@@ -452,8 +452,8 @@ INSERT INTO partner_deals (
   (
     '44444444-4444-4444-8444-333333333333',
     '15% Off Premium Pet Food',
-    'Exclusive discount on Royal Canin and Hills Science Diet for Saudi Petsitters members.',
-    'PetMart KSA',
+    'Exclusive discount on Royal Canin and Hills Science Diet for Dubai Petsitters members.',
+    'PetMart UAE',
     'food',
     '15% OFF',
     '15% OFF',
@@ -497,28 +497,28 @@ INSERT INTO blog_posts (
 ) VALUES
   (
     '55555555-5555-4555-8555-111111111111',
-    'How to Prepare Your Pet for Summer in Saudi Arabia',
-    'prepare-pet-for-saudi-summer',
+    'How to Prepare Your Pet for Summer in the UAE',
+    'prepare-pet-for-dubai-summer',
     'Practical heat-safety tips for walks, hydration, grooming, and emergency warning signs.',
-    '<p>Saudi summers can be challenging for pets. With temperatures regularly exceeding 40°C, owners need a proactive plan to keep animals safe, comfortable, and healthy.</p><h2>Walk smarter, not longer</h2><p>Keep walks short and schedule them before sunrise or after sunset. Hot pavement can burn paw pads in seconds — if you cannot hold your hand on the ground for five seconds, it is too hot for your pet.</p><h2>Hydration and shade</h2><ul><li>Provide constant access to fresh, cool water indoors and outdoors.</li><li>Never leave pets in parked cars, even for a few minutes.</li><li>Create shaded rest areas if your pet spends time in a yard or balcony.</li></ul><h2>Warning signs to watch for</h2><p>Heavy panting, weakness, drooling, vomiting, or confusion can signal heatstroke. Move your pet to a cool area immediately and contact a veterinarian without delay.</p>',
+    '<p>UAE summers can be challenging for pets. With temperatures regularly exceeding 40°C, owners need a proactive plan to keep animals safe, comfortable, and healthy.</p><h2>Walk smarter, not longer</h2><p>Keep walks short and schedule them before sunrise or after sunset. Hot pavement can burn paw pads in seconds — if you cannot hold your hand on the ground for five seconds, it is too hot for your pet.</p><h2>Hydration and shade</h2><ul><li>Provide constant access to fresh, cool water indoors and outdoors.</li><li>Never leave pets in parked cars, even for a few minutes.</li><li>Create shaded rest areas if your pet spends time in a yard or balcony.</li></ul><h2>Warning signs to watch for</h2><p>Heavy panting, weakness, drooling, vomiting, or confusion can signal heatstroke. Move your pet to a cool area immediately and contact a veterinarian without delay.</p>',
     'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1200&q=85',
     'pet_care',
-    'Saudi Petsitters Team',
+    'Dubai Petsitters Team',
     true,
     'published',
     now() - interval '14 days',
-    ARRAY['summer', 'heat-safety', 'saudi-arabia'],
-    'Summer Pet Care Guide for Saudi Arabia',
-    'Heat-safety tips for pet walks, hydration, grooming, and emergency warning signs in Saudi summers.',
+    ARRAY['summer', 'heat-safety', 'uae'],
+    'Summer Pet Care Guide for the UAE',
+    'Heat-safety tips for pet walks, hydration, grooming, and emergency warning signs in UAE summers.',
     true,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-222222222222',
     'Vaccination Basics for New Pet Owners',
     'vaccination-basics-new-pet-owners',
     'A simple guide to core vaccines and when to ask your vet for a tailored schedule.',
-    '<p>Bringing a new pet home is exciting — and vaccinations are one of the most important steps in protecting their long-term health.</p><h2>Start with a wellness visit</h2><p>Vaccination plans depend on species, age, lifestyle, and previous medical history. Schedule a wellness check within the first week, bring any adoption or breeder records, and ask your veterinarian to build a schedule tailored to your pet.</p><h2>Core vaccines to discuss</h2><ul><li>Rabies (required in many regions)</li><li>Combination vaccines for dogs (distemper, parvovirus, adenovirus)</li><li>Core feline vaccines (panleukopenia, calicivirus, herpesvirus)</li><li>Parasite prevention for fleas, ticks, and worms</li></ul><p>Keep a simple vaccination log and set reminders for boosters. Your vet clinic on Saudi Petsitters can help you stay on track.</p>',
+    '<p>Bringing a new pet home is exciting — and vaccinations are one of the most important steps in protecting their long-term health.</p><h2>Start with a wellness visit</h2><p>Vaccination plans depend on species, age, lifestyle, and previous medical history. Schedule a wellness check within the first week, bring any adoption or breeder records, and ask your veterinarian to build a schedule tailored to your pet.</p><h2>Core vaccines to discuss</h2><ul><li>Rabies (required in many regions)</li><li>Combination vaccines for dogs (distemper, parvovirus, adenovirus)</li><li>Core feline vaccines (panleukopenia, calicivirus, herpesvirus)</li><li>Parasite prevention for fleas, ticks, and worms</li></ul><p>Keep a simple vaccination log and set reminders for boosters. Your vet clinic on Dubai Petsitters can help you stay on track.</p>',
     'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=1200&q=85',
     'health',
     'Dr. Reem Al-Salem',
@@ -527,19 +527,19 @@ INSERT INTO blog_posts (
     now() - interval '10 days',
     ARRAY['vaccination', 'vet-care', 'new-owners'],
     'Vaccination Basics for New Pet Owners',
-    'Core vaccines, wellness visits, and booster schedules explained for new pet owners in Saudi Arabia.',
+    'Core vaccines, wellness visits, and booster schedules explained for new pet owners in the UAE.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-333333333333',
     'Choosing the Right Pet Sitter',
     'choosing-the-right-pet-sitter',
     'Questions to ask before boarding, daycare, or home-sitting bookings.',
-    '<p>Finding trustworthy care for your pet while you travel or work long hours can feel overwhelming. The right sitter should feel like an extension of your own routine.</p><h2>What to ask every sitter</h2><ul><li>How many pets do you host at once, and what species do you accept?</li><li>Can you follow my pet''s feeding, medication, and exercise schedule?</li><li>What is your emergency plan if my pet becomes ill?</li><li>How often will you send updates and photos?</li></ul><h2>Red flags to avoid</h2><p>Vague answers about experience, unwillingness to share references, or no clear cancellation policy are worth noting. On Saudi Petsitters, verified hosts display ratings, services, and availability to help you compare options confidently.</p>',
+    '<p>Finding trustworthy care for your pet while you travel or work long hours can feel overwhelming. The right sitter should feel like an extension of your own routine.</p><h2>What to ask every sitter</h2><ul><li>How many pets do you host at once, and what species do you accept?</li><li>Can you follow my pet''s feeding, medication, and exercise schedule?</li><li>What is your emergency plan if my pet becomes ill?</li><li>How often will you send updates and photos?</li></ul><h2>Red flags to avoid</h2><p>Vague answers about experience, unwillingness to share references, or no clear cancellation policy are worth noting. On Dubai Petsitters, verified hosts display ratings, services, and availability to help you compare options confidently.</p>',
     'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200&q=85',
     'lifestyle',
-    'Saudi Petsitters Team',
+    'Dubai Petsitters Team',
     true,
     'published',
     now() - interval '7 days',
@@ -547,7 +547,7 @@ INSERT INTO blog_posts (
     'How to Choose the Right Pet Sitter',
     'Essential questions for boarding, daycare, and home-sitting before you book a pet sitter.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-444444444444',
@@ -563,9 +563,9 @@ INSERT INTO blog_posts (
     now() - interval '5 days',
     ARRAY['dog-training', 'obedience', 'puppies'],
     '5 Essential Dog Training Commands',
-    'Teach sit, stay, come, leave it, and heel with practical tips for Saudi pet owners.',
+    'Teach sit, stay, come, leave it, and heel with practical tips for UAE pet owners.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-555555555555',
@@ -583,25 +583,25 @@ INSERT INTO blog_posts (
     'Beginner''s Guide to Pet Nutrition',
     'Label reading, portion control, and species-specific feeding tips for pet owners.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '55555555-5555-4555-8555-666666666666',
-    'Saudi Petsitters Launches Nationwide Vet Directory',
-    'saudi-petsitters-vet-directory-launch',
+    'Dubai Petsitters Launches Nationwide Vet Directory',
+    'dubai-petsitters-vet-directory-launch',
     'Find approved clinics, book appointments, and access pet health resources in one place.',
-    '<p>We are excited to announce the expansion of our vet directory across Saudi Arabia, making it easier than ever to find trusted clinics near you.</p><h2>What is new</h2><ul><li>Search clinics by city, specialty, and services offered.</li><li>Book appointments directly through the platform.</li><li>Read verified reviews from other pet owners.</li><li>Access our growing library of pet care articles.</li></ul><p>Whether you need a routine checkup, emergency care referral, or specialist consultation, Saudi Petsitters connects you with the right clinic faster.</p><p><strong>Explore the directory today</strong> and give your pet the care they deserve.</p>',
+    '<p>We are excited to announce the expansion of our vet directory across the UAE, making it easier than ever to find trusted clinics near you.</p><h2>What is new</h2><ul><li>Search clinics by city, specialty, and services offered.</li><li>Book appointments directly through the platform.</li><li>Read verified reviews from other pet owners.</li><li>Access our growing library of pet care articles.</li></ul><p>Whether you need a routine checkup, emergency care referral, or specialist consultation, Dubai Petsitters connects you with the right clinic faster.</p><p><strong>Explore the directory today</strong> and give your pet the care they deserve.</p>',
     'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=1200&q=85',
     'news',
-    'Saudi Petsitters Team',
+    'Dubai Petsitters Team',
     true,
     'published',
     now() - interval '1 day',
     ARRAY['news', 'vet-directory', 'platform'],
-    'Saudi Petsitters Vet Directory Launch',
+    'Dubai Petsitters Vet Directory Launch',
     'Nationwide vet directory with appointments, reviews, and pet health resources.',
     false,
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   )
 ON CONFLICT (id) DO UPDATE SET
   title = EXCLUDED.title,
@@ -672,7 +672,7 @@ INSERT INTO forum_threads (
   (
     '66666666-6666-4666-8666-111111111111',
     'Best time to walk dogs during summer?',
-    'With the hotter weather in Riyadh, what times have worked best for safe dog walks?',
+    'With the hotter weather in Dubai, what times have worked best for safe dog walks?',
     'health',
     'Maha',
     'maha@example.com',
@@ -683,7 +683,7 @@ INSERT INTO forum_threads (
   ),
   (
     '66666666-6666-4666-8666-222222222222',
-    'Cat-friendly boarding recommendations in Jeddah',
+    'Cat-friendly boarding recommendations in Abu Dhabi',
     'I am looking for a calm boarding option for a shy indoor cat. What should I ask hosts before booking?',
     'hosting',
     'Faisal',
@@ -799,12 +799,12 @@ INSERT INTO lost_pets (
     'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=800&q=85',
     'Near Al Nakheel Mall',
     current_date - INTERVAL '2 days',
-    'Riyadh',
+    'Dubai',
     'White and ginger',
     'male',
     '3 years',
     'Abeer',
-    '+966-55-111-2233',
+    '+971-55-111-2233',
     'abeer@example.com',
     500,
     'lost',
@@ -819,12 +819,12 @@ INSERT INTO lost_pets (
     'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&q=85',
     'Corniche walkway',
     current_date - INTERVAL '1 day',
-    'Jeddah',
+    'Abu Dhabi',
     'Brown, black, and white',
     'male',
     '4 years',
     'Yousef',
-    '+966-56-222-3344',
+    '+971-56-222-3344',
     'yousef@example.com',
     750,
     'lost',
@@ -839,12 +839,12 @@ INSERT INTO lost_pets (
     'https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=800&q=85',
     'Al Rakah',
     current_date - INTERVAL '3 days',
-    'Khobar',
+    'Ajman',
     'Orange',
     'female',
     'Unknown',
     'Dana',
-    '+966-57-333-4455',
+    '+971-57-333-4455',
     'dana@example.com',
     NULL,
     'found',
@@ -895,8 +895,8 @@ INSERT INTO vet_subscriptions (
     'Al-Noor Vet Clinic',
     'Dr. Hanan Al-Fahad',
     'info@alnoor.com',
-    '+966-11-123-4567',
-    'Riyadh',
+    '+971-11-123-4567',
+    'Dubai',
     'King Fahd Road, Al Olaya',
     ARRAY['Dogs','Cats','Surgery','Emergency'],
     'New client wellness package',
@@ -907,7 +907,7 @@ INSERT INTO vet_subscriptions (
     999,
     current_date - INTERVAL '30 days',
     current_date + INTERVAL '335 days',
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   ),
   (
     '99999999-9999-4999-8999-222222222222',
@@ -915,8 +915,8 @@ INSERT INTO vet_subscriptions (
     'Pet Care Plus',
     'Dr. Sami Nassar',
     'hello@petcareplus.com',
-    '+966-12-234-5678',
-    'Jeddah',
+    '+971-12-234-5678',
+    'Abu Dhabi',
     'Prince Sultan Street, Al Rawdah',
     ARRAY['Dental','Grooming','Cats'],
     'Dental care month',
@@ -927,7 +927,7 @@ INSERT INTO vet_subscriptions (
     999,
     current_date - INTERVAL '20 days',
     current_date + INTERVAL '345 days',
-    'seed@saudipetsitters.com'
+    'seed@dubaipetsitters.com'
   )
 ON CONFLICT (id) DO UPDATE SET
   clinic_id = EXCLUDED.clinic_id,

@@ -1,19 +1,19 @@
 import { getAppBaseUrl } from "@/lib/notifications/config";
 
-export const SITE_NAME = "Saudi Petsitters";
+export const SITE_NAME = "Dubai Petsitters";
 
 export const SITE_TAGLINE =
-  "Saudi Arabia's trusted pet care community — pet sitting, boarding, vets, and adoption.";
+  "The UAE's trusted pet care community — pet sitting, boarding, vets, and adoption.";
 
 export const SITE_TITLE_TEMPLATE = `%s | ${SITE_NAME}`;
 
 export const DEFAULT_OG_IMAGE = "/logo.png";
 
-export const SITE_LOCALE = "en_SA";
+export const SITE_LOCALE = "en_AE";
 
 export const TWITTER_CARD = "summary_large_image" as const;
 
-export const CONTACT_EMAIL = "hello@saudipetsitters.com";
+export const CONTACT_EMAIL = "hello@dubaipetsitters.com";
 
 /** Human-readable platform phone number. */
 export const CONTACT_PHONE = "+966 54 853 9353";

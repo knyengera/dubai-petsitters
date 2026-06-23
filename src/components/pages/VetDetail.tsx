@@ -47,7 +47,7 @@ export default function VetDetail() {
 
   const galleryPhotos = [clinic.image_url, ...(clinic.gallery || [])].filter(Boolean);
   const fallbackPhotos = galleryPhotos.length > 0 ? galleryPhotos : [FALLBACK_IMAGE];
-  const mapQuery = encodeURIComponent([clinic.name, clinic.address, clinic.city, 'Saudi Arabia'].filter(Boolean).join(', '));
+  const mapQuery = encodeURIComponent([clinic.name, clinic.address, clinic.city, 'UAE'].filter(Boolean).join(', '));
 
   return (
     <div className="min-h-screen bg-background">

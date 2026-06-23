@@ -71,7 +71,7 @@ async function processRow(row: NotificationOutboxRow): Promise<{
     }
     const result = await sendEmail({
       to: row.recipient_email,
-      subject: rendered.subject || "Saudi Petsitters",
+      subject: rendered.subject || "Dubai Petsitters",
       text: rendered.text,
       html: rendered.html,
     });

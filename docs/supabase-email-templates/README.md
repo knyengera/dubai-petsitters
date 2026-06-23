@@ -19,12 +19,12 @@ Supabase has only **one** `magic_link` template slot. Choose **one** of:
 
 | File | Dashboard slot | Recommended subject |
 |------|----------------|---------------------|
-| `confirmation.html` | Confirm signup | `Confirm your email — Saudi Petsitters` |
+| `confirmation.html` | Confirm signup | `Confirm your email — Dubai Petsitters` |
 | `email_change.html` | Change email address | `Confirm your new email address` |
 | `recovery.html` | Reset password | `Reset your password` |
 | `magic_link.html` | Magic Link | `Your sign-in link` |
 | `magic_link_otp.html` | Magic Link (OTP variant) | `Your verification code` |
-| `invite.html` | Invite user | `You've been invited to Saudi Petsitters` |
+| `invite.html` | Invite user | `You've been invited to Dubai Petsitters` |
 | `reauthentication.html` | Reauthentication | `{{ .Token }} is your verification code` |
 
 ## How to paste
@@ -37,5 +37,5 @@ Supabase has only **one** `magic_link` template slot. Choose **one** of:
 
 ## Brand assets
 
-- Header logo: `https://www.saudipetsitters.com/logo-white.png`
+- Header logo: `https://www.dubaipetsitters.com/logo-white.png`
 - Colors match `src/lib/notifications/email-layout.ts`

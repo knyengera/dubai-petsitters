@@ -152,10 +152,10 @@ export default function HostDetailModal({ host, open, onClose }) {
                   style={{ border: 0 }}
                   loading="lazy"
                   allowFullScreen
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent([host.neighborhood, host.city, 'Saudi Arabia'].filter(Boolean).join(', '))}&output=embed&zoom=13`}
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent([host.neighborhood, host.city, 'UAE'].filter(Boolean).join(', '))}&output=embed&zoom=13`}
                 />
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([host.neighborhood, host.city, 'Saudi Arabia'].filter(Boolean).join(', '))}`}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([host.neighborhood, host.city, 'UAE'].filter(Boolean).join(', '))}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute bottom-2 right-2 bg-white text-xs font-medium px-2.5 py-1 rounded-lg shadow flex items-center gap-1 hover:bg-primary hover:text-white transition-colors"

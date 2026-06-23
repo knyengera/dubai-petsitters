@@ -163,7 +163,7 @@ export function validatePassport(idNumber: string): boolean {
   return /^[A-Za-z0-9]{6,12}$/.test(idNumber);
 }
 
-export function toE164Phone(phone: string, defaultCountryCode = "+966"): string {
+export function toE164Phone(phone: string, defaultCountryCode = "+971"): string {
   const trimmed = phone.trim();
   if (!trimmed) return defaultCountryCode;
 
@@ -175,7 +175,7 @@ export function toE164Phone(phone: string, defaultCountryCode = "+966"): string 
   const digits = trimmed.replace(/\D/g, "");
   if (!digits) return defaultCountryCode;
 
-  if (digits.startsWith("966")) return `+${digits}`;
+  if (digits.startsWith("971")) return `+${digits}`;
   if (digits.startsWith("0")) return `${defaultCountryCode}${digits.slice(1)}`;
   if (/^5\d{8}$/.test(digits)) return `${defaultCountryCode}${digits}`;
   if (digits.length >= 10) return `+${digits}`;

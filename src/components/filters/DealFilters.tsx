@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, SlidersHorizontal, X, RotateCcw } from "lucide-react";
-import { SAUDI_CITIES } from "@/lib/partners/partner-types";
+import { UAE_CITIES } from "@/lib/partners/partner-types";
 
-const CITIES = SAUDI_CITIES.filter((c) => c !== "Other");
+const CITIES = UAE_CITIES.filter((c) => c !== "Other");
 
 const CATEGORY_OPTIONS = [
   { value: "vet_clinic", label: "Vet Clinic" },

@@ -27,7 +27,7 @@ export async function generateMetadata({
 
   const name = partner.name || "Pet Business";
   const typePart = partner.business_type ? ` — ${partner.business_type}` : "";
-  const cityPart = partner.city ? ` in ${partner.city}` : " in Saudi Arabia";
+  const cityPart = partner.city ? ` in ${partner.city}` : " in the UAE";
 
   return buildPageMetadata({
     title: `${name}${typePart}${cityPart}`,
@@ -35,8 +35,8 @@ export async function generateMetadata({
     path: `/partners/${id}`,
     image: partner.image_url || undefined,
     keywords: [
-      `${partner.business_type ?? "pet business"} ${partner.city ?? "Saudi Arabia"}`,
-      `pet services ${partner.city ?? "Saudi Arabia"}`,
+      `${partner.business_type ?? "pet business"} ${partner.city ?? "the UAE"}`,
+      `pet services ${partner.city ?? "the UAE"}`,
     ],
   });
 }

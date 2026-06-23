@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, SlidersHorizontal, X, Star, RotateCcw } from "lucide-react";
-import { SAUDI_CITIES } from "@/lib/partners/partner-types";
+import { UAE_CITIES } from "@/lib/partners/partner-types";
 import { NON_VET_PARTNER_TYPES } from "@/lib/partners/queries";
 
-const CITIES = SAUDI_CITIES.filter((c) => c !== "Other");
+const CITIES = UAE_CITIES.filter((c) => c !== "Other");
 const BUSINESS_TYPES = NON_VET_PARTNER_TYPES.map((t) => t.label);
 const CITY_OPTIONS = [
   { value: "all", label: "All Cities" },

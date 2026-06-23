@@ -47,7 +47,7 @@ const socialLinks = [
     ),
   },
   {
-    href: "https://www.instagram.com/saudipetsitters/",
+    href: "https://www.instagram.com/dubaipetsitters/",
     labelEn: "Instagram",
     labelAr: "إنستغرام",
     icon: (
@@ -57,7 +57,7 @@ const socialLinks = [
     ),
   },
   {
-    href: "https://www.tiktok.com/@saudipetsitters",
+    href: "https://www.tiktok.com/@dubaipetsitters",
     labelEn: "TikTok",
     labelAr: "تيك توك",
     icon: (
@@ -110,27 +110,27 @@ export default function Footer() {
             >
               <img
                 src="/logo-white.png"
-                alt="Saudi Petsitters"
+                alt="Dubai Petsitters"
                 className="h-12 w-auto"
               />
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-background/65">
               {t(
-                "Saudi Arabia's trusted pet care community for vets, adoption, hosting, and everyday pet support.",
-                "مجتمع رعاية الحيوانات الأليفة الموثوق في السعودية للأطباء، التبني، الاستضافة، والدعم اليومي."
+                "The UAE's trusted pet care community for vets, adoption, hosting, and everyday pet support.",
+                "مجتمع رعاية الحيوانات الأليفة الموثوق في الإمارات للأطباء، التبني، الاستضافة، والدعم اليومي."
               )}
             </p>
             <div>
               <ul className="space-y-3 text-sm text-background/65">
                 <li>
                   <a
-                    href="https://www.google.com/maps/search/?api=1&query=Khobar%2C%20Saudi%20Arabia"
+                    href="https://www.google.com/maps/search/?api=1&query=Dubai%2C%20UAE"
                     target="_blank"
                     rel="noreferrer"
                     className={`items-center gap-2.5 ${footerLinkClass}`}
                   >
                     <MapPin className="w-4 h-4 text-background shrink-0" />
-                    {t("Khobar, Saudi Arabia", "الخبر، السعودية")}
+                    {t("Dubai, UAE", "دبي، الإمارات")}
                   </a>
                 </li>
                 <li>
@@ -197,7 +197,7 @@ export default function Footer() {
 
         <div className="mt-12 flex flex-col gap-4 border-t border-background/10 pt-6 text-sm text-background/45 md:flex-row md:items-center md:justify-between">
           <p>
-            © {new Date().getFullYear()} Saudi Petsitters.{" "}
+            © {new Date().getFullYear()} Dubai Petsitters.{" "}
             {t("All rights reserved.", "جميع الحقوق محفوظة.")}
           </p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">

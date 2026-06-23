@@ -102,7 +102,7 @@ export default function FeaturedHosts() {
               Top-Rated Pet Sitters
             </h2>
             <p className="text-muted-foreground text-lg">
-              Trusted hosts across the Kingdom — browse profiles and book in minutes.
+              Trusted hosts across the UAE — browse profiles and book in minutes.
             </p>
           </div>
           <Link href="/hosts">

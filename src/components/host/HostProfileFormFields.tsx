@@ -68,7 +68,7 @@ export default function HostProfileFormFields({
             value={form.city}
             onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
             className="rounded-xl mt-1"
-            placeholder="e.g. Riyadh"
+            placeholder="e.g. Dubai"
           />
         </div>
         <div>

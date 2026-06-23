@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description:
       post.seo_description ||
       post.excerpt ||
-      `Read "${post.title}" on the Saudi Petsitters pet care blog.`,
+      `Read "${post.title}" on the Dubai Petsitters pet care blog.`,
     path: `/blog/${post.slug ?? slug}`,
     type: "article",
     image: post.cover_image || undefined,

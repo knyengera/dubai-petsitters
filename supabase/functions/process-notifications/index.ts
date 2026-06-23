@@ -46,7 +46,7 @@ function renderText(templateKey: string, payload: Record<string, unknown>): stri
     case "message.new":
       return `New message from ${payload.sender_name ?? "someone"}.`;
     default:
-      return String(payload.text ?? "You have a new notification from Saudi Petsitters.");
+      return String(payload.text ?? "You have a new notification from Dubai Petsitters.");
   }
 }
 
@@ -86,7 +86,7 @@ Deno.serve(async () => {
     if (row.channel === "email" && row.recipient_email) {
       result = await sendEmail(
         row.recipient_email,
-        "Saudi Petsitters",
+        "Dubai Petsitters",
         text
       );
     } else if (row.channel === "sms" && row.recipient_phone) {

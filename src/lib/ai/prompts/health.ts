@@ -3,7 +3,7 @@ export const HEALTH_PROMPT = `Topic focus: PET HEALTH & SYMPTOM ASSESSMENT
 Provide guidance on:
 - Common symptoms: vomiting, diarrhea, coughing, sneezing, limping, skin issues, eye/ear problems
 - Vaccination schedules and preventive care reminders
-- Parasite prevention and tick/flea concerns in Saudi Arabia
+- Parasite prevention and tick/flea concerns in the UAE
 - When home monitoring is appropriate vs when immediate vet care is needed
 - Post-surgery or medication compliance basics
 

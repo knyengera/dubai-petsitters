@@ -7,7 +7,7 @@ import { Plane, ChevronRight, ChevronLeft, CheckCircle, Circle, AlertTriangle, F
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { DESTINATIONS, SAUDI_IMPORT_CHECKLIST, SPECIES_REQS } from '@/lib/ai/travel-knowledge';
+import { DESTINATIONS, UAE_IMPORT_CHECKLIST, SPECIES_REQS } from '@/lib/ai/travel-knowledge';
 
 export default function TravelCompliance() {
   const { t, isRTL } = useLanguage();
@@ -60,11 +60,11 @@ export default function TravelCompliance() {
             {step === 0 && (
               <div>
                 <h2 className="font-heading text-2xl font-bold text-foreground mb-2">{t('Travel Direction', 'اتجاه السفر')}</h2>
-                <p className="text-muted-foreground mb-6">{t('Are you importing to or exporting from Saudi Arabia?', 'هل تستورد إلى أو تصدر من المملكة العربية السعودية؟')}</p>
+                <p className="text-muted-foreground mb-6">{t('Are you importing to or exporting from the UAE?', 'هل تستورد إلى أو تصدر من الإمارات العربية المتحدة؟')}</p>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { val: 'export', en: 'Exporting', ar: 'تصدير', icon: Plane, desc_en: 'Traveling out of Saudi Arabia with your pet', desc_ar: 'السفر خارج المملكة مع حيوانك الأليف' },
-                    { val: 'import', en: 'Importing', ar: 'استيراد', icon: Globe, desc_en: 'Bringing a pet into Saudi Arabia', desc_ar: 'إحضار حيوان إلى المملكة العربية السعودية' },
+                    { val: 'export', en: 'Exporting', ar: 'تصدير', icon: Plane, desc_en: 'Traveling out of the UAE with your pet', desc_ar: 'السفر خارج الإمارات مع حيوانك الأليف' },
+                    { val: 'import', en: 'Importing', ar: 'استيراد', icon: Globe, desc_en: 'Bringing a pet into the UAE', desc_ar: 'إحضار حيوان إلى الإمارات العربية المتحدة' },
                   ].map(opt => (
                     <button key={opt.val} onClick={() => { setDirection(opt.val); goNext(); }}
                       className={`p-6 rounded-2xl border-2 text-start hover:border-primary transition-all ${direction === opt.val ? 'border-primary bg-primary/5' : 'border-border bg-card'}`}>
@@ -123,12 +123,12 @@ export default function TravelCompliance() {
                   </div>
                 )}
                 <div className="space-y-2">
-                  {(direction === 'import' ? SAUDI_IMPORT_CHECKLIST.map(r => r.en) : reqs).map((req, i) => (
+                  {(direction === 'import' ? UAE_IMPORT_CHECKLIST.map(r => r.en) : reqs).map((req, i) => (
                     <div key={i} className="flex items-start gap-3 bg-card border border-border rounded-xl p-3">
                       <div className="w-6 h-6 bg-primary/10 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
                         <span className="text-xs font-bold text-primary">{i + 1}</span>
                       </div>
-                      <p className="text-sm text-foreground">{direction === 'import' ? t(SAUDI_IMPORT_CHECKLIST[i].en, SAUDI_IMPORT_CHECKLIST[i].ar) : req}</p>
+                      <p className="text-sm text-foreground">{direction === 'import' ? t(UAE_IMPORT_CHECKLIST[i].en, UAE_IMPORT_CHECKLIST[i].ar) : req}</p>
                     </div>
                   ))}
                 </div>
@@ -142,14 +142,14 @@ export default function TravelCompliance() {
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-foreground font-medium">{t('Progress', 'التقدم')}</span>
-                    <span className="text-primary font-bold">{checkedCount}/{(direction === 'import' ? SAUDI_IMPORT_CHECKLIST : reqs).length}</span>
+                    <span className="text-primary font-bold">{checkedCount}/{(direction === 'import' ? UAE_IMPORT_CHECKLIST : reqs).length}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <motion.div className="h-full bg-primary rounded-full" animate={{ width: `${(checkedCount / (direction === 'import' ? SAUDI_IMPORT_CHECKLIST : reqs).length) * 100}%` }} />
+                    <motion.div className="h-full bg-primary rounded-full" animate={{ width: `${(checkedCount / (direction === 'import' ? UAE_IMPORT_CHECKLIST : reqs).length) * 100}%` }} />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  {(direction === 'import' ? SAUDI_IMPORT_CHECKLIST : reqs.map(r => ({ en: r, ar: r }))).map((item, i) => {
+                  {(direction === 'import' ? UAE_IMPORT_CHECKLIST : reqs.map(r => ({ en: r, ar: r }))).map((item, i) => {
                     const isChecked = !!checked[i];
                     return (
                       <button key={i} onClick={() => toggleCheck(i)}
@@ -164,7 +164,7 @@ export default function TravelCompliance() {
                     );
                   })}
                 </div>
-                {checkedCount === (direction === 'import' ? SAUDI_IMPORT_CHECKLIST : reqs).length && (
+                {checkedCount === (direction === 'import' ? UAE_IMPORT_CHECKLIST : reqs).length && (
                   <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-6 bg-success-muted border border-success-border rounded-2xl p-4 flex items-center gap-3">
                     <CheckCircle className="w-6 h-6 text-success" />
                     <p className="font-semibold text-success">{t('All requirements complete! Safe travels 🐾', 'اكتملت جميع المتطلبات! سفر آمن 🐾')}</p>

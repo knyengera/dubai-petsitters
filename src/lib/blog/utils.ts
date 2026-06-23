@@ -85,7 +85,7 @@ export function postToFormValues(post: BlogPost): BlogPostFormValues {
     content: post.content ?? "",
     cover_image: post.cover_image ?? "",
     category: post.category ?? "pet_care",
-    author_name: post.author_name ?? "Saudi Petsitters",
+    author_name: post.author_name ?? "Dubai Petsitters",
     status: post.status ?? (post.published ? "published" : "draft"),
     scheduled_at: post.scheduled_at
       ? new Date(post.scheduled_at).toISOString().slice(0, 16)
@@ -104,7 +104,7 @@ export const EMPTY_BLOG_POST_FORM: BlogPostFormValues = {
   content: "",
   cover_image: "",
   category: "pet_care",
-  author_name: "Saudi Petsitters",
+  author_name: "Dubai Petsitters",
   status: "draft",
   scheduled_at: "",
   tags: "",

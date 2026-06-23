@@ -28,7 +28,7 @@ export async function generateMetadata({
   }
 
   const name = clinic.name || "Vet Clinic";
-  const cityPart = clinic.city ? ` in ${clinic.city}` : " in Saudi Arabia";
+  const cityPart = clinic.city ? ` in ${clinic.city}` : " in the UAE";
   const emergency = clinic.emergency_available
     ? " Offering 24/7 emergency care."
     : "";
@@ -39,8 +39,8 @@ export async function generateMetadata({
     path: `/vets/${id}`,
     image: clinic.image_url || undefined,
     keywords: [
-      `vet ${clinic.city ?? "Saudi Arabia"}`,
-      `veterinary clinic ${clinic.city ?? "Saudi Arabia"}`,
+      `vet ${clinic.city ?? "the UAE"}`,
+      `veterinary clinic ${clinic.city ?? "the UAE"}`,
       clinic.emergency_available ? "emergency vet" : "animal clinic",
     ],
   });

@@ -427,7 +427,7 @@ export default function ProfileCompletionWizard() {
     if (!isValidE164Phone(phone)) {
       toast({
         title: "Invalid phone number",
-        description: "Include your country code, e.g. +966 5XX XXX XXXX or +1 555 123 4567.",
+        description: "Include your country code, e.g. +971 5X XXX XXXX or +1 555 123 4567.",
         variant: "destructive",
       });
       return;
@@ -461,7 +461,7 @@ export default function ProfileCompletionWizard() {
     if (!isValidE164Phone(phone)) {
       toast({
         title: "Invalid phone number",
-        description: "Include your country code, e.g. +966 5XX XXX XXXX or +1 555 123 4567.",
+        description: "Include your country code, e.g. +971 5X XXX XXXX or +1 555 123 4567.",
         variant: "destructive",
       });
       return;
@@ -602,7 +602,7 @@ export default function ProfileCompletionWizard() {
         </div>
         <h1 className="text-2xl font-bold">Complete your profile</h1>
         <p className="mt-1 text-muted-foreground">
-          Verify your identity to access Saudi Petsitters
+          Verify your identity to access Dubai Petsitters
         </p>
       </div>
 
@@ -682,7 +682,7 @@ export default function ProfileCompletionWizard() {
               value={form.city}
               onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
               required
-              placeholder="e.g. Riyadh"
+              placeholder="e.g. Dubai"
               className="rounded-xl"
             />
           </div>
@@ -834,12 +834,12 @@ export default function ProfileCompletionWizard() {
                   autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(sanitizePhoneInput(e.target.value))}
-                  placeholder="+966 5XX XXX XXXX or +1 555 123 4567"
+                  placeholder="+971 5X XXX XXXX or +1 555 123 4567"
                   className="rounded-xl"
                   disabled={loading}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Saudi numbers can be entered as 5XXXXXXXX — we&apos;ll add +966
+                  UAE numbers can be entered as 5XXXXXXXX — we&apos;ll add +971
                   automatically.
                 </p>
               </div>

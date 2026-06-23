@@ -34,7 +34,7 @@ export async function generateMetadata({
   }
 
   const name = host.full_name || "Pet Host";
-  const cityPart = host.city ? ` in ${host.city}` : " in Saudi Arabia";
+  const cityPart = host.city ? ` in ${host.city}` : " in the UAE";
   const services = formatServices(host.services);
 
   return buildPageMetadata({
@@ -44,8 +44,8 @@ export async function generateMetadata({
     type: "profile",
     image: host.photo_url || undefined,
     keywords: [
-      `pet sitter ${host.city ?? "Saudi Arabia"}`,
-      `pet boarding ${host.city ?? "Saudi Arabia"}`,
+      `pet sitter ${host.city ?? "the UAE"}`,
+      `pet boarding ${host.city ?? "the UAE"}`,
       "trusted pet host",
     ],
   });

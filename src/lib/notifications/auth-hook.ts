@@ -129,7 +129,7 @@ export async function handleSendEmailHook(
 
   const result = await sendEmail({
     to: email,
-    subject: rendered.subject || "Saudi Petsitters",
+    subject: rendered.subject || "Dubai Petsitters",
     text: rendered.text,
     html: rendered.html,
   });
@@ -157,7 +157,7 @@ export async function handleSendSmsHook(
 
   const result = await sendTwilioSms({
     to: phone,
-    body: `Your Saudi Petsitters verification code is: ${otp}. It expires in 10 minutes.`,
+    body: `Your Dubai Petsitters verification code is: ${otp}. It expires in 10 minutes.`,
   });
 
   if (!result.ok) return { ok: false, error: result.error };

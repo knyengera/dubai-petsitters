@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, SlidersHorizontal, X, Star, RotateCcw } from 'lucide-react';
 import { DEFAULT_CURRENCY } from '@/lib/monetisation/constants';
 
-const CITIES = ['Riyadh', 'Jeddah', 'Dammam', 'Makkah', 'Madinah', 'Khobar', 'Tabuk', 'Abha'];
+const CITIES = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Al Ain', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain'];
 const CITY_OPTIONS = [{ value: 'all', label: 'All Cities' }, ...CITIES.map(c => ({ value: c, label: c }))];
 const SERVICE_TAGS = ['boarding', 'daycare', 'home_sitting', 'dog_walking'];
 const SERVICE_LABELS = { boarding: 'Boarding', daycare: 'Daycare', home_sitting: 'Home Sitting', dog_walking: 'Dog Walking' };

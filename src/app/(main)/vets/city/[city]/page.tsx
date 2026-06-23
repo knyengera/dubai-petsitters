@@ -22,7 +22,7 @@ export async function generateMetadata({
   if (!city) {
     return buildPageMetadata({
       title: "Vet Clinics",
-      description: "Find veterinary clinics across Saudi Arabia.",
+      description: "Find veterinary clinics across the UAE.",
       path: `/vets/city/${slug}`,
       noIndex: true,
     });

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Search, SlidersHorizontal, X, Star, RotateCcw } from 'lucide-react';
 
-const CITIES = ['Riyadh', 'Jeddah', 'Dammam', 'Makkah', 'Madinah', 'Khobar', 'Tabuk', 'Abha'];
+const CITIES = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Al Ain', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain'];
 const CITY_OPTIONS = [{ value: 'all', label: 'All Cities' }, ...CITIES.map(c => ({ value: c, label: c }))];
 const SPECIALTY_TAGS = ['Dogs', 'Cats', 'Birds', 'Exotic Animals', 'Dental', 'Surgery', 'Dermatology', 'Ophthalmology', 'Oncology', 'Orthopedics'];
 const SERVICE_TAGS = ['Vaccination', 'Grooming', 'X-Ray', 'Lab Tests', 'Microchipping', 'Emergency', 'Physiotherapy'];
