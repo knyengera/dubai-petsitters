@@ -2,6 +2,7 @@
 
 import React from "react";
 import { AlertTriangle } from "lucide-react";
+import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/seo/site";
 
 const sections = [
   {
@@ -67,6 +68,10 @@ export default function LiabilityWaiver() {
         </div>
         <div className="mt-12 bg-muted rounded-2xl p-6 text-sm text-muted-foreground">
           Questions about this waiver? Contact us at{" "}
+          <a href={`tel:${CONTACT_PHONE_TEL}`} className="text-primary hover:underline">
+            {CONTACT_PHONE}
+          </a>{" "}
+          or{" "}
           <a
             href="mailto:legal@saudipetsitters.com"
             className="text-primary hover:underline"

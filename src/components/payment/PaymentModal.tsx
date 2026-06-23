@@ -8,6 +8,7 @@ import { CheckCircle, Loader2, ExternalLink, Clock } from "lucide-react";
 import { getEnabledPaymentProviders } from "@/lib/payments/providers";
 import { startPaymentCheckout } from "@/lib/payments/client";
 import { BANK_TRANSFER_INSTRUCTIONS } from "@/lib/payments/config";
+import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/seo/site";
 import type { EnabledPaymentProvider } from "@/lib/payments/types";
 
 type PaymentModalProps = {
@@ -130,7 +131,11 @@ export default function PaymentModal({
                 </div>
               ) : providers.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No payment methods are currently available. Please contact support.
+                  No payment methods are currently available. Please contact support at{" "}
+                  <a href={`tel:${CONTACT_PHONE_TEL}`} className="text-primary hover:underline">
+                    {CONTACT_PHONE}
+                  </a>
+                  .
                 </p>
               ) : (
                 <div className="space-y-2 max-h-56 overflow-y-auto">

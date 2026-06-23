@@ -1,4 +1,5 @@
 import { getAppBaseUrl } from "@/lib/notifications/config";
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/seo/site";
 
 /** Brand palette from globals.css (hex for email client compatibility). */
 export const EMAIL_BRAND = {
@@ -197,6 +198,11 @@ export function buildBrandedEmail(options: BrandedEmailOptions): string {
             <td align="center" style="background-color:${b.muted};border:1px solid ${b.border};border-top:0;border-radius:0 0 16px 16px;padding:24px 32px;">
               <p style="margin:0 0 8px 0;font-family:${b.fontBody};font-size:13px;line-height:20px;color:${b.mutedForeground};">
                 &copy; ${year} ${escapeHtml(b.appName)}. All rights reserved.
+              </p>
+              <p style="margin:0 0 8px 0;font-family:${b.fontBody};font-size:12px;line-height:18px;color:${b.mutedForeground};">
+                <a href="tel:${escapeHtml(CONTACT_PHONE_TEL)}" style="color:${b.primary};text-decoration:underline;">${escapeHtml(CONTACT_PHONE)}</a>
+                &nbsp;&middot;&nbsp;
+                <a href="mailto:${escapeHtml(CONTACT_EMAIL)}" style="color:${b.primary};text-decoration:underline;">${escapeHtml(CONTACT_EMAIL)}</a>
               </p>
               <p style="margin:0;font-family:${b.fontBody};font-size:12px;line-height:18px;color:${b.mutedForeground};">
                 <a href="${getAppBaseUrl()}" style="color:${b.primary};text-decoration:underline;">Visit our website</a>

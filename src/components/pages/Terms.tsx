@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { CONTACT_PHONE, CONTACT_PHONE_TEL } from '@/lib/seo/site';
 
 const sections = [
   { title: '1. Acceptance of Terms', body: 'By creating an account, signing up, or using Saudi Petsitters, you agree to be bound by these Terms and Conditions, our Privacy Policy, and our Liability Waiver. Your acceptance is recorded at registration. If you do not agree, please discontinue use of the platform immediately.' },
@@ -31,7 +32,10 @@ export default function Terms() {
           ))}
         </div>
         <div className="mt-12 bg-muted rounded-2xl p-6 text-sm text-muted-foreground">
-          Questions about these Terms? Contact us at <a href="mailto:legal@saudipetsitters.com" className="text-primary hover:underline">legal@saudipetsitters.com</a>.
+          Questions about these Terms? Contact us at{" "}
+          <a href={`tel:${CONTACT_PHONE_TEL}`} className="text-primary hover:underline">{CONTACT_PHONE}</a>
+          {" "}or{" "}
+          <a href={`mailto:legal@saudipetsitters.com`} className="text-primary hover:underline">legal@saudipetsitters.com</a>.
         </div>
       </div>
     </div>

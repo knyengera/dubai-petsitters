@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_TEL } from '@/lib/seo/site';
 
 const sections = [
   { title: 'General Information Only', body: 'The content on Saudi Petsitters — including blog posts, forum discussions, AI pet care guidance, and vet profiles — is provided for general informational purposes only. It does not constitute professional veterinary, medical, or legal advice.' },
@@ -29,7 +30,10 @@ export default function Disclaimer() {
           ))}
         </div>
         <div className="mt-12 bg-muted rounded-2xl p-6 text-sm text-muted-foreground">
-          If you have concerns about content accuracy, please contact us at <a href="mailto:hello@saudipetsitters.com" className="text-primary hover:underline">hello@saudipetsitters.com</a>.
+          If you have concerns about content accuracy, please contact us at{" "}
+          <a href={`tel:${CONTACT_PHONE_TEL}`} className="text-primary hover:underline">{CONTACT_PHONE}</a>
+          {" "}or{" "}
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">{CONTACT_EMAIL}</a>.
         </div>
       </div>
     </div>

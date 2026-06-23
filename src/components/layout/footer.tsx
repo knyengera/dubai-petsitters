@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, HeartHandshake, Mail, MapPin } from "lucide-react";
+import { ArrowRight, HeartHandshake, Mail, MapPin, Phone } from "lucide-react";
 import { PUBLIC_NAV_LINKS, type NavLinkItem } from "@/lib/auth/navigation";
 import { useLanguage } from "@/lib/language-context";
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/seo/site";
 
 const serviceLinks: NavLinkItem[] = [
   ...PUBLIC_NAV_LINKS.filter(
@@ -134,11 +135,20 @@ export default function Footer() {
                 </li>
                 <li>
                   <a
-                    href="mailto:hello@saudipetsitters.com"
+                    href={`tel:${CONTACT_PHONE_TEL}`}
+                    className={`items-center gap-2.5 ${footerLinkClass}`}
+                  >
+                    <Phone className="w-4 h-4 text-background shrink-0" />
+                    {CONTACT_PHONE}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
                     className={`items-center gap-2.5 ${footerLinkClass}`}
                   >
                     <Mail className="w-4 h-4 text-background shrink-0" />
-                    hello@saudipetsitters.com
+                    {CONTACT_EMAIL}
                   </a>
                 </li>
               </ul>

@@ -15,6 +15,12 @@ export const TWITTER_CARD = "summary_large_image" as const;
 
 export const CONTACT_EMAIL = "hello@saudipetsitters.com";
 
+/** Human-readable platform phone number. */
+export const CONTACT_PHONE = "+966 54 853 9353";
+
+/** E.164 format for tel:, sms:, and wa.me links. */
+export const CONTACT_PHONE_TEL = "+966548539353";
+
 /** Absolute production/site origin, used for canonical URLs, OG tags, and JSON-LD. */
 export function getSiteUrl(): string {
   return getAppBaseUrl();

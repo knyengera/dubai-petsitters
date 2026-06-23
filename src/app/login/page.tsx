@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { CONTACT_PHONE, CONTACT_PHONE_TEL } from "@/lib/seo/site";
 import LegalAcceptanceCheckbox from "@/components/legal/LegalAcceptanceCheckbox";
 import {
   LEGAL_DOCUMENTS_VERSION,
@@ -204,7 +205,11 @@ function LoginForm() {
       {accountDeleted && (
         <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           This account is no longer active. If you believe this is a mistake,
-          please contact support.
+          please contact support at{" "}
+          <a href={`tel:${CONTACT_PHONE_TEL}`} className="font-medium underline">
+            {CONTACT_PHONE}
+          </a>
+          .
         </div>
       )}
 

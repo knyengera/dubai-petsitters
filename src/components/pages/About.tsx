@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Heart, Shield, Users } from 'lucide-react';
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_TEL } from '@/lib/seo/site';
 
 const values = [
   { icon: Heart, title: 'Compassion First', desc: 'Every decision we make is guided by the well-being of animals and the people who love them.' },
@@ -54,9 +55,14 @@ export default function About() {
         <section className="bg-card border border-border rounded-2xl p-8 text-center">
           <h2 className="font-heading text-xl font-bold text-foreground mb-2">Get in Touch</h2>
           <p className="text-muted-foreground mb-4">Have questions or want to partner with us?</p>
-          <a href="mailto:hello@saudipetsitters.com" className="text-primary font-semibold hover:underline">
-            hello@saudipetsitters.com
-          </a>
+          <div className="flex flex-col items-center gap-2">
+            <a href={`tel:${CONTACT_PHONE_TEL}`} className="text-primary font-semibold hover:underline">
+              {CONTACT_PHONE}
+            </a>
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary font-semibold hover:underline">
+              {CONTACT_EMAIL}
+            </a>
+          </div>
         </section>
       </div>
     </div>

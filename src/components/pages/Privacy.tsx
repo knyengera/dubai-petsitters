@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { CONTACT_PHONE, CONTACT_PHONE_TEL } from '@/lib/seo/site';
 
 const sections = [
   { title: '1. Information We Collect', body: 'We collect information you provide directly, such as your name, email address, phone number, and pet details when you register, book a service, or contact us. When you sign up, we also record your acceptance of our legal documents, including the timestamp and document version. We also collect usage data automatically, including IP addresses, browser type, and pages visited.' },
@@ -29,7 +30,10 @@ export default function Privacy() {
           ))}
         </div>
         <div className="mt-12 bg-muted rounded-2xl p-6 text-sm text-muted-foreground">
-          For privacy-related enquiries, contact us at <a href="mailto:privacy@saudipetsitters.com" className="text-primary hover:underline">privacy@saudipetsitters.com</a>.
+          For privacy-related enquiries, contact us at{" "}
+          <a href={`tel:${CONTACT_PHONE_TEL}`} className="text-primary hover:underline">{CONTACT_PHONE}</a>
+          {" "}or{" "}
+          <a href="mailto:privacy@saudipetsitters.com" className="text-primary hover:underline">privacy@saudipetsitters.com</a>.
         </div>
       </div>
     </div>

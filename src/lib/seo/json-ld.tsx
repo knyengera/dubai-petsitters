@@ -1,5 +1,6 @@
 import {
   CONTACT_EMAIL,
+  CONTACT_PHONE_TEL,
   SITE_NAME,
   SITE_TAGLINE,
   absoluteUrl,
@@ -32,10 +33,12 @@ export function organizationSchema(): JsonLdObject {
     logo: absoluteUrl("/logo.png"),
     description: SITE_TAGLINE,
     email: CONTACT_EMAIL,
+    telephone: CONTACT_PHONE_TEL,
     areaServed: { "@type": "Country", name: "Saudi Arabia" },
     contactPoint: {
       "@type": "ContactPoint",
       email: CONTACT_EMAIL,
+      telephone: CONTACT_PHONE_TEL,
       contactType: "customer support",
       areaServed: "SA",
       availableLanguage: ["en", "ar"],
