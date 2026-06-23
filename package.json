@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "db:migrate": "node scripts/push-migrations.mjs",
+    "db:seed": "node scripts/seed.mjs",
     "db:seed-blog": "node scripts/seed-blog.mjs",
     "db:seed-forum": "node scripts/seed-forum.mjs"
   },
