@@ -7,10 +7,19 @@ import { getStripeClient } from "@/lib/payments/stripe-client";
 import { getPaymentBaseUrl, isStripeConfigured } from "@/lib/payments/config";
 import { ensurePlanPrice } from "@/lib/partners/stripe-plan-sync";
 import { parseAdvertisingPlan } from "@/lib/partners/advertising-plans";
+import { getPartnerBillingEnabled } from "@/lib/partners/billing-settings";
+import { createClient } from "@/lib/supabase/server";
 
 export type SubscriptionActionResult<T = undefined> =
   | { ok: true; data: T }
   | { ok: false; error: string };
+
+export type PartnerAdvertisingSettingsRow = {
+  id: string;
+  billing_enabled: boolean;
+  updated_at: string;
+  updated_by: string | null;
+};
 
 function toError(e: unknown): string {
   return e instanceof Error ? e.message : "Unknown error";
@@ -47,6 +56,9 @@ export async function createPartnerSubscriptionCheckout(input: {
   try {
     if (!isStripeConfigured()) {
       return { ok: false, error: "Stripe is not configured." };
+    }
+    if (!(await getPartnerBillingEnabled())) {
+      return { ok: false, error: "Advertising billing is currently disabled." };
     }
     const email = input.payerEmail.trim().toLowerCase();
     if (!email) return { ok: false, error: "A billing email is required." };
@@ -243,6 +255,78 @@ export async function adminCancelPartnerSubscription(input: {
 
     revalidatePath("/admin/subscriptions");
     return { ok: true, data: undefined };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
+}
+
+export async function adminGetPartnerBillingSettings(): Promise<
+  SubscriptionActionResult<PartnerAdvertisingSettingsRow>
+> {
+  try {
+    await requireAdmin();
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("partner_advertising_settings")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+    if (error) return { ok: false, error: error.message };
+    if (!data) return { ok: false, error: "Advertising settings not found" };
+    return { ok: true, data: data as PartnerAdvertisingSettingsRow };
+  } catch (e) {
+    return { ok: false, error: toError(e) };
+  }
+}
+
+export async function adminUpdatePartnerBillingSettings(input: {
+  billingEnabled: boolean;
+}): Promise<SubscriptionActionResult<PartnerAdvertisingSettingsRow>> {
+  try {
+    const admin = await requireAdmin();
+    const supabase = await createClient();
+
+    const updates: Record<string, unknown> = {
+      billing_enabled: input.billingEnabled,
+      updated_at: new Date().toISOString(),
+      updated_by: admin.email,
+    };
+
+    const { data: existing, error: existingError } = await supabase
+      .from("partner_advertising_settings")
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+
+    if (existingError) return { ok: false, error: existingError.message };
+
+    const existingRow = existing as { id: string } | null;
+
+    let data: PartnerAdvertisingSettingsRow | null = null;
+    let error: { message: string } | null = null;
+
+    if (existingRow?.id) {
+      const result = await supabase
+        .from("partner_advertising_settings")
+        .update(updates as never)
+        .eq("id", existingRow.id)
+        .select()
+        .single();
+      data = result.data as PartnerAdvertisingSettingsRow | null;
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("partner_advertising_settings")
+        .insert(updates as never)
+        .select()
+        .single();
+      data = result.data as PartnerAdvertisingSettingsRow | null;
+      error = result.error;
+    }
+
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/admin/advertising-plans");
+    return { ok: true, data: data as PartnerAdvertisingSettingsRow };
   } catch (e) {
     return { ok: false, error: toError(e) };
   }

@@ -144,6 +144,26 @@ export interface Database {
           updated_by?: string | null;
         };
       };
+      partner_advertising_settings: {
+        Row: {
+          id: string;
+          billing_enabled: boolean;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          billing_enabled?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          billing_enabled?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+      };
       escrow_accounts: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       ledger_entries: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       host_balances: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
@@ -347,6 +367,10 @@ export interface Database {
       get_auth_verification_settings: {
         Args: Record<string, never>;
         Returns: Database["public"]["Tables"]["platform_auth_settings"]["Row"];
+      };
+      get_partner_advertising_settings: {
+        Args: Record<string, never>;
+        Returns: Database["public"]["Tables"]["partner_advertising_settings"]["Row"];
       };
     };
     Enums: Record<string, never>;

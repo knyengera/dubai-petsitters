@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Loader2, Megaphone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import AdminDataList from "@/components/admin/AdminDataList";
 import AdminFilterBar from "@/components/admin/AdminFilterBar";
@@ -20,6 +22,10 @@ import {
 import { useAdminPaginatedList } from "@/components/admin/useAdminPaginatedList";
 import { ADMIN_TABLES, type Row } from "@/lib/admin/tables";
 import { formatAdvertisingPlanPrice } from "@/lib/partners/advertising-plans";
+import {
+  adminGetPartnerBillingSettings,
+  adminUpdatePartnerBillingSettings,
+} from "@/lib/partners/subscription-actions";
 
 const EMPTY = {
   name: "",
@@ -75,11 +81,39 @@ export default function AdminAdvertisingPlans() {
     deleteRow,
     createRow,
   } = useAdminPaginatedList(ADMIN_TABLES.advertising_plans, "admin-advertising-plans");
+  const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [viewingPlan, setViewingPlan] = useState<Row | null>(null);
   const [editingPlan, setEditingPlan] = useState<Row | null>(null);
+  const [billingEnabled, setBillingEnabled] = useState<boolean | null>(null);
+  const [billingSaving, setBillingSaving] = useState(false);
+
+  useEffect(() => {
+    adminGetPartnerBillingSettings().then((result) => {
+      if (result.ok) setBillingEnabled(result.data.billing_enabled);
+    });
+  }, []);
+
+  const handleBillingToggle = async (enabled: boolean) => {
+    setBillingSaving(true);
+    const result = await adminUpdatePartnerBillingSettings({ billingEnabled: enabled });
+    setBillingSaving(false);
+
+    if (result.ok === false) {
+      toast({ title: "Update failed", description: result.error, variant: "destructive" });
+      return;
+    }
+
+    setBillingEnabled(result.data.billing_enabled);
+    toast({
+      title: enabled ? "Advertising billing enabled" : "Advertising billing disabled",
+      description: enabled
+        ? "Partners must select a plan and pay to be listed."
+        : "Partners can onboard for free — plans are hidden and no payment is taken.",
+    });
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,6 +162,28 @@ export default function AdminAdvertisingPlans() {
           </Button>
         }
       />
+
+      <div className="mb-6 rounded-2xl border border-border bg-card">
+        <div className="flex items-center justify-between gap-4 p-4 sm:p-5">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <Megaphone className="h-4 w-4 text-primary shrink-0" />
+              <p className="font-semibold text-foreground">Advertising billing</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              When enabled, partners must pick a plan and pay via Stripe to be listed. When
+              disabled, the Partners page hides plans and partners can join for free (no
+              payment).
+            </p>
+          </div>
+          <Switch
+            checked={billingEnabled ?? true}
+            disabled={billingEnabled === null || billingSaving}
+            onCheckedChange={handleBillingToggle}
+            aria-label="Toggle advertising billing"
+          />
+        </div>
+      </div>
 
       <AdminFilterBar
         search={search}

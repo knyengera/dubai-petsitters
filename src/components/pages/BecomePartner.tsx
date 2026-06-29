@@ -25,6 +25,7 @@ import GalleryImageUpload from "@/components/common/GalleryImageUpload";
 import PartnerTypeFields from "@/components/partners/PartnerTypeFields";
 import { createPartnerSubscriptionCheckout } from "@/lib/partners/subscription-actions";
 import { getActiveAdvertisingPlans } from "@/lib/partners/actions";
+import { getPartnerBillingEnabled } from "@/lib/partners/billing-settings";
 import {
   ADVERTISING_PLAN_HIGHLIGHT_STYLES,
   formatAdvertisingPlanPrice,
@@ -77,6 +78,7 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
   const { toast } = useToast();
   const [adPlans, setAdPlans] = useState<AdvertisingPlan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
+  const [billingEnabled, setBillingEnabled] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<AdvertisingPlan | null>(null);
   const [loading, setLoading] = useState(false);
   const [businessTypeId, setBusinessTypeId] = useState<PartnerTypeId | "">(
@@ -90,6 +92,9 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
     getActiveAdvertisingPlans()
       .then(setAdPlans)
       .finally(() => setPlansLoading(false));
+    getPartnerBillingEnabled()
+      .then(setBillingEnabled)
+      .catch(() => setBillingEnabled(true));
   }, []);
 
   const handleSelectPlan = (plan: AdvertisingPlan) => {
@@ -121,7 +126,7 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedPlan) {
+    if (billingEnabled && !selectedPlan) {
       toast({
         title: "Select a plan",
         description: "Please choose an advertising plan before proceeding to payment.",
@@ -173,11 +178,28 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
         website: form.website || null,
         image_url: form.image_url,
         gallery: form.gallery,
-        plan: form.plan,
-        message: `Advertising plan signup for ${selectedPlan.name}`,
+        plan: billingEnabled && selectedPlan ? form.plan : "",
+        message:
+          billingEnabled && selectedPlan
+            ? `Advertising plan signup for ${selectedPlan.name}`
+            : "Free partner signup",
         business_details: validation.data,
         status: "new",
       });
+
+      if (!billingEnabled || !selectedPlan) {
+        toast({
+          title: "Application submitted",
+          description:
+            "Thanks for joining! Our team will review your details and get your listing live soon.",
+        });
+        setForm(emptyForm);
+        setBusinessTypeId("");
+        setBusinessDetails({});
+        setSelectedPlan(null);
+        setLoading(false);
+        return;
+      }
 
       const checkout = await createPartnerSubscriptionCheckout({
         inquiryId: String(inquiry.id),
@@ -255,6 +277,8 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
           })}
         </div>
 
+        {billingEnabled && (
+          <>
         <div className="text-center mb-10">
           <h2 className="font-heading text-3xl font-bold text-foreground mb-2">Advertising Plans</h2>
           <p className="text-muted-foreground">Flexible options to fit every business size and budget.</p>
@@ -327,11 +351,15 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
             })}
           </div>
         )}
+          </>
+        )}
 
         <div id="partner-form" className="max-w-2xl mx-auto">
           <h2 className="font-heading text-2xl font-bold text-foreground mb-2 text-center">Business Details</h2>
           <p className="text-muted-foreground text-center mb-8">
-            Enter your business information and complete payment for your selected advertising plan.
+            {billingEnabled
+              ? "Enter your business information and complete payment for your selected advertising plan."
+              : "Enter your business information to join our partner directory for free."}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5 bg-card border border-border rounded-2xl p-8">
@@ -439,7 +467,7 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
               />
             )}
 
-            {selectedPlan && (
+            {billingEnabled && selectedPlan && (
               <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 text-sm text-primary font-medium space-y-1">
                 <div>
                   Selected Plan: <strong>{selectedPlan.name}</strong> — {formatAdvertisingPlanPrice(selectedPlan)}
@@ -452,7 +480,7 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
             )}
             <Button
               type="submit"
-              disabled={loading || !selectedPlan}
+              disabled={loading || (billingEnabled && !selectedPlan)}
               className="w-full rounded-xl bg-primary h-12 font-bold text-base"
             >
               {loading ? (
@@ -460,7 +488,7 @@ export default function BecomePartner({ initialBusinessType = null }: BecomePart
               ) : (
                 <CreditCard className="w-5 h-5 mr-2" />
               )}
-              Subscribe &amp; Pay Monthly
+              {billingEnabled ? "Subscribe & Pay Monthly" : "Join for Free"}
             </Button>
           </form>
         </div>
